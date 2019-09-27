@@ -118,6 +118,7 @@ def load_spectra(filename, wave_unit=u.AA, flux_unit=units.FLAM, wave_col='WAVEL
     """
     This function try to load a spectra and return it as a synphot.SourceSpectrum object.
     It will attempt to load the spectra from different format but it might nevertheless fail.
+    TODO: It should also accept a specutils.Spectrum1D object
 
     Parameters
     ----------
@@ -213,12 +214,14 @@ def get_filter(filter_name):
 
 
 def get_zero_mag_spectrum(system_name="AB"):
+    mag = 0
     if system_name.lower() in ["vega"]:
-        spec = vega_spectrum()
+        vega = get_vega_spectrum()
+        spec = vega * 10**(-0.4 * mag)  # is this necessary?
     elif system_name.lower() in ["ab"]:
-        spec = ab_spectrum()
+        spec = SourceSpectrum(ConstFlux1D, amplitude=mag*u.ABmag)
     elif system_name.lower() in ["st", "hst"]:
-        spec = st_spectrum()
+        spec = SourceSpectrum(ConstFlux1D, amplitude=mag*u.STmag)
 
     return spec
 
