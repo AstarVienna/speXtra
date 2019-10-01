@@ -11,22 +11,34 @@ Description
 
 Spyctra is a python tool to download, load, display and manipulate spectra of astronomical sources. It has developed to provide spectral sources to SpecSim but it may be helpful for other purposes too.
 
-It heavily piggybacks in funcionalities provided by synphot and astropy
+It heavily piggybacks in funcionalities provided by ``synphot`` and ``astropy``
 
 Functionalities
 ===============
 
-- Download spectra from known sources and return it in synphot format
-- Load spectra from files in different formats and return it in synphot format
+- Download spectra from known sources and return it in ``synphot`` format: We will need
+  to create a database of spectra.
+
+- Load spectra from files in different formats and return it in ``synphot`` format
+   - Ascii and fits tables are natively support by ``synphot``
+   - fits files and other type of spectra will be supported by converting
+        a ``specutils.Spectrum1D`` object to a ``synphot.SourceSpectrum``
+
 - Manipulate spectra:
    - rebinning (interpolate), including log-rebin and constant velocity
-   - smooth with a kernel, including a wavelengths changing kernel (think about it later)
+   - smooth with a kernel, including a wavelength changing kernel (think about it later)
    - redshifting (blueshifting)
    - attenuating
    - scaling to a magnitude?
 - plot the spectra
-- save it the wcs1d format
+- save it the wcs1d format as well as tables
 
 
+TODO
+====
+
+- Change the name, there is already another tool with the same name_
+
+.. _name: https://github.com/parkin/spyctra
 
 
