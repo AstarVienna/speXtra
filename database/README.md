@@ -13,7 +13,7 @@ database
 │   index.html
 │   database_contents.yaml?    
 │
-└───grid
+└───templates
 │   │
 │   └─── library1
 │   │   │  contents.yaml?
@@ -46,9 +46,9 @@ a quick look.  Not sure if yaml fits the bill (hence the question marks)
 * Similarly each data directory should contain a file describing the contents, 
 like list of templates, a summary and references.
 
-* Files should be readable by synphot
+* Data files should be readable by synphot
 
-**These files should be able to be parsed by Spyctra and display the contents 
+* **Content files should be able to be parsed by Spyctra and display the contents 
 to the user and/or pass them to the API**
 
 Following the same standard other datafiles can be added like filters, etc. 
