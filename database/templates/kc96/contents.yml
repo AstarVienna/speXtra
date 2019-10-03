@@ -1,0 +1,94 @@
+name : kc96
+
+type : galaxies
+
+wavelength :
+  - uv
+  - vis
+  - nir
+
+resolution : ???
+
+description : THE KINNEY-CALZETTI SPECTRAL ATLAS OF GALAXIES
+
+summary : |
+  The Kinney-Calsetti Atlas consists of an homogeneous set of 12 galaxy spectral
+  covering the ultraviolet, optical and near-infrared wavelength range up to about 1 micron.
+  The spectra include various morphological types and starburst galaxies.
+
+  This atlas contains a set of galaxy spectral covering the ultraviolet to near-infrared spectral range
+  (i.e. from 0.12  to 1 μm). The ultraviolet range of the spectral templates was obtained with the large aperture (10" by 20")
+  and low resolution spectrographs on the IUE satellite. The optical spectra were obtained through a long
+  slit with a 10" width, where a window of 20" long was extracted to match the IUE aperture.
+
+  The spectral templates cover various galaxy morphological types from elliptical to late type spiral.
+  Starburst spectra for low (E(B-V < 0.10) to high (0.61 < E(B-V) < 0.70) internal extinction are also available.
+  Several of the starburst galaxies used are classified as irregulars. Thus, although irregular galaxies are
+  not explicitly covered, the starburst templates can be used for this morphological type.
+  Details about how the spectra have been constructed can be found in Kinney et al. (1996) for
+  the different morphological types, and in Calzetti et al. (1994) for the starbursts.
+
+  The flux of the spectra has been normalized to a visual magnitude of 12.5 (STMAG).
+  Details about each spectrum can be found in the header of the FITS file.
+
+reference : Kinney, A.L., Calzetti, D., Bohlin, R.C., McQuade, K., Storchi-Bergmann, T.  & Schmitt, H.R. 1996, ApJ, 467, 38
+
+link : "http://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/the-kinney-calzetti-spetral-atlas"
+
+template_files:
+  - elliptical
+  - bulge
+  - s0
+  - sa
+  - sb
+  - sc
+  - starb1
+  - starb2
+  - starb3
+  - starb4
+  - starb5
+  - starb6
+
+template_wmin:
+  - 1235
+  - 1235
+  - 1235
+  - 1235
+  - 1235
+  - 1235
+  - 1235
+  - 1235
+  - 1235
+  - 1235
+  - 1235
+  - 1235
+
+template_wmax:
+  - 9935
+  - 7545
+  - 9940
+  - 9940
+  - 9940
+  - 7660
+  - 9945
+  - 9945
+  - 9945
+  - 9945
+  - 9945
+  - 9945
+
+template_comments:
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null       
+  - starburst with E(B-V)<0.1
+  - starburst with 0.11<E(B-V)<0.21
+  - starburst with 0.25<E(B-V)<0.35
+  - starburst with 0.39<E(B-V)<0.50
+  - starburst with 0.51<E(B-V)<0.60
+  - starburst with 0.61<E(B-V)<0.70
+
