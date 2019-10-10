@@ -37,7 +37,8 @@ two options
 
 import numpy as np
 import synphot
-from synphot import units
+from synphot import units, SourceSpectrum, SpectralElement, Observation
+from synphot.models import Empirical1D, GaussianFlux1D
 from astropy.io import fits
 from astropy.table import Table
 import astropy.units as u
@@ -45,6 +46,9 @@ from astropy.utils.data import download_file
 from astropy.constants import c
 import tynt
 import warnings
+import yaml
+
+database_location = "https://homepage.univie.ac.at/miguel.verdugo/database/"  # Need to be put in a config file
 
 # TODO: Add Y-band, GALEX, Spitzer and some HST filters to the defaults
 FILTER_DEFAULTS = {"U": "Generic/Bessell.U",
@@ -75,15 +79,148 @@ FILTER_DEFAULTS = {"U": "Generic/Bessell.U",
                    }
 
 
-
-
-
-class Spectra:
+def load_yaml_dict(filename):
     """
+    Loads one dict stored in a YAML file under ``filename``
+    (Taken from ScopeSim)
+    Parameters
+    ----------
+    filename : str
+        Path to the YAML file
+    Returns
+    -------
+    yaml_dicts : list
+        A list of dicts
+    """
+    with open(filename) as f:
+        yaml_dict = yaml.safe_load(f)
+
+    return yaml_dict
+
+
+def display_contents(dictionary):
+    """
+    Nicely display the contents of the files
+
+    Parameters
+    ----------
+    dictionary
+
+    Returns
+    -------
+
+    """
+    print(yaml.dump(dictionary))
+
+
+
+def get_template_database(display=False):
+    """
+
+
+    Parameters
+    ----------
+    url: url of the database
+    display: display the contents instead of returning them
+    Returns
+    -------
+    a dictionary with the database contents
+    """
+    url = database_location + "templates.yml"
+    path = download_file(url, cache=False)
+    templates = load_yaml_dict(path)
+
+    return templates
+
+
+def get_library(library_name):
+    """
+
+    Parameters
+    ----------
+    library_name: name of the library
+    display: display the contents instead of returning them
+    Returns
+    -------
+    a dictionary with the contents of a particular library
+    """
+    templates = get_template_database()
+    if library_name not in templates.keys():
+        raise NameError("library not in the database")
+
+    else:
+        url = database_location + "templates/" + library_name + "/contents.yml"
+        path = download_file(url, cache=True)
+        library = load_yaml_dict(path)
+
+    return library
+
+
+def get_template(spec_name):
+    """
+
+    Parameters
+    ----------
+    template_name: the name of the template, specified as library_name/template_name
+
+    Returns
+    -------
+
+    """
+    library_name, template_name = spec_name.split("/")
+    library = get_library(library_name)
+    if template_name not in library["template_names"]:
+        raise NameError("template not in library")
+
+    url = database_location + "templates/" + spec_name + ".fits"
+    data_type = library["data_type"]
+    path = download_file(url, cache=False)
+
+    if data_type == fits:
+        OPEN_WITH_FITS
+    else:
+        OPEN_WITH_ASCII
+
+
+    return spectrum
+
+
+
+
+
+
+class Spectrum(SourceSpectrum):
+    """
+    Class to handle spectra.
+
+    Parameters
+    ----------
+    modelclass, kwargs
+        See `BaseSpectrum`.
+
+    z : number
+        Redshift to apply to model.
+
+    z_type : {'wavelength_only', 'conserve_flux'}
+        Redshift can be done in one of the following ways:
+
+        * ``'wavelength_only'`` only shifts the wavelength
+          without adjusting the flux. This is the default behavior
+          to be backward compatible with ASTROLIB PYSYNPHOT.
+        * ``'conserve_flux'`` also scales the flux to conserve it.
+
     This class stores and manipulates the spectra. Whenever applies, it returns a synphot spectra
 
     TODO: Write the methods first as individual functions and incorporate later
+
     """
+
+    def __init__(self, modelclass, z=0, z_type='wavelength_only', **kwargs):
+        self._valid_z_types = ('wavelength_only', 'conserve_flux')
+        self.z_type = z_type
+        self.z = z
+        super(Spectrum, self).__init__(modelclass, **kwargs)
+
 
     def from_file(self, filename):
         pass
@@ -91,13 +228,40 @@ class Spectra:
     def from_database(self, name):
         pass
 
-    def plot(self, wave_units=u.angstrom, flux_unit="flam"):
+    def plot(self, wave_units=u.angstrom, flux_unit="flam", **kwargs):
+        """
+        Plot the spectra,
+        TODO: Check in comparison with SourceSpectrum.plot()
+
+        Parameters
+        ----------
+        wave_units
+        flux_unit
+        kwargs
+
+        Returns
+        -------
+
+        """
 
         wavelenghts = self.waveset.to(wave_unit, equivalencies=u.spectral())
-        self.plot(wavelenghts=wavelenghts, flux_unit=flux_unit)
-        pass
+        self.plot(wavelenghts=wavelenghts, flux_unit=flux_unit, **kwargs)
+
 
     def redshift(self, z=0, vel=0):
+        """
+        change the redshift of the object. Should we modify the waveset?
+
+        Parameters
+        ----------
+        z
+        vel
+
+        Returns
+        -------
+
+        """
+
         pass
 
     def attenuate(self, curve):
@@ -113,7 +277,7 @@ class Spectra:
         pass
 
 
-
+# Probably not needed
 def load_spectra(filename, wave_unit=u.AA, flux_unit=units.FLAM, wave_col='WAVELENGTH', flux_col='FLUX', ext=1):
     """
     This function try to load a spectra and return it as a synphot.SourceSpectrum object.
@@ -144,10 +308,10 @@ def load_spectra(filename, wave_unit=u.AA, flux_unit=units.FLAM, wave_col='WAVEL
     # This should load most of the tables
     try:
         if filename.lower().endswith("fit") or filename.lower().endswith("fits"):
-            sp = synphot.SourceSpectrum.from_file(filename=filename, wave_unit=wave_unit, flux_unit=flux_unit,
+            sp = SourceSpectrum.from_file(filename=filename, wave_unit=wave_unit, flux_unit=flux_unit,
                                           wave_col=wave_col, flux_col=flux_col, ext=ext)
         else:
-            sp = synphot.SourceSpectrum.from_file(filename=filename, wave_unit=wave_unit, flux_unit=flux_unit)
+            sp = SourceSpectrum.from_file(filename=filename, wave_unit=wave_unit, flux_unit=flux_unit)
 
     except AttributeError as e:
      # Try to load the 1D fits images-spectra here
@@ -351,8 +515,7 @@ def get_vega_spectrum():
     flux = remote[2]
     url = 'Vega from ' + location
     meta = {'header': header, 'expr': url}
-    vega_sp = synphot.SourceSpectrum(synphot.models.Empirical1D,
-                                     points=wave, lookup_table=flux, meta=meta)
+    vega_sp = SourceSpectrum(Empirical1D, points=wave, lookup_table=flux, meta=meta)
     return vega_sp
 
 
@@ -429,8 +592,7 @@ def get_filter(name=None, filename=None, wave_unit=u.AA):
         except FileNotFoundError as e:
             print(e, "File not found")
 
-    bandpass = synphot.SpectralElement(synphot.models.Empirical1D(points=waves,
-                                                                  lookup_table=trans))
+    bandpass = SpectralElement(Empirical1D(points=waves, lookup_table=trans))
 
     return bandpass
 
@@ -496,7 +658,7 @@ def photons_in_range(spectra, wave_min, wave_max, area, bandpass=None):
             #spec = make_synphot_spectrum(spec) # Try to make a synphot spectrum from e.g. file/np.array
             pass
 
-        obs = synphot.Observation(spec, bandpass)
+        obs = Observation(spec, bandpass)
         counts.append(obs.countrate(area=area*u.m**2).value)
 
     counts = np.array(counts) * u.ph * u.s**-1
@@ -539,14 +701,12 @@ def rebin_spectra(spectra, new_waves):
     waves = spectra.waveset.value
     f = np.ones(len(waves))
 
-    filt = synphot.SpectralElement(synphot.models.Empirical1D,
-                                   points=waves, lookup_table=f)
-    obs = synphot.Observation(spectra, filt, binset=new_waves, force='taper')
+    filt = SpectralElement(Empirical1D, points=waves, lookup_table=f)
+    obs = Observation(spectra, filt, binset=new_waves, force='taper')
 
     newflux = obs.binflux
 
-    rebin_spec = synphot.SourceSpectrum(synphot.models.Empirical1D,
-                                        points=new_waves, lookup_table=newflux, meta=spectra.meta)
+    rebin_spec = SourceSpectrum(Empirical1D, points=new_waves, lookup_table=newflux, meta=spectra.meta)
 
     return rebin_spec
 
@@ -710,8 +870,7 @@ def add_emission_line(spectrum, center, flux, fwhm):
     if isinstance(fwhm, u.Quantity) is True:
         fwhm = fwhm.to(u.AA).value
 
-    g_em = synphot.SourceSpectrum(synphot.models.GaussianFlux1D(total_flux=flux,
-                                                                mean=center, fwhm=fwhm))
+    g_em = SourceSpectrum(GaussianFlux1D(total_flux=flux, mean=center, fwhm=fwhm))
     sp = spectrum + g_em
 
     return sp
@@ -744,19 +903,17 @@ def add_absorption_line(spectrum, center, ew, fwhm):
     left, right = center - np.abs(ew/2), center + np.abs(ew/2)
     wavelengths = spectrum.waveset[(spectrum.waveset.value >= left) & (spectrum.waveset.value <= right)]
 
-    fluxes = synphot.units.convert_flux(wavelengths=wavelengths, fluxes=spectrum(wavelengths),
-                                        out_flux_unit=units.FLAM)
+    fluxes = units.convert_flux(wavelengths=wavelengths, fluxes=spectrum(wavelengths),
+                                out_flux_unit=units.FLAM)
     flux = np.trapz(fluxes.value, wavelengths.value)
 
-    g_abs = synphot.SourceSpectrum(synphot.models.GaussianFlux1D(total_flux=sign * flux,
-                                                                 mean=center, fwhm=fwhm))
+    g_abs = SourceSpectrum(GaussianFlux1D(total_flux=sign * flux, mean=center, fwhm=fwhm))
     sp = spectrum + g_abs
 
     if (sp(wavelengths).value < 0).any():
         warnings.warn("Warning: Flux<0 for specified EW and FHWM, setting it to Zero")
         waves = sp.waveset[sp(sp.waveset) < 0]
-        zero_sp = synphot.SourceSpectrum(synphot.models.Empirical1D,
-                                         points=waves, lookup_table=-1 * sp(waves).value)
+        zero_sp = SourceSpectrum(Empirical1D, points=waves, lookup_table=-1 * sp(waves).value)
         sp = sp + zero_sp
 
     return sp

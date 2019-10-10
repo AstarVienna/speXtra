@@ -49,9 +49,17 @@ Wish-list
 TODO
 ====
 
-- Change the name, there is already another tool with the same name_
+- Change the name, there is already another tool with the same name_. Some ideas
+   - espyctro (spyctra in spanish)
+   - spyctral (there is 2009 repo with the same name)
+   - spextra, spyxtra, spextrum or some similar variation
+   - spyctrums (spectrums is another plural form of spectrum)
+   - spyktrum (german of spectrum, spektrum is taken)
+
 
 .. _name: https://github.com/parkin/spyctra
+
+
 
 - Create a logo ;-)
 

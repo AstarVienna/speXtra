@@ -1,0 +1,16 @@
+# Database contents
+
+kc96:
+   name: THE KINNEY-CALZETTI SPECTRAL ATLAS OF GALAXIES
+   type: galaxies
+   resolution: 10 A
+   wavelength: ["uv", "vis"]
+
+pickles:
+   name: Pickles stellar atlas
+   type: stellar
+   resolution: 5 A
+   wavelength: ["uv", "vis", "nir"]
+
+
+
