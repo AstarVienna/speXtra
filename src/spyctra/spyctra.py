@@ -98,20 +98,6 @@ def load_yaml_dict(filename):
     return yaml_dict
 
 
-def display_contents(dictionary):
-    """
-    Nicely display the contents of the files
-
-    Parameters
-    ----------
-    dictionary
-
-    Returns
-    -------
-
-    """
-    print(yaml.dump(dictionary))
-
 
 
 def get_template_database(display=False):
@@ -133,27 +119,7 @@ def get_template_database(display=False):
     return templates
 
 
-def get_library(library_name):
-    """
 
-    Parameters
-    ----------
-    library_name: name of the library
-    display: display the contents instead of returning them
-    Returns
-    -------
-    a dictionary with the contents of a particular library
-    """
-    templates = get_template_database()
-    if library_name not in templates.keys():
-        raise NameError("library not in the database")
-
-    else:
-        url = database_location + "templates/" + library_name + "/contents.yml"
-        path = download_file(url, cache=True)
-        library = load_yaml_dict(path)
-
-    return library
 
 
 def get_template(spec_name):
@@ -176,15 +142,84 @@ def get_template(spec_name):
     data_type = library["data_type"]
     path = download_file(url, cache=False)
 
-    if data_type == fits:
-        OPEN_WITH_FITS
-    else:
-        OPEN_WITH_ASCII
+    #if data_type == fits:
+    #    OPEN_WITH_FITS
+    #else:
+    #    OPEN_WITH_ASCII
 
 
-    return spectrum
+    return path
 
 
+
+
+
+class SpecLibrary:
+    """
+    Better describe the library as a class
+
+    """
+    library_name = None
+
+    def __init__(self, library_name):
+        self.library_name = library_name
+        self.url = database_location + "templates/" + self.library_name + "/contents.yml"
+        self.yaml_dict = self.get_library(self.library_name)
+
+        # self.library = self.yaml_dict["library"]
+        # self.type = self.yaml_dict["type"]
+        # self.resolution = self.yaml_dict["resolution"]
+        # self.description = self.yaml_dict["description"]
+        # self.summary = self.yaml_dict["summary"]
+        # self.reference = self.yaml_dict["reference"]
+        # self.template_names = self.yaml_dict["template_names"]
+        # self.wmin = self.yaml_dict["wmin"]
+        # self.wmax = self.yaml_dict["wmax"]
+        # self.flux_unit = self.yaml_dict["flux_unit"]
+        # self.wave_unit = self.yaml_dict["wave_unit"]
+        # self.data_type = self.yaml_dict["data_type"]
+        # self.file_extension = self.yaml_dict["file_extension"]
+
+        for key in self.yaml_dict:
+            # This works, however it's apparently frowned upon
+            # Also it hard to see the attributes names down under
+            setattr(self, key, self.yaml_dict[key])
+
+        self.files = [f + self.file_extension for f in self.template_names]
+        self.templates = [self.library_name + "/" + tn for tn in self.template_names]
+
+        if self.library != self.library_name:
+            warnings.warn("inconsistency in library names!")
+
+    def get_library(self, library_name):
+        """
+
+        Parameters
+        ----------
+        library_name: name of the library
+        display: display the contents instead of returning them
+        Returns
+        -------
+        a dictionary with the contents of a particular library
+        """
+        templates = get_template_database()
+        if self.library_name not in templates.keys():
+            raise NameError("library not in the database")
+
+        else:
+            path = download_file(self.url, cache=True)
+            library = load_yaml_dict(path)
+
+        return library
+
+    def display(self):
+        """
+        Nicely (try to) display the library, good for interactive mode
+        Returns
+        -------
+
+        """
+        print(yaml.dump(self.yaml_dict, indent=4, sort_keys=False, default_flow_style=False))
 
 
 
