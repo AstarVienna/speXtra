@@ -40,7 +40,7 @@ import synphot
 from synphot import units, SourceSpectrum, SpectralElement, Observation
 from synphot.models import Empirical1D, GaussianFlux1D
 from astropy.io import fits
-from astropy.table import Table
+from astropy.table import Table, Column
 import astropy.units as u
 from astropy.utils.data import download_file
 from astropy.constants import c
@@ -79,7 +79,7 @@ FILTER_DEFAULTS = {"U": "Generic/Bessell.U",
                    }
 
 
-def load_yaml_dict(filename):
+def load_library_info(filename):
     """
     Loads one dict stored in a YAML file under ``filename``
     (Taken from ScopeSim)
@@ -89,13 +89,13 @@ def load_yaml_dict(filename):
         Path to the YAML file
     Returns
     -------
-    yaml_dicts : list
+    library_infos : list
         A list of dicts
     """
     with open(filename) as f:
-        yaml_dict = yaml.safe_load(f)
+        library_info = yaml.safe_load(f)
 
-    return yaml_dict
+    return library_info
 
 
 
@@ -114,7 +114,7 @@ def get_template_database(display=False):
     """
     url = database_location + "templates.yml"
     path = download_file(url, cache=False)
-    templates = load_yaml_dict(path)
+    templates = load_library_info(path)
 
     return templates
 
@@ -147,11 +147,7 @@ def get_template(spec_name):
     #else:
     #    OPEN_WITH_ASCII
 
-
     return path
-
-
-
 
 
 class SpecLibrary:
@@ -162,33 +158,34 @@ class SpecLibrary:
     library_name = None
 
     def __init__(self, library_name):
+        
         self.library_name = library_name
         self.url = database_location + "templates/" + self.library_name + "/contents.yml"
-        self.yaml_dict = self.get_library(self.library_name)
+        self.library_info = self.get_library(self.library_name)
 
-        # self.library = self.yaml_dict["library"]
-        # self.type = self.yaml_dict["type"]
-        # self.resolution = self.yaml_dict["resolution"]
-        # self.description = self.yaml_dict["description"]
-        # self.summary = self.yaml_dict["summary"]
-        # self.reference = self.yaml_dict["reference"]
-        # self.template_names = self.yaml_dict["template_names"]
-        # self.wmin = self.yaml_dict["wmin"]
-        # self.wmax = self.yaml_dict["wmax"]
-        # self.flux_unit = self.yaml_dict["flux_unit"]
-        # self.wave_unit = self.yaml_dict["wave_unit"]
-        # self.data_type = self.yaml_dict["data_type"]
-        # self.file_extension = self.yaml_dict["file_extension"]
+        self.type = self.library_info["type"]
+        self.resolution = self.library_info["resolution"]
+        self.description = self.library_info["description"]
+        self.summary = self.library_info["summary"]
+        self.reference = self.library_info["reference"]
+        self.template_names = self.library_info["template_names"]
+        self.wmin = self.library_info["wmin"]
+        self.wmax = self.library_info["wmax"]
+        self.flux_unit = self.library_info["flux_unit"]
+        self.wave_unit = self.library_info["wave_unit"]
+        self.data_type = self.library_info["data_type"]
+        self.file_extension = self.library_info["file_extension"]
+        self.comments = self.library_info["comments"]
 
-        for key in self.yaml_dict:
+       # for key in self.library_info:
             # This works, however it's apparently frowned upon
             # Also it hard to see the attributes names down under
-            setattr(self, key, self.yaml_dict[key])
+        #    setattr(self, key, self.library_info[key])
 
         self.files = [f + self.file_extension for f in self.template_names]
         self.templates = [self.library_name + "/" + tn for tn in self.template_names]
 
-        if self.library != self.library_name:
+        if self.library_info["library"] != self.library_name:
             warnings.warn("inconsistency in library names!")
 
     def get_library(self, library_name):
@@ -208,7 +205,7 @@ class SpecLibrary:
 
         else:
             path = download_file(self.url, cache=True)
-            library = load_yaml_dict(path)
+            library = load_library_info(path)
 
         return library
 
@@ -219,8 +216,30 @@ class SpecLibrary:
         -------
 
         """
-        print(yaml.dump(self.yaml_dict, indent=4, sort_keys=False, default_flow_style=False))
+        print(yaml.dump(self.library_info, indent=4, sort_keys=False, default_flow_style=False))
 
+    def as_table(self):
+        """
+
+        Returns
+        -------
+        an astropy.table with the contents of the library
+        """
+        if isinstance(self.wmin, list) is False:
+            wmin = [self.wmin]*len(self.templates)
+        else:
+            wmin = self.wmin
+
+        if isinstance(self.wmax, list) is False:
+            wmax = [self.wmax] * len(self.templates)
+        else:
+            wmax = self.wmax
+
+        names = ["template_name", "wmin", "wmax", "comment"]
+        data = [self.templates, wmin, wmax, self.comments]
+        meta = self.library_info
+        table = Table(names=names, data=data, meta=meta)
+        return table
 
 
 

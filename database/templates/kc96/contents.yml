@@ -61,19 +61,7 @@ template_names:
   - starb5
   - starb6
 
-wmin:
-  - 1235
-  - 1235
-  - 1235
-  - 1235
-  - 1235
-  - 1235
-  - 1235
-  - 1235
-  - 1235
-  - 1235
-  - 1235
-  - 1235
+wmin: 1235
 
 wmax:
   - 9935
@@ -90,7 +78,6 @@ wmax:
   - 9945
 
 comments:
-  - null
   - null
   - null
   - null

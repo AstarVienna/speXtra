@@ -1,0 +1,305 @@
+# Pickles Stellar Spectral Flux Library
+
+library : pickles
+
+type : stars
+
+wavelength :
+  - uv
+  - vis
+  - nir
+
+resolution : 5 A
+
+description : Pickles Stellar Spectral Flux Library
+
+summary : |
+  This library of wide spectral coverage, consists of 131 flux calibrated stellar spectra,
+  encompassing all normal spectral types and luminosity classes at solar abundance, and metal-weak
+  and metal-rich F-K dwarf and G-K giant components. Each spectrum in the library is a combination
+  of several sources overlapping in wavelength coverage. The creator of the library has followed
+  precise criteria in combining sources and to assembling the most reliable spectra. As part of
+  the selection criteria prior to combination, all input sources were checked aginst the SIMBAD
+  database and against the colors and line strengths as derived by the observed spectra
+  themselves, in order to esure they had similar spectral types.
+
+reference : Pickles, A. J. 1998, PASP, 110, 863
+
+link : "https://www.eso.org/sci/facilities/paranal/decommissioned/isaac/tools/lib.html"
+
+wave_unit: AA
+
+flux_unit : FLAM
+
+data_type: fits
+
+file_extension: .fits
+
+template_names:
+  - o5v
+  - o8iii
+  - o9v
+  - b0i
+  - b0v
+  - b12iii
+  - b1i
+  - b1v
+  - b2ii
+  - b2iv
+  - b3i
+  - b3iii
+  - b3v
+  - b57v
+  - b5i
+  - b5ii
+  - b5iii
+  - b6iv
+  - b8i
+  - b8v
+  - b9iii
+  - b9v
+  - a0i
+  - a0iii
+  - a0iv
+  - a0v
+  - a2i
+  - a2v
+  - a3iii
+  - a3v
+  - a47iv
+  - a5iii
+  - a5v
+  - a7iii
+  - a7v
+  - f02iv
+  - f0i
+  - f0ii
+  - f0iii
+  - f0v
+  - f2ii
+  - f2iii
+  - f2v
+  - f5i
+  - f5iii
+  - f5iv
+  - f5v
+  - f6v
+  - f8i
+  - f8iv
+  - f8v
+  - rf6v
+  - rf8v
+  - wf5v
+  - wf8v
+  - g0i
+  - g0iii
+  - g0iv
+  - g0v
+  - g2i
+  - g2iv
+  - g2v
+  - g5i
+  - g5ii
+  - g5iii
+  - g5iv
+  - g5v
+  - g8i
+  - g8iii
+  - g8iv
+  - g8v
+  - rg0v
+  - rg5iii
+  - rg5v
+  - wg0v
+  - wg5iii
+  - wg5v
+  - wg8iii
+  - k01ii
+  - k0iii
+  - k0iv
+  - k0v
+  - k1iii
+  - k1iv
+  - k2i
+  - k2iii
+  - k2v
+  - k34ii
+  - k3i
+  - k3iii
+  - k3iv
+  - k3v
+  - k4i
+  - k4iii
+  - k4v
+  - k5iii
+  - k5v
+  - k7v
+  - rk0iii
+  - rk0v
+  - rk1iii
+  - rk2iii
+  - rk3iii
+  - rk4iii
+  - rk5iii
+  - wk0iii
+  - wk1iii
+  - wk2iii
+  - wk3iii
+  - wk4iii
+  - m0iii
+  - m0v
+  - m1iii
+  - m1v
+  - m2.5v
+  - m2i
+  - m2iii
+  - m2v
+  - m3ii
+  - m3iii
+  - m3v
+  - m4iii
+  - m4v
+  - m5iii
+  - m5v
+  - m6iii
+  - m6v
+  - m7iii
+  - m8iii
+  - m9iii
+  - m10iii
+
+wmin: 1150
+
+wmax: 25000
+
+comments:
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - metal rich
+  - metal rich
+  - metal weak
+  - metal weak
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - metal rich
+  - metal rich
+  - metal rich
+  - metal weak
+  - metal weak
+  - metal weak
+  - metal weak
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - metal rich
+  - metal rich
+  - metal rich
+  - metal rich
+  - metal rich
+  - metal rich
+  - metal rich
+  - metal weak
+  - metal weak
+  - metal weak
+  - metal weak
+  - metal weak
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
