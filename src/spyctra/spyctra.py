@@ -79,75 +79,56 @@ FILTER_DEFAULTS = {"U": "Generic/Bessell.U",
                    }
 
 
-def load_library_info(filename):
-    """
-    Loads one dict stored in a YAML file under ``filename``
-    (Taken from ScopeSim)
-    Parameters
-    ----------
-    filename : str
-        Path to the YAML file
-    Returns
-    -------
-    library_infos : list
-        A list of dicts
-    """
-    with open(filename) as f:
-        library_info = yaml.safe_load(f)
 
-    return library_info
-
-
-
-
-def get_template_database(display=False):
+class Database:
     """
 
-
-    Parameters
-    ----------
-    url: url of the database
-    display: display the contents instead of returning them
-    Returns
-    -------
-    a dictionary with the database contents
-    """
-    url = database_location + "templates.yml"
-    path = download_file(url, cache=False)
-    templates = load_library_info(path)
-
-    return templates
-
-
-
-
-
-def get_template(spec_name):
+    usage should be
+    Database(keys) return all libraries that fulfill the keys
+    Database() return a list of all libraries
     """
 
-    Parameters
-    ----------
-    template_name: the name of the template, specified as library_name/template_name
+    def __init__(self):
+        self.url = database_location + "templates.yml"
+        self.contents = self.get_database(self.url)
+        self.library_names = list(self.contents.keys())
 
-    Returns
-    -------
+    def get_database(self, url):
 
-    """
-    library_name, template_name = spec_name.split("/")
-    library = get_library(library_name)
-    if template_name not in library["template_names"]:
-        raise NameError("template not in library")
+        path = download_file(url, cache=False)
+        with open(path) as f:
+            templates = yaml.safe_load(f)
 
-    url = database_location + "templates/" + spec_name + ".fits"
-    data_type = library["data_type"]
-    path = download_file(url, cache=False)
+        return templates
 
-    #if data_type == fits:
-    #    OPEN_WITH_FITS
-    #else:
-    #    OPEN_WITH_ASCII
+    def display(self):
+        """
+        try to nicely display the contents
 
-    return path
+        """
+        print(yaml.dump(self.contents, indent=4, sort_keys=False, default_flow_style=False))
+
+    def as_table(self):
+        """
+
+        Returns
+        -------
+        an astropy.table with the database contents
+        """
+        pass
+
+    def browse(self, keys):
+        """
+
+        Parameters
+        ----------
+        keys
+
+        Returns
+        -------
+        libraries that fulfill the criteria (type, spectral coverage, resolution etc
+        """
+        pass
 
 
 class SpecLibrary:
@@ -199,13 +180,14 @@ class SpecLibrary:
         -------
         a dictionary with the contents of a particular library
         """
-        templates = get_template_database()
-        if self.library_name not in templates.keys():
+        database = Database()
+        if library_name not in database.library_names:
             raise NameError("library not in the database")
 
         else:
             path = download_file(self.url, cache=True)
-            library = load_library_info(path)
+            with open(path) as f:
+                library = yaml.safe_load(f)
 
         return library
 
@@ -242,8 +224,7 @@ class SpecLibrary:
         return table
 
 
-
-class Spectrum(SourceSpectrum):
+class Spectrum:
     """
     Class to handle spectra.
 
@@ -268,13 +249,49 @@ class Spectrum(SourceSpectrum):
     TODO: Write the methods first as individual functions and incorporate later
 
     """
+    template_name = None
 
-    def __init__(self, modelclass, z=0, z_type='wavelength_only', **kwargs):
-        self._valid_z_types = ('wavelength_only', 'conserve_flux')
-        self.z_type = z_type
-        self.z = z
-        super(Spectrum, self).__init__(modelclass, **kwargs)
+#    def __init__(self, template_name):
 
+    def __init__(self, template_name):
+
+        self.template_name = template_name
+        self.spectrum = self.get_template(self.template_name)
+
+
+
+#    def __init__(self, modelclass, z=0, z_type='wavelength_only', **kwargs):
+#        self._valid_z_types = ('wavelength_only', 'conserve_flux')
+#        self.z_type = z_type
+#        self.z = z
+#        super(Spectrum, self).__init__(modelclass, **kwargs)
+
+    def get_template(self, spec_name):
+        """
+
+        Parameters
+        ----------
+        template_name: the name of the template, specified as library_name/template_name
+
+        Returns
+        -------
+
+        """
+        library_name, template_name = spec_name.split("/")
+        library = SpecLibrary(library_name)
+        if template_name not in library.template_names:
+            raise NameError("template not in library")
+
+        url = database_location + "templates/" + spec_name + ".fits"
+        data_type = library.data_type
+        path = download_file(url, cache=False)
+
+        # if data_type == fits:
+        #    OPEN_WITH_FITS
+        # else:
+        #    OPEN_WITH_ASCII
+
+        return path
 
     def from_file(self, filename):
         pass
