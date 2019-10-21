@@ -2,37 +2,13 @@
 """
 Spyctra: A python tool to manage and manipulate astronomical spectra
 
-returned spectra should  be in synphot format: do not altere attributes
+returned spectra should  be in synphot format: do not alter attributes
 
+Database is implemented as a yaml file containing the basic information of the libraries
+each library is described by a yaml file
 
-Probably we need functions to parse particular spectra, like Pickles, Brown, Kinney-Calzetti, etc
-Another possibility is to download all these catalogs and put them in a single format.
-
-
-We need to create a database of remote spectra like this:
-
-collection | name | type   | flux_unit | wave_unit | location | wave_col | flux_col
-
-Kinney     | Sba1 | galaxy | FLAM      | Angstrom  |  URL   |
-Pickles    | A0V  | AGN    | etc       |  um       |     |
-etc
-
-adding spectra should be as easy as table.add_row()
-
-What about also a user defined database of spectra?
-
-two options
-
-1.- Add the spectra to the database allowing also paths besides URLs, and collection='User'
-
-2.- A different database containing the same info
-
-3.- A different database containing arrays that can be read as wavelengths and fluxes
-    name | type | lambda      | flux         | flux_unit | wave_unit
-    sp1  | gal1 | (3000,4000) | (1e-3, 1e-4)
-    sp2  | gal2
-
-
+Classes for describing the database and libraries are being implemented
+TODO: Consider @dataclass for better and more concise description of these classes (only python 3.7 though)
 """
 
 import numpy as np
@@ -47,10 +23,11 @@ from astropy.constants import c
 import tynt
 import warnings
 import yaml
+import shutil
 
 database_location = "https://homepage.univie.ac.at/miguel.verdugo/database/"  # Need to be put in a config file
 
-# TODO: Add Y-band, GALEX, Spitzer and some HST filters to the defaults
+# TODO: Add Y-band, GALEX, Spitzer and some HST filters to the defaults, maybe put this in a yaml file?
 FILTER_DEFAULTS = {"U": "Generic/Bessell.U",
                    "B": "Generic/Bessell.B",
                    "V": "Generic/Bessell.V",
@@ -130,7 +107,8 @@ class Database:
         """
         pass
 
-
+# TODO: Make SpecLibrary and Database only one class to easy browsing.
+#       Make it independent of Spectrum class to facilitate rewrite if we move to SQL/whatever
 class SpecLibrary:
     """
     Better describe the library as a class
@@ -224,7 +202,34 @@ class SpecLibrary:
         return table
 
 
-class Spectrum:
+def get_template(template, path=None):
+    """
+
+    Parameters
+    ----------
+    template: the name of the template, specified as library_name/template_name
+    path: the path were the downloaded template will be located (optional)
+
+    Returns
+    -------
+
+    """
+    library_name, template_name = template.split("/")
+    library = SpecLibrary(library_name)
+    if template_name not in library.template_names:
+        raise NameError("template not in library")
+
+    url = database_location + "templates/" + template + ".fits"
+    print(url)
+    data_type = library.data_type
+    file = download_file(url, cache=True)
+    if path is not None:
+        file = shutil.copy2(file, path)
+    print(file)
+    return file
+
+
+class Spectrum(SourceSpectrum):
     """
     Class to handle spectra.
 
@@ -253,93 +258,234 @@ class Spectrum:
 
 #    def __init__(self, template_name):
 
-    def __init__(self, template_name):
+#    def __init__(self, template_name):
 
-        self.template_name = template_name
-        self.spectrum = self.get_template(self.template_name)
+    def __init__(self, modelclass, z=0, z_type='wavelength_only', **kwargs):
+        self._valid_z_types = ('wavelength_only', 'conserve_flux')
+        self.z_type = z_type
+        self.z = z
 
+        super(Spectrum, self).__init__(modelclass, **kwargs)
 
-
-#    def __init__(self, modelclass, z=0, z_type='wavelength_only', **kwargs):
-#        self._valid_z_types = ('wavelength_only', 'conserve_flux')
-#        self.z_type = z_type
-#        self.z = z
-#        super(Spectrum, self).__init__(modelclass, **kwargs)
-
-    def get_template(self, spec_name):
+    @classmethod
+    def load(cls, template_name):
         """
 
         Parameters
         ----------
-        template_name: the name of the template, specified as library_name/template_name
+        template_name: The name of the spectral template
+
+        TODO: Checks for units etc in the library to correctly call read_*__spec
 
         Returns
         -------
 
         """
-        library_name, template_name = spec_name.split("/")
-        library = SpecLibrary(library_name)
-        if template_name not in library.template_names:
-            raise NameError("template not in library")
+        library, template = template_name.split("/")
+        location = get_template(template_name)
+        data_type = SpecLibrary(library).data_type
+        if data_type == "fits":
+            header, wavelengths, fluxes = synphot.specio.read_fits_spec(location)
+        else:
+            header, wavelengths, fluxes = synphot.specio.read_ascii_spec(location)
+        # if 1D?
+        return cls(Empirical1D, points=wavelengths, lookup_table=fluxes,
+                   meta=header)
 
-        url = database_location + "templates/" + spec_name + ".fits"
-        data_type = library.data_type
-        path = download_file(url, cache=False)
-
-        # if data_type == fits:
-        #    OPEN_WITH_FITS
-        # else:
-        #    OPEN_WITH_ASCII
-
-        return path
-
-    def from_file(self, filename):
-        pass
-
-    def from_database(self, name):
-        pass
-
-    def plot(self, wave_units=u.angstrom, flux_unit="flam", **kwargs):
+    @classmethod
+    def from1dspec(cls, filename, **kwargs):
         """
-        Plot the spectra,
-        TODO: Check in comparison with SourceSpectrum.plot()
+        This function tries to create a Spectrum from 1d fits files.
+        It relies in specutils for its job
 
         Parameters
         ----------
-        wave_units
-        flux_unit
-        kwargs
+        filename
 
         Returns
         -------
 
         """
+        try:
+            from specutils import Spectrum1D
+        except ImportError("specutils not installed, cannot import spectra")
 
-        wavelenghts = self.waveset.to(wave_unit, equivalencies=u.spectral())
-        self.plot(wavelenghts=wavelenghts, flux_unit=flux_unit, **kwargs)
+        pass
 
 
     def redshift(self, z=0, vel=0):
         """
-        change the redshift of the object. Should we modify the waveset?
+        Redshift or blueshift a spectra
+        TODO: Do we need to modify the waveset? Probably
 
         Parameters
         ----------
-        z
-        vel
+        spectrum: a synphot spectra
+        z: redshift
+        vel: radial velocity,  if no unit are present it is assumed to be in m/s
+
+        Returns
+        -------
+        a synphot SourceSpectrum
+
+        """
+        if z != 0:
+            self.z = z
+
+        if vel != 0:
+
+            if isinstance(vel, u.Quantity) is False:
+                vel = vel * u.m / u.s
+
+            z = vel.to(u.m / u.s) / c
+            self.z = z.value
+
+    def rebin_spectra(self, new_waves):
+        """
+        Rebin a synphot spectra to a new wavelength grid conserving flux.
+        Grid does not need to be linear and can be at higher or lower resolution
+
+        TODO: To resample the spectra at lower resolution a convolution is first needed. Implement!
+        TODO: Return the new spectra in the input wavelengths
+
+        Parameters
+        ----------
+        spectra: a synphot spectra
+        new_waves: an array of the output wavelenghts in Angstroms but other units can be
+            specified
+
 
         Returns
         -------
 
+        A synphot spectra in the new wavelengths
+
+        """
+        if isinstance(new_waves, u.Quantity):
+            new_waves = new_waves.to(u.Angstrom).value
+
+        waves = self.waveset.value
+        f = np.ones(len(waves))
+        filt = SpectralElement(Empirical1D, points=waves, lookup_table=f)
+        obs = Observation(self, filt, binset=new_waves, force='taper')
+        newflux = obs.binflux
+        rebin_spec = SourceSpectrum(Empirical1D, points=new_waves, lookup_table=newflux, meta=spectra.meta)
+
+        return rebin_spec
+
+    def add_emission_line(self, center, flux, fwhm):
         """
 
-        pass
+        Parameters
+        ----------
+        spectrum: a synphot spectrum
+        center: center of the line, astropy.units accepted
+        flux: total flux of the line, astropy.units accepted
+        fwhm: fwhm of the line, astropy.units accepted
 
-    def attenuate(self, curve):
-        pass
+        Returns
+        -------
+        the spectrum with the emission line
 
-    def rebin(self, array):
-        pass
+        """
+
+        if isinstance(center, u.Quantity) is True:
+            center = center.to(u.AA).value
+        if isinstance(flux, u.Quantity) is True:
+            flux = flux.to(u.erg / (u.cm ** 2 * u.s)).value
+        if isinstance(fwhm, u.Quantity) is True:
+            fwhm = fwhm.to(u.AA).value
+
+        g_em = SourceSpectrum(GaussianFlux1D(total_flux=flux, mean=center, fwhm=fwhm))
+        sp = self.__class__(self.model + g_em.model)  # TODO: Probably +,-,*, validate, etc needs to be implemented too
+
+        return sp
+
+    def add_absorption_line(self, center, ew, fwhm):
+        """
+        Add a absorption line of to a spectrum with center, fwhm and equivalent width specified by the user
+        It also supports emission lines if ew is negative
+
+        Parameters
+        ----------
+        spectrum
+        center
+        fwhm
+        ew
+
+        Returns
+        -------
+        a synphot.SourceSpectrum
+        """
+        if isinstance(center, u.Quantity) is True:
+            center = center.to(u.AA).value
+        if isinstance(ew, u.Quantity) is True:
+            ew = ew.to(u.AA).value
+        if isinstance(fwhm, u.Quantity) is True:
+            fwhm = fwhm.to(u.AA).value
+
+        sign = -1 * np.sign(ew)  # to keep the convention that EL are negative and ABS are positive
+        left, right = center - np.abs(ew / 2), center + np.abs(ew / 2)
+        wavelengths = self.waveset[(self.waveset.value >= left) & (self.waveset.value <= right)]
+
+        fluxes = units.convert_flux(wavelengths=wavelengths, fluxes=self(wavelengths),
+                                    out_flux_unit=units.FLAM)
+        flux = np.trapz(fluxes.value, wavelengths.value)
+        g_abs = Spectrum(GaussianFlux1D(total_flux=sign * flux, mean=center, fwhm=fwhm))
+        sp = self.__class__(self.model + g_abs.model)
+        if (sp(wavelengths).value < 0).any():
+            warnings.warn("Warning: Flux<0 for specified EW and FHWM, setting it to Zero")
+            waves = sp.waveset[sp(sp.waveset) < 0]
+            zero_sp = SourceSpectrum(Empirical1D, points=waves, lookup_table=-1 * sp(waves).value)
+            sp = self.__class__(sp.model + zero_sp.model)
+
+        return sp
+
+    def attenuate(self, curve, AV=None, EBV=0):
+        """
+        This function attenuate  a spectrum with a extinction curve normalized to a E(B-V)
+
+        TODO: We also need a library of extinction curves and a way to read them
+
+        Parameters
+        ----------
+        spectrum: a synphot spectrum
+        curve: the extinction curve
+        EBV: E(B-V)
+
+        Returns
+        -------
+        an attenuated synphot spectrum
+
+        """
+
+        extinction = synphot.ReddeningLaw.from_extinction_model(curve).extinction_curve(EBV)
+        sp = self.__class__(self.model * extinction.model)
+
+        return sp
+
+    def deredden(self, curve, ebv=0):
+        """
+        This function de-redden a spectrum.
+
+        TODO: We also need a library of extinction curves and a way to read them
+
+        Parameters
+        ----------
+        spectrum: a synphot spectrum
+        curve: the extinction curve
+        EBV: E(B-V)
+
+        Returns
+        -------
+        an attenuated synphot spectrum
+
+        """
+
+        extinction = synphot.ReddeningLaw.from_extinction_model(curve).extinction_curve(EBV)
+        sp = self.__class__(self.model / extinction.model)
+
+        return sp
 
     def smooth(self, kernel):
         pass
@@ -347,53 +493,6 @@ class Spectrum:
     def scale_to_magnitude(self, magnitude, unit):
         pass
 
-
-# Probably not needed
-def load_spectra(filename, wave_unit=u.AA, flux_unit=units.FLAM, wave_col='WAVELENGTH', flux_col='FLUX', ext=1):
-    """
-    This function try to load a spectra and return it as a synphot.SourceSpectrum object.
-    It will attempt to load the spectra from different format but it might nevertheless fail.
-    TODO: It should also accept a specutils.Spectrum1D object
-
-    Parameters
-    ----------
-    filename: A file containing the 1D spectra
-    wave_unit: optional,
-                wavelength units, either synphot.units or astropy.units
-    flux_unit: optional,
-                flux units, either synphot.units or astropy.units
-    wave_col: optional,
-                The column name containing the wavelengths if filename is a fits table, default WAVELENGTH
-    flux_col: optional,
-               The column name containing the wavelengths if filename is a fits table, default FLUX
-    ext: optional,
-         The extension number where the spectra is located if file is a fits table or image, default 1
-
-
-    Returns
-    -------
-
-    A synphot.SourceSpectrum
-
-    """
-    # This should load most of the tables
-    try:
-        if filename.lower().endswith("fit") or filename.lower().endswith("fits"):
-            sp = SourceSpectrum.from_file(filename=filename, wave_unit=wave_unit, flux_unit=flux_unit,
-                                          wave_col=wave_col, flux_col=flux_col, ext=ext)
-        else:
-            sp = SourceSpectrum.from_file(filename=filename, wave_unit=wave_unit, flux_unit=flux_unit)
-
-    except AttributeError as e:
-     # Try to load the 1D fits images-spectra here
-        print(e)
-     #   try:
-     #       sp = load_1dfits(filename,                            wave_unit, flux_unit, wave_col, flux_col, ext)
-
-     #   except AttributeError as e:
-     #       print(e)
-
-    return sp
 
 
 
@@ -562,6 +661,8 @@ def scale_spectrum(spectrum, filter_name, amplitude):
     return spectrum
 
 
+
+
 #------------------------------ END    -------------------------------------------
 
 
@@ -668,8 +769,6 @@ def get_filter(name=None, filename=None, wave_unit=u.AA):
     return bandpass
 
 
-
-
 def photons_in_range(spectra, wave_min, wave_max, area, bandpass=None):
     """
     Return the number of photons between wave_min and wave_max or within
@@ -738,49 +837,6 @@ def photons_in_range(spectra, wave_min, wave_max, area, bandpass=None):
 
 
 
-def rebin_spectra(spectra, new_waves):
-    """
-    Rebin a synphot spectra to a new wavelength grid conserving flux.
-    Grid does not need to be linear and can be at higher or lower resolution
-
-    TODO: To resample the spectra at lower resolution a convolution is first needed. Implement!
-    TODO: Return the new spectra in the input wavelengths
-
-    Parameters
-    ----------
-    spectra: a synphot spectra
-    new_waves: an array of the output wavelenghts in Angstroms but other units can be
-        specified
-
-
-    Returns
-    -------
-
-    A synphot spectra in the new wavelengths
-
-    """
-    if isinstance(spectra, synphot.spectrum.SourceSpectrum) is False:
-        # spec = make_synphot_spectrum(spec) # Try to make a synphot spectrum from e.g. file/np.array
-        raise ValueError(spec, "is not a synphot spectra!")
-
-    if spectra.waveset is None:
-        raise ValueError("spectra doesn't have a defined waveset")
-
-    if isinstance(new_waves, u.Quantity):
-        new_waves = new_waves.to(u.Angstrom).value
-
-    waves = spectra.waveset.value
-    f = np.ones(len(waves))
-
-    filt = SpectralElement(Empirical1D, points=waves, lookup_table=f)
-    obs = Observation(spectra, filt, binset=new_waves, force='taper')
-
-    newflux = obs.binflux
-
-    rebin_spec = SourceSpectrum(Empirical1D, points=new_waves, lookup_table=newflux, meta=spectra.meta)
-
-    return rebin_spec
-
 
 def scale_to_magnitude(spectra, magnitude, passband, units=u.ABmag):
     """
@@ -797,104 +853,6 @@ def scale_to_magnitude(spectra, magnitude, passband, units=u.ABmag):
     a scale synphot spectra
     """
     pass
-
-
-def get_magnitude(spectra, passband, units=u.ABmag):
-    """
-    get magnitude in the passband from spectra spectra to a magnitude
-
-    Parameters
-    ----------
-    spectra
-    magnitude
-    units
-
-    Returns
-    -------
-    a magnitude in the specified units
-    """
-    pass
-
-
-def redshift(spectrum, z=0, vel=0):
-    """
-    Redshift or blueshift a spectra
-
-    Parameters
-    ----------
-    spectrum: a synphot spectra
-    z: redshift
-    vel: radial velocity,  if no unit are present it is assumed to be in m/s
-
-    Returns
-    -------
-    a synphot SourceSpectrum
-
-    """
-    if z != 0:
-        spectrum.z = z
-
-    if vel != 0:
-
-        if isinstance(vel, u.Quantity) is False:
-
-            vel = vel * u.m / u.s
-
-        z = vel.to(u.m/u.s)/c
-        spectrum.z = z.value
-
-    return spectrum
-
-
-def attenuate(spectrum, curve, AV=None, EBV=0):
-    """
-    This function attenuate  a spectrum with a extinction curve normalized to a E(B-V)
-
-    TODO: We also need a library of extinction curves and a way to read them
-
-    Parameters
-    ----------
-    spectrum: a synphot spectrum
-    curve: the extinction curve
-    EBV: E(B-V)
-
-    Returns
-    -------
-    an attenuated synphot spectrum
-
-    """
-
-    extinction = synphot.ReddeningLaw.from_extinction_model(curve).extinction_curve(EBV)
-    sp = spectrum * extinction
-
-    return sp
-
-
-def deredden(spectrum, curve, EBV=0):
-    """
-    This function de-redden a spectrum.
-
-    TODO: We also need a library of extinction curves and a way to read them
-
-    Parameters
-    ----------
-    spectrum: a synphot spectrum
-    curve: the extinction curve
-    EBV: E(B-V)
-
-    Returns
-    -------
-    an attenuated synphot spectrum
-
-    """
-
-    extinction = synphot.ReddeningLaw.from_extinction_model(curve).extinction_curve(EBV)
-    sp = spectrum / extinction
-
-    return sp
-
-
-
 
 
 
@@ -918,98 +876,6 @@ def black_body(t, wmin, wmax):
     pass
 
 
-def add_emission_line(spectrum, center, flux, fwhm):
-    """
-
-    Parameters
-    ----------
-    spectrum: a synphot spectrum
-    center: center of the line, astropy.units accepted
-    flux: total flux of the line, astropy.units accepted
-    fwhm: fwhm of the line, astropy.units accepted
-
-    Returns
-    -------
-    the spectrum with the emission line
-
-    """
-
-    if isinstance(center, u.Quantity) is True:
-        center = center.to(u.AA).value
-    if isinstance(flux, u.Quantity) is True:
-        flux = flux.to(u.erg/(u.cm**2 * u.s)).value
-    if isinstance(fwhm, u.Quantity) is True:
-        fwhm = fwhm.to(u.AA).value
-
-    g_em = SourceSpectrum(GaussianFlux1D(total_flux=flux, mean=center, fwhm=fwhm))
-    sp = spectrum + g_em
-
-    return sp
-
-
-def add_absorption_line(spectrum, center, ew, fwhm):
-    """
-    Add a absorption line of to a spectrum with center, fwhm and equivalent width specified by the user
-    It also supports emission lines if ew is negative
-
-    Parameters
-    ----------
-    spectrum
-    center
-    fwhm
-    ew
-
-    Returns
-    -------
-    a synphot.SourceSpectrum
-    """
-    if isinstance(center, u.Quantity) is True:
-        center = center.to(u.AA).value
-    if isinstance(ew, u.Quantity) is True:
-        ew = ew.to(u.AA).value
-    if isinstance(fwhm, u.Quantity) is True:
-        fwhm = fwhm.to(u.AA).value
-
-    sign = -1 * np.sign(ew)  # to keep the convention that EL are negative and ABS are positive
-    left, right = center - np.abs(ew/2), center + np.abs(ew/2)
-    wavelengths = spectrum.waveset[(spectrum.waveset.value >= left) & (spectrum.waveset.value <= right)]
-
-    fluxes = units.convert_flux(wavelengths=wavelengths, fluxes=spectrum(wavelengths),
-                                out_flux_unit=units.FLAM)
-    flux = np.trapz(fluxes.value, wavelengths.value)
-
-    g_abs = SourceSpectrum(GaussianFlux1D(total_flux=sign * flux, mean=center, fwhm=fwhm))
-    sp = spectrum + g_abs
-
-    if (sp(wavelengths).value < 0).any():
-        warnings.warn("Warning: Flux<0 for specified EW and FHWM, setting it to Zero")
-        waves = sp.waveset[sp(sp.waveset) < 0]
-        zero_sp = SourceSpectrum(Empirical1D, points=waves, lookup_table=-1 * sp(waves).value)
-        sp = sp + zero_sp
-
-    return sp
-
-
-
-
-
-def list_spectra(keyword):
-    """
-    List the spectra available for download
-    """
-    pass
-
-
-def get_spectra(keyword):
-    """
-    This should download the spectra from the interwebs
-    """
-    pass
-
-
-def get_pickles(type):
-    pass
-
 
 
 
@@ -1017,7 +883,7 @@ def load_1dfits(filename, wave_unit=u.AA, flux_unit=units.FLAM, wave_col='WAVELE
     """
     This function load spectra stored as fits images and return them in fits format
 
-    TODO: MUCH TO DO HERE.
+    TODO: MUCH TO DO HERE. USE SPECUTILS TO DO THE HARD WORK
 
     Parameters
     ----------
@@ -1041,50 +907,6 @@ def load_1dfits(filename, wave_unit=u.AA, flux_unit=units.FLAM, wave_col='WAVELE
 
     """
 
-    hdu = fits.open(filename)
-
-    header_primary = hdu[0].header
-    data = hdu[ext].data
-    if len(hdu) > 1:
-        header_ext = hdu[ext].header
-        data = hdu[ext].data
-    else:
-        header_ext = header_primary
-
-    hdu.close()
-    try:
-        crval1 = header_ext["CRVAL1"]
-        crpix1 = header_ext["CRPIX1"]
-        cdelt1 = header_ext["CDELT1"]
-        #cunit1 = header_ext["CUNIT1"]
-        bunit  = header_ext["BUNIT"]
-
-    except KeyError as e:
-        print(e, "keys not found")
-        try:
-            crval1 = header_primary["CRVAL1"]
-            crpix1 = header_primary["CRPIX1"]
-            cdelt1 = header_primary["CDELT1"]
-         #   cunit1 = header_primary["CUNIT1"]
-            bunit = header_primary["BUNIT"]
-
-        except KeyError as e:
-            print(e, "keys not found")
-
-    try:
-        spl_units = bunit.split(" ")
-        factor = eval(spl_units.pop(0))
-        unit = u.Unit(" ".join(spl_units))
-
-    except ValueError as e:
-        print(e, "Units not recognized")
-
-    wavelengths = crval1 + np.arange(crpix1 - 1, len(data), 1)*cdelt1
-    values = data
-    fluxes = values*factor*unit
-    sp = synphot.SourceSpectrum(synphot.models.Empirical1D, points=wavelengths, lookup_table=fluxes,
-                        meta={'header': header_primary})
-
-    return sp
+    pass
 
 
