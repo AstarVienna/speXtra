@@ -27,7 +27,7 @@ import shutil
 
 database_location = "https://homepage.univie.ac.at/miguel.verdugo/database/"  # Need to be put in a config file
 
-# TODO: Add Y-band, GALEX, Spitzer and some HST filters to the defaults, maybe put this in a yaml file?
+# TODO: Add Y-band, GALEX, Spitzer and some HST filters to the defaults, maybe put this in a (yaml) file?
 FILTER_DEFAULTS = {"U": "Generic/Bessell.U",
                    "B": "Generic/Bessell.B",
                    "V": "Generic/Bessell.V",
@@ -54,6 +54,64 @@ FILTER_DEFAULTS = {"U": "Generic/Bessell.U",
                    "PaBeta": "Gemini/NIRI.PaBeta-G0221",
                    "BrGamma": "Gemini/NIRI.BrG-G0218",
                    }
+
+
+class SpecDatabase:
+
+    def __init__(self):
+        self.url = database_location + "templates.yml"
+
+        self.library_names = list(self.contents.keys())
+
+    @property
+    def contents(self):
+        path = download_file(self.url, cache=False)
+        with open(path) as f:
+            contents = yaml.safe_load(f)
+
+        return contents
+
+    def display(self):
+        """
+        try to nicely display the contents
+
+        """
+        print(yaml.dump(self.contents, indent=4, sort_keys=False, default_flow_style=False))
+
+    @property
+    def as_table(self):
+        """
+
+        Returns
+        -------
+        an astropy.table with the database contents
+        """
+        column_names = ["libraries", "title", "type", "resolution", "wave_coverage"]
+        library_names = self.library_names
+        titles = [self.contents[n]["name"] for n in self.library_names]
+        types = [self.contents[n]["type"] for n in self.library_names]
+        resolution = [self.contents[n]["resolution"] for n in self.library_names]
+        wave_coverage = [self.contents[n]["wavelength"] for n in self.library_names]
+
+        data = [library_names, titles, types, resolution, wave_coverage]
+        meta = self.contents
+        table = Table(names=column_names, data=data, meta=meta)
+        return table
+
+
+
+    def browse(self, keys):
+        """
+
+        Parameters
+        ----------
+        keys
+
+        Returns
+        -------
+        libraries that fulfill the criteria (type, spectral coverage, resolution etc
+        """
+        pass
 
 
 
@@ -249,23 +307,18 @@ class Spectrum(SourceSpectrum):
           to be backward compatible with ASTROLIB PYSYNPHOT.
         * ``'conserve_flux'`` also scales the flux to conserve it.
 
-    This class stores and manipulates the spectra. Whenever applies, it returns a synphot spectra
+    This class stores and manipulates the spectra.
 
     TODO: Write the methods first as individual functions and incorporate later
 
     """
-    template_name = None
-
-#    def __init__(self, template_name):
-
-#    def __init__(self, template_name):
-
     def __init__(self, modelclass, z=0, z_type='wavelength_only', **kwargs):
         self._valid_z_types = ('wavelength_only', 'conserve_flux')
         self.z_type = z_type
         self.z = z
 
-        super(Spectrum, self).__init__(modelclass, **kwargs)
+        super().__init__(modelclass, **kwargs)
+
 
     @classmethod
     def load(cls, template_name):
@@ -308,9 +361,11 @@ class Spectrum(SourceSpectrum):
         """
         try:
             from specutils import Spectrum1D
-        except ImportError("specutils not installed, cannot import spectra")
+        except ImportError as ie:
+            print(ie, "specutils not installed, cannot import spectra")
 
-        pass
+        spec1d = Spectrum1D.read(filename, **kwargs)
+        
 
 
     def redshift(self, z=0, vel=0):

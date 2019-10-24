@@ -43,6 +43,10 @@ wave_unit: AA
 
 flux_unit : FLAM
 
+wave_column_name : WAVELENGTH
+
+flux_column_name : FLUX
+
 data_type: fits
 
 file_extension: .fits
