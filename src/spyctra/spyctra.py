@@ -11,49 +11,32 @@ Classes for describing the database and libraries are being implemented
 TODO: Consider @dataclass for better and more concise description of these classes (only python 3.7 though)
 """
 
+import numbers
+import warnings
+import shutil
+
 import numpy as np
-import synphot
-from synphot import units, SourceSpectrum, SpectralElement, Observation
-from synphot.models import Empirical1D, GaussianFlux1D
+
 from astropy.io import fits
-from astropy.table import Table, Column
+from astropy.table import Table
 import astropy.units as u
 from astropy.utils.data import download_file
 from astropy.constants import c
-import tynt
-import warnings
+
+import synphot
+from synphot import units, SourceSpectrum, SpectralElement, Observation, BaseUnitlessSpectrum
+from synphot.models import Empirical1D, GaussianFlux1D
+
 import yaml
-import shutil
+import tynt
+
+
 
 database_location = "https://homepage.univie.ac.at/miguel.verdugo/database/"  # Need to be put in a config file
 
-# TODO: Add Y-band, GALEX, Spitzer and some HST filters to the defaults, maybe put this in a (yaml) file?
-FILTER_DEFAULTS = {"U": "Generic/Bessell.U",
-                   "B": "Generic/Bessell.B",
-                   "V": "Generic/Bessell.V",
-                   "R": "Generic/Bessell.R",
-                   "I": "Generic/Bessell.I",
-                   "J": "2MASS/2MASS.J",
-                   "H": "2MASS/2MASS.H",
-                   "Ks": "2MASS/2MASS.Ks",
-                   "K": "Generic/Johnson_UBVRIJHKL.K",
-                   "L": "Gemini/NIRI.Lprime-G0207w",
-                   "M": "Gemini/NIRI.Mprime-G0208w",
-                   "N": "Generic/Johnson_UBVRIJHKL.N",
-                   "u": "SLOAN/SDSS.u",
-                   "g": "SLOAN/SDSS.g",
-                   "r": "SLOAN/SDSS.r",
-                   "i": "SLOAN/SDSS.i",
-                   "z": "SLOAN/SDSS.z",
-                   "u'": "SLOAN/SDSS.uprime_filter",
-                   "g'": "SLOAN/SDSS.gprime_filter",
-                   "r'": "SLOAN/SDSS.rprime_filter",
-                   "i'": "SLOAN/SDSS.iprime_filter",
-                   "z'": "SLOAN/SDSS.zprime_filter",
-                   "HAlpha": "Gemini/GMOS-N.Ha",
-                   "PaBeta": "Gemini/NIRI.PaBeta-G0221",
-                   "BrGamma": "Gemini/NIRI.BrG-G0218",
-                   }
+# default filter definitions now in data/default_filters.yml, including GALEX, Spitzer, HST and Y-band filters
+with open("data/default_filters.yml") as f:
+    FILTER_DEFAULTS = yaml.safe_load(f)
 
 
 class SpecDatabase:
@@ -326,9 +309,9 @@ class Spectrum(SourceSpectrum):
 
         Parameters
         ----------
-        template_name: The name of the spectral template
+        template_name: The name of the spectral template in the speclibrary, format: library/template
 
-        TODO: Checks for units etc in the library to correctly call read_*__spec
+        TODO: Checks for units etc in the library to correctly call read_*__spec for most possible cases
 
         Returns
         -------
@@ -338,22 +321,23 @@ class Spectrum(SourceSpectrum):
         location = get_template(template_name)
         data_type = SpecLibrary(library).data_type
         if data_type == "fits":
-            header, wavelengths, fluxes = synphot.specio.read_fits_spec(location)
+            header, lam, flux = synphot.specio.read_fits_spec(location)
         else:
-            header, wavelengths, fluxes = synphot.specio.read_ascii_spec(location)
+            header, lam, flux = synphot.specio.read_ascii_spec(location)
         # if 1D?
-        return cls(Empirical1D, points=wavelengths, lookup_table=fluxes,
-                   meta=header)
+        return cls(Empirical1D, points=lam, lookup_table=flux, meta=header)
 
     @classmethod
-    def from1dspec(cls, filename, **kwargs):
+    def from1dspec(cls, filename, format="wcs1d-fits", **kwargs):
         """
         This function tries to create a Spectrum from 1d fits files.
         It relies in specutils for its job
 
+        TODO: More checks from units, etc.
         Parameters
         ----------
         filename
+        format: format of the spectra accepted by specutils (see specutils documentation)
 
         Returns
         -------
@@ -364,14 +348,20 @@ class Spectrum(SourceSpectrum):
         except ImportError as ie:
             print(ie, "specutils not installed, cannot import spectra")
 
-        spec1d = Spectrum1D.read(filename, **kwargs)
-        
+        spec1d = Spectrum1D.read(filename, format=format, **kwargs)
+        meta = {'header': dict(fits.getheader(filename))}
+        lam = spec1d.spectral_axis.value * u.AA
+        flux = spec1d.flux.value * units.FLAM
+
+        return cls(Empirical1D, points=lam, lookup_table=flux, meta=meta)
 
 
     def redshift(self, z=0, vel=0):
         """
         Redshift or blueshift a spectra
         TODO: Do we need to modify the waveset? Probably
+              In that case we need to return a new spectra as waveset is read-only property,
+              se also below
 
         Parameters
         ----------
@@ -395,13 +385,15 @@ class Spectrum(SourceSpectrum):
             z = vel.to(u.m / u.s) / c
             self.z = z.value
 
-    def rebin_spectra(self, new_waves):
+    @classmethod
+    def rebin_spectra(cls, new_waves):
         """
         Rebin a synphot spectra to a new wavelength grid conserving flux.
         Grid does not need to be linear and can be at higher or lower resolution
 
         TODO: To resample the spectra at lower resolution a convolution is first needed. Implement!
-        TODO: Return the new spectra in the input wavelengths
+        TODO: Return the new spectra in the input wavelengths units
+        TODO: Check this!!
 
         Parameters
         ----------
@@ -417,14 +409,14 @@ class Spectrum(SourceSpectrum):
 
         """
         if isinstance(new_waves, u.Quantity):
-            new_waves = new_waves.to(u.Angstrom).value
+            new_waves = new_waves.to(u.AA).value
 
         waves = self.waveset.value
         f = np.ones(len(waves))
         filt = SpectralElement(Empirical1D, points=waves, lookup_table=f)
-        obs = Observation(self, filt, binset=new_waves, force='taper')
+        obs = Observation(cls, filt, binset=new_waves, force='taper')
         newflux = obs.binflux
-        rebin_spec = SourceSpectrum(Empirical1D, points=new_waves, lookup_table=newflux, meta=spectra.meta)
+        rebin_spec = cls(Empirical1D, points=new_waves, lookup_table=newflux, meta=cls.meta)
 
         return rebin_spec
 
@@ -496,7 +488,7 @@ class Spectrum(SourceSpectrum):
 
         return sp
 
-    def attenuate(self, curve, AV=None, EBV=0):
+    def redden(self, curve, Av=None, Ebv=0, Rv=3.1):
         """
         This function attenuate  a spectrum with a extinction curve normalized to a E(B-V)
 
@@ -513,13 +505,15 @@ class Spectrum(SourceSpectrum):
         an attenuated synphot spectrum
 
         """
+        if Av is not None:
+            Ebv = Rv * Ebv
 
-        extinction = synphot.ReddeningLaw.from_extinction_model(curve).extinction_curve(EBV)
+        extinction = synphot.ReddeningLaw.from_extinction_model(curve).extinction_curve(Ebv)
         sp = self.__class__(self.model * extinction.model)
 
         return sp
 
-    def deredden(self, curve, ebv=0):
+    def deredden(self, curve, Av=None, Ebv=0, Rv=3.1):
         """
         This function de-redden a spectrum.
 
@@ -536,8 +530,10 @@ class Spectrum(SourceSpectrum):
         an attenuated synphot spectrum
 
         """
+        if Av is not None:
+            Ebv = Rv * Ebv
 
-        extinction = synphot.ReddeningLaw.from_extinction_model(curve).extinction_curve(EBV)
+        extinction = synphot.ReddeningLaw.from_extinction_model(curve).extinction_curve(Ebv)
         sp = self.__class__(self.model / extinction.model)
 
         return sp
@@ -548,7 +544,31 @@ class Spectrum(SourceSpectrum):
     def scale_to_magnitude(self, magnitude, unit):
         pass
 
+    def _validate_other_add_sub(self, other):
+        """
+        Conditions for other to satisfy before add/sub.
+        Copied from SourceSpectrum so additions can happen with SourceSpectrum
+        """
+        if not isinstance(other, (self.__class__, SourceSpectrum)):
+            raise exceptions.IncompatibleSources(
+                'Can only operate on {0}.'.format(self.__class__.__name__))
 
+    def _validate_other_mul_div(self, other):
+        """Conditions for other to satisfy before mul/div."""
+        if not isinstance(other, (u.Quantity, numbers.Number,
+                                  BaseUnitlessSpectrum, SourceSpectrum, self.__class__)):
+            raise exceptions.IncompatibleSources(
+                'Can only operate on scalar number/Quantity or spectrum')
+        elif (isinstance(other, u.Quantity) and
+              (other.unit.decompose() != u.dimensionless_unscaled or
+               not np.isscalar(other.value) or
+               not isinstance(other.value, numbers.Real))):
+            raise exceptions.IncompatibleSources(
+                'Can only operate on real scalar dimensionless Quantity')
+        elif (isinstance(other, numbers.Number) and
+              not (np.isscalar(other) and isinstance(other, numbers.Real))):
+            raise exceptions.IncompatibleSources(
+                'Can only operate on real scalar number')
 
 
 #------------------ BEGIN ---------------------------------------------
