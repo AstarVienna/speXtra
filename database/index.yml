@@ -1,0 +1,13 @@
+# Database contents
+
+library_names:
+   - kc96
+   - pickles
+
+# here go the extinction curves
+extinction:
+
+# in case is needed
+filters:
+
+

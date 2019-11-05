@@ -30,110 +30,104 @@ from synphot.models import Empirical1D, GaussianFlux1D
 import yaml
 import tynt
 
-
-
 database_location = "https://homepage.univie.ac.at/miguel.verdugo/database/"  # Need to be put in a config file
 
 # default filter definitions now in data/default_filters.yml, including GALEX, Spitzer, HST and Y-band filters
-with open("data/default_filters.yml") as f:
-    FILTER_DEFAULTS = yaml.safe_load(f)
+#with open("data/default_filters.yml") as f:
+#    FILTER_DEFAULTS = yaml.safe_load(f)
 
 
 class SpecDatabase:
 
     def __init__(self):
-        self.url = database_location + "templates.yml"
+        self.url = database_location
 
-        self.library_names = list(self.contents.keys())
+        self.library_names = list(self.contents["library_names"])
 
     @property
     def contents(self):
-        path = download_file(self.url, cache=False)
-        with open(path) as f:
-            contents = yaml.safe_load(f)
+        return self._get_contents("index.yml")
 
-        return contents
-
-    def display(self):
+    def get_library(self, library_name):
         """
-        try to nicely display the contents
+        get the contents of a particular library
+        Parameters
+        ----------
+        library_name
+
+        Returns
+        -------
+        a dictionary with the library contents
+        """
+
+        if library_name not in self.library_names:
+            raise ValueError(library_name, "library not found")
+
+        url = "libraries/" + library_name + "/contents.yml"
+        return self._get_contents(url)
+
+    def display_library(self, library_name):
+        """
+        try to nicely display the contents of library
 
         """
-        print(yaml.dump(self.contents, indent=4, sort_keys=False, default_flow_style=False))
+        print(yaml.dump(self.get_library(library_name), indent=4, sort_keys=False, default_flow_style=False))
 
     @property
     def as_table(self):
         """
+        make a summary of the database properties
 
         Returns
         -------
         an astropy.table with the database contents
         """
-        column_names = ["libraries", "title", "type", "resolution", "wave_coverage"]
-        library_names = self.library_names
-        titles = [self.contents[n]["name"] for n in self.library_names]
-        types = [self.contents[n]["type"] for n in self.library_names]
-        resolution = [self.contents[n]["resolution"] for n in self.library_names]
-        wave_coverage = [self.contents[n]["wavelength"] for n in self.library_names]
 
-        data = [library_names, titles, types, resolution, wave_coverage]
-        meta = self.contents
-        table = Table(names=column_names, data=data, meta=meta)
+        column_names = ["library_name", "title", "type", "resolution", "spectral_coverage", "templates"]
+        library_names = self.library_names
+        titles = []
+        types = []
+        resolution = []
+        spectral_coverage = []
+        templates = []
+
+        for lib in self.library_names:
+            contents = self.get_library(lib)
+            titles.append(contents["title"])
+            types.append(contents["type"])
+            resolution.append(contents["resolution"])
+            spectral_coverage.append(contents["spectral_coverage"])
+            templates.append(contents["templates"])
+
+        data = [library_names, titles, types, resolution, spectral_coverage, templates]
+        table = Table(names=column_names, data=data)
+
         return table
 
-
-
-    def browse(self, keys):
+    @property
+    def as_dict(self):
         """
-
-        Parameters
-        ----------
-        keys
+        Represent the whole database as a dictionary
 
         Returns
         -------
-        libraries that fulfill the criteria (type, spectral coverage, resolution etc
+
         """
-        pass
+        database = {}
+        for lib in self.library_names:
+            contents = self.get_library(lib)
+            database[lib] = contents
 
-
-
-class Database:
-    """
-
-    usage should be
-    Database(keys) return all libraries that fulfill the keys
-    Database() return a list of all libraries
-    """
-
-    def __init__(self):
-        self.url = database_location + "templates.yml"
-        self.contents = self.get_database(self.url)
-        self.library_names = list(self.contents.keys())
-
-    def get_database(self, url):
-
-        path = download_file(url, cache=False)
-        with open(path) as f:
-            templates = yaml.safe_load(f)
-
-        return templates
+        return database
 
     def display(self):
         """
-        try to nicely display the contents
-
-        """
-        print(yaml.dump(self.contents, indent=4, sort_keys=False, default_flow_style=False))
-
-    def as_table(self):
-        """
-
+        Try to nicely display the whole database
         Returns
         -------
-        an astropy.table with the database contents
+
         """
-        pass
+        print(yaml.dump(self.as_dict, indent=4, sort_keys=False, default_flow_style=False))
 
     def browse(self, keys):
         """
@@ -144,9 +138,18 @@ class Database:
 
         Returns
         -------
-        libraries that fulfill the criteria (type, spectral coverage, resolution etc
+        libraries and templates that fulfill the criteria (type, spectral coverage, resolution etc
         """
         pass
+
+    def _get_contents(self, path=""):
+        url = self.url + path
+        filename = download_file(url, cache=False)
+        with open(filename) as f:
+            data = yaml.safe_load(f)
+
+        return data
+
 
 # TODO: Make SpecLibrary and Database only one class to easy browsing.
 #       Make it independent of Spectrum class to facilitate rewrite if we move to SQL/whatever
@@ -177,71 +180,6 @@ class SpecLibrary:
         self.file_extension = self.library_info["file_extension"]
         self.comments = self.library_info["comments"]
 
-       # for key in self.library_info:
-            # This works, however it's apparently frowned upon
-            # Also it hard to see the attributes names down under
-        #    setattr(self, key, self.library_info[key])
-
-        self.files = [f + self.file_extension for f in self.template_names]
-        self.templates = [self.library_name + "/" + tn for tn in self.template_names]
-
-        if self.library_info["library"] != self.library_name:
-            warnings.warn("inconsistency in library names!")
-
-    def get_library(self, library_name):
-        """
-
-        Parameters
-        ----------
-        library_name: name of the library
-        display: display the contents instead of returning them
-        Returns
-        -------
-        a dictionary with the contents of a particular library
-        """
-        database = Database()
-        if library_name not in database.library_names:
-            raise NameError("library not in the database")
-
-        else:
-            path = download_file(self.url, cache=True)
-            with open(path) as f:
-                library = yaml.safe_load(f)
-
-        return library
-
-    def display(self):
-        """
-        Nicely (try to) display the library, good for interactive mode
-        Returns
-        -------
-
-        """
-        print(yaml.dump(self.library_info, indent=4, sort_keys=False, default_flow_style=False))
-
-    def as_table(self):
-        """
-
-        Returns
-        -------
-        an astropy.table with the contents of the library
-        """
-        if isinstance(self.wmin, list) is False:
-            wmin = [self.wmin]*len(self.templates)
-        else:
-            wmin = self.wmin
-
-        if isinstance(self.wmax, list) is False:
-            wmax = [self.wmax] * len(self.templates)
-        else:
-            wmax = self.wmax
-
-        names = ["template_name", "wmin", "wmax", "comment"]
-        data = [self.templates, wmin, wmax, self.comments]
-        meta = self.library_info
-        table = Table(names=names, data=data, meta=meta)
-        return table
-
 
 def get_template(template, path=None):
     """
@@ -255,18 +193,20 @@ def get_template(template, path=None):
     -------
 
     """
-    library_name, template_name = template.split("/")
-    library = SpecLibrary(library_name)
-    if template_name not in library.template_names:
-        raise NameError("template not in library")
+    database = SpecDatabase()
 
-    url = database_location + "templates/" + template + ".fits"
+    library_name, template_name = template.split("/")
+    library_contents = database.get_library(library_name)
+    if template_name not in library_contents["templates"]:
+        raise ValueError(template_name, "not found")
+
+    url = database_location + "libraries/" + library_name + "/" + template_name + ".fits"
     print(url)
-    data_type = library.data_type
-    file = download_file(url, cache=True)
+    file = download_file(url, cache=False)
     if path is not None:
         file = shutil.copy2(file, path)
-    print(file)
+        print(file)
+        
     return file
 
 

@@ -1,16 +1,10 @@
 # THE KINNEY-CALZETTI SPECTRAL ATLAS OF GALAXIES
 
-library : kc96
+library_name : kc96
 
 type : galaxies
 
-wavelength :
-  - uv
-  - vis
-
-resolution : 10 A
-
-description : THE KINNEY-CALZETTI SPECTRAL ATLAS OF GALAXIES
+title : The Kinney-Calzetti Spectral Atlas of Galaxies
 
 summary : |
   The Kinney-Calsetti Atlas consists of an homogeneous set of 12 galaxy spectral
@@ -39,19 +33,21 @@ reference : Kinney, A.L., Calzetti, D., Bohlin, R.C., McQuade, K., Storchi-Bergm
 
 link : "http://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/the-kinney-calzetti-spetral-atlas"
 
-wave_unit: AA
+spectral_coverage :
+  - uv
+  - vis
+
+resolution : 10
+
+wave_unit: Angstrom
 
 flux_unit : FLAM
-
-wave_column_name : WAVELENGTH
-
-flux_column_name : FLUX
 
 data_type: fits
 
 file_extension: .fits
 
-template_names:
+templates:
   - elliptical
   - bulge
   - s0
@@ -64,22 +60,6 @@ template_names:
   - starb4
   - starb5
   - starb6
-
-wmin: 1235
-
-wmax:
-  - 9935
-  - 7545
-  - 9940
-  - 9940
-  - 9940
-  - 7660
-  - 9945
-  - 9945
-  - 9945
-  - 9945
-  - 9945
-  - 9945
 
 comments:
   - null

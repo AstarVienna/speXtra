@@ -1,17 +1,10 @@
 # Pickles Stellar Spectral Flux Library
 
-library : pickles
+library_name : pickles
 
 type : stars
 
-wavelength :
-  - uv
-  - vis
-  - nir
-
-resolution : 5 A
-
-description : Pickles Stellar Spectral Flux Library
+title : Pickles Stellar Spectral Flux Library
 
 summary : |
   This library of wide spectral coverage, consists of 131 flux calibrated stellar spectra,
@@ -27,15 +20,26 @@ reference : Pickles, A. J. 1998, PASP, 110, 863
 
 link : "https://www.eso.org/sci/facilities/paranal/decommissioned/isaac/tools/lib.html"
 
-wave_unit: AA
+spectral_coverage :
+  - uv
+  - vis
+  - nir
+
+resolution : 5
+
+wave_unit: Angstrom
 
 flux_unit : FLAM
+
+wave_column_name : WAVELENGTH
+
+flux_column_name : FLUX
 
 data_type: fits
 
 file_extension: .fits
 
-template_names:
+templates:
   - o5v
   - o8iii
   - o9v
@@ -167,10 +171,6 @@ template_names:
   - m8iii
   - m9iii
   - m10iii
-
-wmin: 1150
-
-wmax: 25000
 
 comments:
   - null
