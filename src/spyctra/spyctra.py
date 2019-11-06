@@ -14,6 +14,7 @@ TODO: Consider @dataclass for better and more concise description of these class
 import numbers
 import warnings
 import shutil
+from posixpath import join as urljoin
 
 import numpy as np
 
@@ -63,8 +64,8 @@ class SpecDatabase:
         if library_name not in self.library_names:
             raise ValueError(library_name, "library not found")
 
-        url = "libraries/" + library_name + "/contents.yml"
-        return self._get_contents(url)
+        path = urljoin("libraries", library_name, "contents.yml")
+        return self._get_contents(path)
 
     def display_library(self, library_name):
         """
@@ -143,7 +144,19 @@ class SpecDatabase:
         pass
 
     def _get_contents(self, path=""):
-        url = self.url + path
+        """
+        read a yaml file from a relative url
+
+        Parameters
+        ----------
+        path
+
+        Returns
+        -------
+        dict with the contents of the yaml file
+        """
+
+        url = urljoin(self.url, path)
         filename = download_file(url, cache=False)
         with open(filename) as f:
             data = yaml.safe_load(f)
@@ -187,27 +200,38 @@ def get_template(template, path=None):
     Parameters
     ----------
     template: the name of the template, specified as library_name/template_name
-    path: the path were the downloaded template will be located (optional)
+    path: the path were the downloaded template will be downloaded (optional)
 
     Returns
     -------
+    a file
+    a dictionary with the main template attributes
 
     """
     database = SpecDatabase()
 
     library_name, template_name = template.split("/")
-    library_contents = database.get_library(library_name)
-    if template_name not in library_contents["templates"]:
+    lib_data = database.get_library(library_name)
+    template_meta = {"resolution": lib_data["resolution"],
+                     "wave_unit": lib_data["wave_unit"],
+                     "flux_unit": lib_data["flux_unit"],
+                     "wave_column_name": lib_data["wave_column_name"],
+                     "flux_column_name": lib_data["flux_column_name"],
+                     "data_type": lib_data["data_type"],
+                     "file_extension": lib_data["file_extension"]}
+
+    if template_name not in lib_data["templates"]:
         raise ValueError(template_name, "not found")
 
-    url = database_location + "libraries/" + library_name + "/" + template_name + ".fits"
+    filename = template_name + template_meta["file_extension"]
+    url = urljoin(database.url, "libraries/", library_name, filename)
     print(url)
     file = download_file(url, cache=False)
     if path is not None:
         file = shutil.copy2(file, path)
         print(file)
-        
-    return file
+
+    return file, template_meta
 
 
 class Spectrum(SourceSpectrum):
@@ -244,7 +268,7 @@ class Spectrum(SourceSpectrum):
 
 
     @classmethod
-    def load(cls, template_name):
+    def load(cls, template):
         """
 
         Parameters
@@ -257,20 +281,29 @@ class Spectrum(SourceSpectrum):
         -------
 
         """
-        library, template = template_name.split("/")
-        location = get_template(template_name)
-        data_type = SpecLibrary(library).data_type
+
+        location, meta = get_template(template)
+
+        data_type = meta["data_type"]
+        resolution = meta["resolution"]
+        wave_unit = meta["wave_unit"]
+        flux_unit = meta["flux_unit"]
+        wave_column_name = meta["wave_column_name"]
+        flux_column_name = meta["flux_column_name"]
+        file_extension = meta["file_extension"]
+
+        # make try and except here to catch most problems
         if data_type == "fits":
             header, lam, flux = synphot.specio.read_fits_spec(location)
         else:
             header, lam, flux = synphot.specio.read_ascii_spec(location)
-        # if 1D?
+
         return cls(Empirical1D, points=lam, lookup_table=flux, meta=header)
 
     @classmethod
     def from1dspec(cls, filename, format="wcs1d-fits", **kwargs):
         """
-        This function tries to create a Spectrum from 1d fits files.
+        This function _tries_ to create a Spectrum from 1d fits files.
         It relies in specutils for its job
 
         TODO: More checks from units, etc.
@@ -299,9 +332,6 @@ class Spectrum(SourceSpectrum):
     def redshift(self, z=0, vel=0):
         """
         Redshift or blueshift a spectra
-        TODO: Do we need to modify the waveset? Probably
-              In that case we need to return a new spectra as waveset is read-only property,
-              se also below
 
         Parameters
         ----------
