@@ -164,39 +164,9 @@ class SpecDatabase:
         return data
 
 
-# TODO: Make SpecLibrary and Database only one class to easy browsing.
-#       Make it independent of Spectrum class to facilitate rewrite if we move to SQL/whatever
-class SpecLibrary:
-    """
-    Better describe the library as a class
-
-    """
-    library_name = None
-
-    def __init__(self, library_name):
-        
-        self.library_name = library_name
-        self.url = database_location + "templates/" + self.library_name + "/contents.yml"
-        self.library_info = self.get_library(self.library_name)
-
-        self.type = self.library_info["type"]
-        self.resolution = self.library_info["resolution"]
-        self.description = self.library_info["description"]
-        self.summary = self.library_info["summary"]
-        self.reference = self.library_info["reference"]
-        self.template_names = self.library_info["template_names"]
-        self.wmin = self.library_info["wmin"]
-        self.wmax = self.library_info["wmax"]
-        self.flux_unit = self.library_info["flux_unit"]
-        self.wave_unit = self.library_info["wave_unit"]
-        self.data_type = self.library_info["data_type"]
-        self.file_extension = self.library_info["file_extension"]
-        self.comments = self.library_info["comments"]
-
-
 def get_template(template, path=None):
     """
-
+    TODO: make it a SpecDatabase method
     Parameters
     ----------
     template: the name of the template, specified as library_name/template_name
