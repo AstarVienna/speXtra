@@ -15,7 +15,7 @@ import numbers
 import warnings
 import shutil
 from posixpath import join as urljoin
-from urllib.parse import urlparse
+import urllib
 
 import numpy as np
 
@@ -34,10 +34,19 @@ import tynt
 
 
 def is_url(url):
+    """
+    Checks that a given URL is reachable.
+    :param url: A URL
+    :rtype: bool
+    """
+    
+    request = urllib.request.Request(url)
+    request.get_method = lambda: 'HEAD'
+
     try:
-        result = urlparse(url)
-        return all([result.scheme, result.netloc])
-    except ValueError:
+        urllib.request.urlopen(request)
+        return True
+    except urllib.error.URLError:
         return False
 
 
