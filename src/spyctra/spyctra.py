@@ -35,19 +35,30 @@ import tynt
 
 def is_url(url):
     """
-    Checks that a given URL is reachable.
-    :param url: A URL
-    :rtype: bool
+    Checks that a given URL is reachable. Depending of the configuration of the server
+    it might return True even if the page doesn't exist.
+
+    Parameters
+    -----------
+    url: A URL
+
+    Returns
+    -------
+    Boolean
     """
-    
-    request = urllib.request.Request(url)
-    request.get_method = lambda: 'HEAD'
 
     try:
-        urllib.request.urlopen(request)
-        return True
-    except urllib.error.URLError:
-        return False
+        request = urllib.request.Request(url)
+        request.get_method = lambda: 'HEAD'
+        try:
+            urllib.request.urlopen(request)
+            output = True
+        except urllib.error.URLError:
+            output = False
+    except ValueError:
+        output = False
+
+    return output
 
 
 database_location = "https://homepage.univie.ac.at/miguel.verdugo/database/"  # Need to be put in a config file
@@ -181,9 +192,12 @@ class SpecDatabase:
         """
 
         url = urljoin(self.url, path)
-        filename = download_file(url, cache=False)
-        with open(filename) as f:
-            data = yaml.safe_load(f)
+        if is_url(url):
+            filename = download_file(url, cache=False)
+            with open(filename) as f:
+                data = yaml.safe_load(f)
+        else:
+            raise urllib.error.URLError
 
         return data
 
