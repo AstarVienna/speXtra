@@ -15,6 +15,7 @@ import numbers
 import warnings
 import shutil
 from posixpath import join as urljoin
+from urllib.parse import urlparse
 
 import numpy as np
 
@@ -31,7 +32,19 @@ from synphot.models import Empirical1D, GaussianFlux1D
 import yaml
 import tynt
 
+
+def is_url(url):
+    try:
+        result = urlparse(url)
+        return all([result.scheme, result.netloc])
+    except ValueError:
+        return False
+
+
 database_location = "https://homepage.univie.ac.at/miguel.verdugo/database/"  # Need to be put in a config file
+
+if is_url(database_location):
+    database_location = database_location
 
 # default filter definitions now in data/default_filters.yml, including GALEX, Spitzer, HST and Y-band filters
 #with open("data/default_filters.yml") as f:
@@ -72,7 +85,8 @@ class SpecDatabase:
         try to nicely display the contents of library
 
         """
-        print(yaml.dump(self.get_library(library_name), indent=4, sort_keys=False, default_flow_style=False))
+        print(yaml.dump(self.get_library(library_name),
+                        indent=4, sort_keys=False, default_flow_style=False))
 
     @property
     def as_table(self):
@@ -128,7 +142,8 @@ class SpecDatabase:
         -------
 
         """
-        print(yaml.dump(self.as_dict, indent=4, sort_keys=False, default_flow_style=False))
+        print(yaml.dump(self.as_dict,
+                        indent=4, sort_keys=False, default_flow_style=False))
 
     def browse(self, keys):
         """
@@ -298,8 +313,8 @@ class Spectrum(SourceSpectrum):
 
         return cls(Empirical1D, points=lam, lookup_table=flux, meta=meta)
 
-
-    def redshift(self, z=0, vel=0):
+    @classmethod
+    def redshift(cls, z=0, vel=0):
         """
         Redshift or blueshift a spectra
 
@@ -351,7 +366,7 @@ class Spectrum(SourceSpectrum):
         if isinstance(new_waves, u.Quantity):
             new_waves = new_waves.to(u.AA).value
 
-        waves = self.waveset.value
+        waves = cls.waveset.value
         f = np.ones(len(waves))
         filt = SpectralElement(Empirical1D, points=waves, lookup_table=f)
         obs = Observation(cls, filt, binset=new_waves, force='taper')
@@ -923,5 +938,6 @@ def load_1dfits(filename, wave_unit=u.AA, flux_unit=units.FLAM, wave_col='WAVELE
     """
 
     pass
+
 
 
