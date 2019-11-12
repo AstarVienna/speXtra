@@ -23,7 +23,7 @@ from astropy.constants import c
 
 import synphot
 from synphot import (units, SourceSpectrum, SpectralElement, Observation, BaseUnitlessSpectrum)
-from synphot.models import (Empirical1D, GaussianFlux1D, Box1D)
+from synphot.models import (Empirical1D, GaussianFlux1D, Box1D, ConstFlux1D)
 
 import tynt
 
@@ -65,7 +65,6 @@ class Spectrum(SourceSpectrum):
         self.z = z
         super().__init__(modelclass, **kwargs)
 
-
     @classmethod
     def load(cls, template_name):
         """
@@ -76,13 +75,11 @@ class Spectrum(SourceSpectrum):
         ----------
         template_name: The name of the spectral template in the speclibrary, format: library/template_name
 
-
-
         Returns
         -------
 
-        """
 
+        """
         location, meta = get_template(template_name)
 
         data_type = meta["data_type"]
@@ -319,6 +316,35 @@ class Spectrum(SourceSpectrum):
     def smooth(self, kernel):
         pass
 
+    @classmethod
+    def get_zero_mag_spectrum(cls, system_name="AB"):
+        mag = 0
+        if system_name.lower() in ["vega"]:
+            vega = get_vega_spectrum()
+            spec = vega * 10 ** (-0.4 * mag)  # is this necessary?
+        elif system_name.lower() in ["ab"]:
+            spec = SourceSpectrum(ConstFlux1D, amplitude=mag * u.ABmag)
+        elif system_name.lower() in ["st", "hst"]:
+            spec = SourceSpectrum(ConstFlux1D, amplitude=mag * u.STmag)
+
+        return cls(spec)
+
+    @classmethod
+    def black_body_spectrum(cls, temperature, wmin, wmax):
+        """
+        Produce a blackbody spectrum for a given temperature and cut it between wmin and wmax
+        Parameters
+        ----------
+        temperature
+        wmin
+        wmax
+
+        Returns
+        -------
+
+        """
+        pass
+
     def scale_to_magnitude(self, magnitude, unit):
         pass
 
@@ -400,17 +426,7 @@ def get_filter(filter_name):
     return filt
 
 
-def get_zero_mag_spectrum(system_name="AB"):
-    mag = 0
-    if system_name.lower() in ["vega"]:
-        vega = get_vega_spectrum()
-        spec = vega * 10**(-0.4 * mag)  # is this necessary?
-    elif system_name.lower() in ["ab"]:
-        spec = SourceSpectrum(ConstFlux1D, amplitude=mag*u.ABmag)
-    elif system_name.lower() in ["st", "hst"]:
-        spec = SourceSpectrum(ConstFlux1D, amplitude=mag*u.STmag)
 
-    return spec
 
 
 def zero_mag_flux(filter_name, photometric_system, return_filter=False):
@@ -680,24 +696,6 @@ def photons_in_range(spectra, wave_min, wave_max, area, bandpass=None):
     counts = np.array(counts) * u.ph * u.s**-1
 
     return counts
-
-
-def scale_to_magnitude(spectra, magnitude, passband, units=u.ABmag):
-    """
-    Scale spectra to a magnitude
-
-    Parameters
-    ----------
-    spectra
-    magnitude
-    units
-
-    Returns
-    -------
-    a scale synphot spectra
-    """
-    pass
-
 
 
 
