@@ -10,12 +10,8 @@ each library is described by a yaml file
 Classes for describing the database and libraries are being implemented
 TODO: Consider @dataclass for better and more concise description of these classes (only python 3.7 though)
 """
-
 import numbers
 import warnings
-import shutil
-from posixpath import join as urljoin
-import urllib
 
 import numpy as np
 
@@ -26,220 +22,16 @@ from astropy.utils.data import download_file
 from astropy.constants import c
 
 import synphot
-from synphot import units, SourceSpectrum, SpectralElement, Observation, BaseUnitlessSpectrum
-from synphot.models import Empirical1D, GaussianFlux1D
+from synphot import (units, SourceSpectrum, SpectralElement, Observation, BaseUnitlessSpectrum)
+from synphot.models import (Empirical1D, GaussianFlux1D, Box1D)
 
-import yaml
 import tynt
 
-
-def is_url(url):
-    """
-    Checks that a given URL is reachable. Depending of the configuration of the server
-    it might return True even if the page doesn't exist.
-
-    Parameters
-    -----------
-    url: A URL
-
-    Returns
-    -------
-    Boolean
-    """
-
-    try:
-        request = urllib.request.Request(url)
-        request.get_method = lambda: 'HEAD'
-        try:
-            urllib.request.urlopen(request)
-            output = True
-        except urllib.error.URLError:
-            output = False
-    except ValueError:
-        output = False
-
-    return output
-
-
-database_location = "https://homepage.univie.ac.at/miguel.verdugo/database/"  # Need to be put in a config file
-
-if is_url(database_location):
-    database_location = database_location
+from .database import get_template
 
 # default filter definitions now in data/default_filters.yml, including GALEX, Spitzer, HST and Y-band filters
-#with open("data/default_filters.yml") as f:
+# with open("data/default_filters.yml") as f:
 #    FILTER_DEFAULTS = yaml.safe_load(f)
-
-
-class SpecDatabase:
-
-    def __init__(self):
-        self.url = database_location
-
-        self.library_names = list(self.contents["library_names"])
-
-    @property
-    def contents(self):
-        return self._get_contents("index.yml")
-
-    def get_library(self, library_name):
-        """
-        get the contents of a particular library
-        Parameters
-        ----------
-        library_name
-
-        Returns
-        -------
-        a dictionary with the library contents
-        """
-
-        if library_name not in self.library_names:
-            raise ValueError(library_name, "library not found")
-
-        path = urljoin("libraries", library_name, "contents.yml")
-        return self._get_contents(path)
-
-    def display_library(self, library_name):
-        """
-        try to nicely display the contents of library
-
-        """
-        print(yaml.dump(self.get_library(library_name),
-                        indent=4, sort_keys=False, default_flow_style=False))
-
-    @property
-    def as_table(self):
-        """
-        make a summary of the database properties
-
-        Returns
-        -------
-        an astropy.table with the database contents
-        """
-
-        column_names = ["library_name", "title", "type", "resolution", "spectral_coverage", "templates"]
-        library_names = self.library_names
-        titles = []
-        types = []
-        resolution = []
-        spectral_coverage = []
-        templates = []
-
-        for lib in self.library_names:
-            contents = self.get_library(lib)
-            titles.append(contents["title"])
-            types.append(contents["type"])
-            resolution.append(contents["resolution"])
-            spectral_coverage.append(contents["spectral_coverage"])
-            templates.append(contents["templates"])
-
-        data = [library_names, titles, types, resolution, spectral_coverage, templates]
-        table = Table(names=column_names, data=data)
-
-        return table
-
-    @property
-    def as_dict(self):
-        """
-        Represent the whole database as a dictionary
-
-        Returns
-        -------
-
-        """
-        database = {}
-        for lib in self.library_names:
-            contents = self.get_library(lib)
-            database[lib] = contents
-
-        return database
-
-    def display(self):
-        """
-        Try to nicely display the whole database
-        Returns
-        -------
-
-        """
-        print(yaml.dump(self.as_dict,
-                        indent=4, sort_keys=False, default_flow_style=False))
-
-    def browse(self, keys):
-        """
-
-        Parameters
-        ----------
-        keys
-
-        Returns
-        -------
-        libraries and templates that fulfill the criteria (type, spectral coverage, resolution etc
-        """
-        pass
-
-    def _get_contents(self, path=""):
-        """
-        read a yaml file from a relative url
-
-        Parameters
-        ----------
-        path
-
-        Returns
-        -------
-        dict with the contents of the yaml file
-        """
-
-        url = urljoin(self.url, path)
-        if is_url(url):
-            filename = download_file(url, cache=False)
-            with open(filename) as f:
-                data = yaml.safe_load(f)
-        else:
-            raise urllib.error.URLError
-
-        return data
-
-
-def get_template(template, path=None):
-    """
-    TODO: make it a SpecDatabase method
-    Parameters
-    ----------
-    template: the name of the template, specified as library_name/template_name
-    path: the path were the downloaded template will be downloaded (optional)
-
-    Returns
-    -------
-    a file
-    a dictionary with the main template attributes
-
-    """
-    database = SpecDatabase()
-
-    library_name, template_name = template.split("/")
-    lib_data = database.get_library(library_name)
-    template_meta = {"resolution": lib_data["resolution"],
-                     "wave_unit": lib_data["wave_unit"],
-                     "flux_unit": lib_data["flux_unit"],
-                     "wave_column_name": lib_data["wave_column_name"],
-                     "flux_column_name": lib_data["flux_column_name"],
-                     "data_type": lib_data["data_type"],
-                     "file_extension": lib_data["file_extension"]}
-
-    if template_name not in lib_data["templates"]:
-        raise ValueError(template_name, "not found")
-
-    filename = template_name + template_meta["file_extension"]
-    url = urljoin(database.url, "libraries/", library_name, filename)
-    print(url)
-    file = download_file(url, cache=False)
-    if path is not None:
-        file = shutil.copy2(file, path)
-        print(file)
-
-    return file, template_meta
 
 
 class Spectrum(SourceSpectrum):
@@ -271,26 +63,27 @@ class Spectrum(SourceSpectrum):
         self._valid_z_types = ('wavelength_only', 'conserve_flux')
         self.z_type = z_type
         self.z = z
-
         super().__init__(modelclass, **kwargs)
 
 
     @classmethod
-    def load(cls, template):
+    def load(cls, template_name):
         """
-
-        Parameters
-        ----------
-        template_name: The name of the spectral template in the speclibrary, format: library/template
+        Load a template from the database
 
         TODO: Checks for units etc in the library to correctly call read_*__spec for most possible cases
+        Parameters
+        ----------
+        template_name: The name of the spectral template in the speclibrary, format: library/template_name
+
+
 
         Returns
         -------
 
         """
 
-        location, meta = get_template(template)
+        location, meta = get_template(template_name)
 
         data_type = meta["data_type"]
         resolution = meta["resolution"]
@@ -323,6 +116,7 @@ class Spectrum(SourceSpectrum):
         Returns
         -------
 
+
         """
         try:
             from specutils import Spectrum1D
@@ -353,15 +147,13 @@ class Spectrum(SourceSpectrum):
 
         """
         if z != 0:
-            self.z = z
-
+            cls.z = z
         if vel != 0:
-
             if isinstance(vel, u.Quantity) is False:
                 vel = vel * u.m / u.s
 
             z = vel.to(u.m / u.s) / c
-            self.z = z.value
+            cls.z = z.value
 
     @classmethod
     def rebin_spectra(cls, new_waves):
@@ -378,7 +170,6 @@ class Spectrum(SourceSpectrum):
         spectra: a synphot spectra
         new_waves: an array of the output wavelenghts in Angstroms but other units can be
             specified
-
 
         Returns
         -------
@@ -400,7 +191,7 @@ class Spectrum(SourceSpectrum):
 
     def add_emission_line(self, center, flux, fwhm):
         """
-
+        TODO: accept different profiles (Lorentz1D, Voigt1D, etc)
         Parameters
         ----------
         spectrum: a synphot spectrum
@@ -413,7 +204,6 @@ class Spectrum(SourceSpectrum):
         the spectrum with the emission line
 
         """
-
         if isinstance(center, u.Quantity) is True:
             center = center.to(u.AA).value
         if isinstance(flux, u.Quantity) is True:
@@ -421,13 +211,19 @@ class Spectrum(SourceSpectrum):
         if isinstance(fwhm, u.Quantity) is True:
             fwhm = fwhm.to(u.AA).value
 
-        g_em = SourceSpectrum(GaussianFlux1D(total_flux=flux, mean=center, fwhm=fwhm))
-        sp = self.__class__(self.model + g_em.model)  # TODO: Probably +,-,*, validate, etc needs to be implemented too
+        center = np.array([center]).flatten()
+        flux = np.array([flux]).flatten()
+        fwhm = np.array([fwhm]).flatten()
+
+        for c, x, f in zip(center, flux, fwhm):
+            g_em = SourceSpectrum(GaussianFlux1D(mean=c, total_flux=x, fwhm=f))
+            sp = self.__class__(self.model + g_em.model)
 
         return sp
 
     def add_absorption_line(self, center, ew, fwhm):
         """
+        TODO: accept different profiles (Lorentz1D, Voigt1D, etc)
         Add a absorption line of to a spectrum with center, fwhm and equivalent width specified by the user
         It also supports emission lines if ew is negative
 
@@ -449,20 +245,24 @@ class Spectrum(SourceSpectrum):
         if isinstance(fwhm, u.Quantity) is True:
             fwhm = fwhm.to(u.AA).value
 
-        sign = -1 * np.sign(ew)  # to keep the convention that EL are negative and ABS are positive
-        left, right = center - np.abs(ew / 2), center + np.abs(ew / 2)
-        wavelengths = self.waveset[(self.waveset.value >= left) & (self.waveset.value <= right)]
+        center = np.array([center]).flatten()
+        ew = np.array([ew]).flatten()
+        fwhm = np.array([fwhm]).flatten()
 
-        fluxes = units.convert_flux(wavelengths=wavelengths, fluxes=self(wavelengths),
-                                    out_flux_unit=units.FLAM)
-        flux = np.trapz(fluxes.value, wavelengths.value)
-        g_abs = Spectrum(GaussianFlux1D(total_flux=sign * flux, mean=center, fwhm=fwhm))
-        sp = self.__class__(self.model + g_abs.model)
-        if (sp(wavelengths).value < 0).any():
-            warnings.warn("Warning: Flux<0 for specified EW and FHWM, setting it to Zero")
-            waves = sp.waveset[sp(sp.waveset) < 0]
-            zero_sp = SourceSpectrum(Empirical1D, points=waves, lookup_table=-1 * sp(waves).value)
-            sp = self.__class__(sp.model + zero_sp.model)
+        for c, e, f in zip(center, ew, fwhm):
+            sign = -1 * np.sign(e)  # to keep the convention that EL are negative and ABS are positive
+            left, right = center - np.abs(e / 2), center + np.abs(e / 2)
+            wavelengths = self.waveset[(self.waveset.value >= left) & (self.waveset.value <= right)]
+            fluxes = units.convert_flux(wavelengths=wavelengths, fluxes=self(wavelengths),
+                                        out_flux_unit=units.FLAM)
+            flux = np.trapz(fluxes.value, wavelengths.value)
+            g_abs = Spectrum(GaussianFlux1D(total_flux=sign * flux, mean=c, fwhm=f))
+            sp = self.__class__(self.model + g_abs.model)
+            if (sp(wavelengths).value < 0).any():
+                warnings.warn("Warning: Flux<0 for specified EW and FHWM, setting it to Zero")
+                waves = sp.waveset[sp(sp.waveset) < 0]
+                zero_sp = SourceSpectrum(Empirical1D, points=waves, lookup_table=-1 * sp(waves).value)
+                sp = self.__class__(sp.model + zero_sp.model)
 
         return sp
 
@@ -836,11 +636,11 @@ def photons_in_range(spectra, wave_min, wave_max, area, bandpass=None):
     ----------
     spectra: a synphot spectrum
     wave_min
-        [um]
+        [Angstrom]
     wave_max
-        [um]
+        [Angstrom]
     area : Quantity
-        [m2]
+        [cm2]
     bandpass : SpectralElement
 
 
@@ -850,18 +650,11 @@ def photons_in_range(spectra, wave_min, wave_max, area, bandpass=None):
 
     """
     if isinstance(area, u.Quantity):
-        area = area.to(u.m**2).value  # if not unit is given, area is assumed in m2
-
+        area = area.to(u.cm**2).value  #
     if isinstance(wave_min, u.Quantity):
         wave_min = wave_min.to(u.Angstrom).value
-    else:
-        wave_min *= 1E4
-
     if isinstance(wave_max, u.Quantity):
         wave_max = wave_max.to(u.Angstrom).value
-    else:
-        wave_max *= 1E4  # if not unit is given, wavelength is assumed in Angstrom
-
     if isinstance(spectra, list) is False:
         spectra = [spectra]
 
@@ -887,8 +680,6 @@ def photons_in_range(spectra, wave_min, wave_max, area, bandpass=None):
     counts = np.array(counts) * u.ph * u.s**-1
 
     return counts
-
-
 
 
 def scale_to_magnitude(spectra, magnitude, passband, units=u.ABmag):
@@ -928,39 +719,6 @@ def black_body(t, wmin, wmax):
     """
     pass
 
-
-
-
-
-def load_1dfits(filename, wave_unit=u.AA, flux_unit=units.FLAM, wave_col='WAVELENGTH', flux_col='FLUX', ext=1):
-    """
-    This function load spectra stored as fits images and return them in fits format
-
-    TODO: MUCH TO DO HERE. USE SPECUTILS TO DO THE HARD WORK
-
-    Parameters
-    ----------
-    filename: A file containing the 1D spectra
-    wave_unit: optional,
-                wavelength units, either synphot.units or astropy.units
-    flux_unit: optional,
-                flux units, either synphot.units or astropy.units
-    wave_col: optional,
-                The column name containing the wavelengths if filename is a table
-    flux_col: optional,
-               The column name containing the wavelengths if filename is a table
-    ext: optional,
-         The extension number where the spectra is located if file is a fits table or image, default 1
-
-
-    Returns
-    -------
-
-    A synphot.SourceSpectrum
-
-    """
-
-    pass
 
 
 
