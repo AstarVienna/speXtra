@@ -5,7 +5,7 @@ import pytest
 from spyctra import Spectrum
 
 
-class TestSpectrum:
+class TestSpectrumInstances:
 
     def test_load(self):
         sp = Spectrum("kc96/s0")
@@ -20,7 +20,9 @@ class TestSpectrum:
         sp2 = sp.redshift(z=1)
         assert isinstance(sp2, Spectrum)
 
-
+    def test_zero_mag_spectrum(self):
+        sp = Spectrum.zero_mag_spectrum(system_name="AB")
+        assert isinstance(sp, Spectrum)
 
 
 

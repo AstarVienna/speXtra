@@ -321,7 +321,17 @@ class Spectrum(SourceSpectrum):
         pass
 
     @classmethod
-    def get_zero_mag_spectrum(cls, system_name="AB"):
+    def zero_mag_spectrum(cls, system_name="AB"):
+        """
+        Creates a spectrum with zero magnitude in the preferred system
+        Parameters
+        ----------
+        system_name: AB, Vega or ST, default AB
+
+        Returns
+        -------
+
+        """
         mag = 0
         if system_name.lower() in ["vega"]:
             vega = get_vega_spectrum()
@@ -331,7 +341,7 @@ class Spectrum(SourceSpectrum):
         elif system_name.lower() in ["st", "hst"]:
             spec = SourceSpectrum(ConstFlux1D, amplitude=mag * u.STmag)
 
-        return cls(spec)
+        return cls(modelclass=spec)
 
     @classmethod
     def black_body_spectrum(cls, temperature, wmin, wmax):
