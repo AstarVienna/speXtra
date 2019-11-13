@@ -8,6 +8,7 @@ import urllib
 
 import yaml
 from astropy.utils.data import download_file
+from astropy.table import Table
 
 
 def is_url(url):
@@ -36,7 +37,7 @@ def is_url(url):
         return output
 
 
-def database_location():
+def database_url():
     """
     TODO: it should read it from a file
     Returns
@@ -55,7 +56,7 @@ def database_location():
 class SpecDatabase:
 
     def __init__(self):
-        self.url = database_location()
+        self.url = database_url()
         self.library_names = list(self.contents["library_names"])
 
     @property
@@ -177,7 +178,7 @@ class SpecDatabase:
         except urllib.error.URLError:
             print(url, "library not reachable")
         else:
-            filename = download_file(url, cache=False)
+            filename = download_file(url, cache=True)
             with open(filename) as f:
                 data = yaml.safe_load(f)
 
@@ -217,7 +218,7 @@ def get_template(template, path=None):
     else:
         filename = template_name + template_meta["file_extension"]
         url = urljoin(database.url, "libraries/", library_name, filename)
-        file = download_file(url, cache=False)
+        file = download_file(url, cache=True)
         if path is not None:
             file = shutil.copy2(file, path)
             print(file)

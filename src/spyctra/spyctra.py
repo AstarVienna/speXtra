@@ -36,37 +36,33 @@ from .database import get_template
 
 class Spectrum(SourceSpectrum):
     """
-    Class to handle spectra.
+    Class to handle spectra. This class stores and manipulates the spectra.
+
+    This class can be initialized with a remote file which will be downloaded from
+    the database or with a synphot.Spectrum
 
     Parameters
     ----------
+    template_name: Name of the template to download with format library/template
     modelclass, kwargs
         See `BaseSpectrum`.
 
-    z : number
-        Redshift to apply to model.
-
-    z_type : {'wavelength_only', 'conserve_flux'}
-        Redshift can be done in one of the following ways:
-
-        * ``'wavelength_only'`` only shifts the wavelength
-          without adjusting the flux. This is the default behavior
-          to be backward compatible with ASTROLIB PYSYNPHOT.
-        * ``'conserve_flux'`` also scales the flux to conserve it.
-
-    This class stores and manipulates the spectra.
-
-    TODO: Write the methods first as individual functions and incorporate later
-
     """
-    def __init__(self, modelclass, z=0, z_type='wavelength_only', **kwargs):
-        self._valid_z_types = ('wavelength_only', 'conserve_flux')
-        self.z_type = z_type
-        self.z = z
+
+    def __init__(self, template_name=None, modelclass=None, **kwargs):
+
+        if template_name is not None:
+            meta, lam, flux = self.__loader(template_name)
+            modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=flux, meta=meta)
+        if modelclass is not None:
+            modelclass = modelclass
+        else:
+            raise ValueError("please define a spectra")
+
         super().__init__(modelclass, **kwargs)
 
     @classmethod
-    def load(cls, template_name):
+    def __loader(cls, template_name):
         """
         Load a template from the database
 
@@ -77,11 +73,13 @@ class Spectrum(SourceSpectrum):
 
         Returns
         -------
-
+        meta: metadata of the spectra (header)
+        lam: wavelengths
+        flux: flux
 
         """
         location, meta = get_template(template_name)
-
+        print(location)
         data_type = meta["data_type"]
         resolution = meta["resolution"]
         wave_unit = meta["wave_unit"]
@@ -92,11 +90,11 @@ class Spectrum(SourceSpectrum):
 
         # make try and except here to catch most problems
         if data_type == "fits":
-            header, lam, flux = synphot.specio.read_fits_spec(location)
+            meta, lam, flux = synphot.specio.read_fits_spec(location)
         else:
-            header, lam, flux = synphot.specio.read_ascii_spec(location)
+            meta, lam, flux = synphot.specio.read_ascii_spec(location)
 
-        return cls(Empirical1D, points=lam, lookup_table=flux, meta=header)
+        return meta, lam, flux
 
     @classmethod
     def from1dspec(cls, filename, format="wcs1d-fits", **kwargs):
@@ -125,10 +123,10 @@ class Spectrum(SourceSpectrum):
         lam = spec1d.spectral_axis.value * u.AA
         flux = spec1d.flux.value * units.FLAM
 
-        return cls(Empirical1D, points=lam, lookup_table=flux, meta=meta)
+        modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=flux, meta=meta)
+        return Spectrum(modelclass=modelclass)
 
-    @classmethod
-    def redshift(cls, z=0, vel=0):
+    def redshift(self, z=0, vel=0):
         """
         Redshift or blueshift a spectra
 
@@ -143,14 +141,20 @@ class Spectrum(SourceSpectrum):
         a synphot SourceSpectrum
 
         """
-        if z != 0:
-            cls.z = z
         if vel != 0:
             if isinstance(vel, u.Quantity) is False:
-                vel = vel * u.m / u.s
+                vel = vel * u.m / u.s # assumed to be in m/s
 
-            z = vel.to(u.m / u.s) / c
-            cls.z = z.value
+            z = (vel.to(u.m / u.s) / c).value
+        if z <= -1:
+            raise ValueError("Redshift or velocity unphysical")
+
+        lam = self.model.points[0] * (1 + z)
+        flux = self.model.lookup_table
+        meta = self.model.meta
+
+        modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=flux, meta=meta)
+        return Spectrum(modelclass=modelclass)
 
     @classmethod
     def rebin_spectra(cls, new_waves):
@@ -182,9 +186,9 @@ class Spectrum(SourceSpectrum):
         filt = SpectralElement(Empirical1D, points=waves, lookup_table=f)
         obs = Observation(cls, filt, binset=new_waves, force='taper')
         newflux = obs.binflux
-        rebin_spec = cls(Empirical1D, points=new_waves, lookup_table=newflux, meta=cls.meta)
+        rebin_spec = SourceSpectrum(Empirical1D, points=new_waves, lookup_table=newflux, meta=cls.meta)
 
-        return rebin_spec
+        return Spectrum(modelclass=rebin_spec)
 
     def add_emission_line(self, center, flux, fwhm):
         """
