@@ -1,0 +1,173 @@
+# The IRTF Spectral Library
+
+library_name : irtf
+
+type : 
+  - stars
+  - brown dwarfs
+  - planets
+
+title : The IRTF Spectral Library
+
+summary : |
+  The IRTF Spectral Library is a collection of 0.8-5.0 μm mostly stellar spectra observed at a resolving power of R = λ/Δλ ~ 2000 with the 
+  medium-resolution spectrograph, SpeX, at the NASA Infrared Telescope Facility (IRTF) on Mauna Kea. The current release covers mainly 
+  solar-metallicity late-type stars with spectral types between F and M and luminosity classes between I and V, but also includes AGB stars, 
+  carbon and S stars, and L and T dwarfs. We also include spectra of the giant planets, Jupiter, Saturn, Uranus, and Neptune. Later updates will 
+  add Wolf-Rayet, O, B, and A stars.
+
+reference : Rayner, J.T., Cushing, M.C., & Vacca, W.D., 2009, ApJS, 185, 289
+
+link : "http://irtfweb.ifa.hawaii.edu/~spex/IRTF_Spectral_Library/index.html"
+
+spectral_coverage :
+  - nir
+  - mir
+
+resolution : ??
+
+wave_unit: um
+
+flux_unit : TBD
+
+wave_column_name : WAVELENGTH
+
+flux_column_name : FLUX
+
+data_type: fits
+
+file_extension: .fits
+
+templates:      # comments
+  TBD
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
