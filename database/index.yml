@@ -1,10 +1,11 @@
 # Database contents
 
 library_names:
-   - kc96
-   - pickles
-   - sdss
-
+  - kc96    
+  - pickles 
+  - sdss
+  - irtf
+    
 # here go the extinction curves
 extinction:
 
