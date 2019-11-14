@@ -113,7 +113,7 @@ class SpecDatabase:
             types.append(contents["type"])
             resolution.append(contents["resolution"])
             spectral_coverage.append(contents["spectral_coverage"])
-            templates.append(contents["templates"])
+            templates.append([t for t in contents["templates"]])
 
         data = [library_names, titles, types, resolution, spectral_coverage, templates]
         table = Table(names=column_names, data=data)

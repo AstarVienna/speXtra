@@ -13,6 +13,13 @@ __pycache__/*
 .*.swp
 */.ipynb_checkpoints/*
 
+# MV: some possible extensions of data files
+*.fits
+*.tfits
+*.dat
+*.ascii
+*.sed
+
 # Project files
 .ropeproject
 .project

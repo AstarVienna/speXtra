@@ -39,268 +39,267 @@ data_type: fits
 
 file_extension: .fits
 
-templates:
-  - o5v
-  - o8iii
-  - o9v
-  - b0i
-  - b0v
-  - b12iii
-  - b1i
-  - b1v
-  - b2ii
-  - b2iv
-  - b3i
-  - b3iii
-  - b3v
-  - b57v
-  - b5i
-  - b5ii
-  - b5iii
-  - b6iv
-  - b8i
-  - b8v
-  - b9iii
-  - b9v
-  - a0i
-  - a0iii
-  - a0iv
-  - a0v
-  - a2i
-  - a2v
-  - a3iii
-  - a3v
-  - a47iv
-  - a5iii
-  - a5v
-  - a7iii
-  - a7v
-  - f02iv
-  - f0i
-  - f0ii
-  - f0iii
-  - f0v
-  - f2ii
-  - f2iii
-  - f2v
-  - f5i
-  - f5iii
-  - f5iv
-  - f5v
-  - f6v
-  - f8i
-  - f8iv
-  - f8v
-  - rf6v
-  - rf8v
-  - wf5v
-  - wf8v
-  - g0i
-  - g0iii
-  - g0iv
-  - g0v
-  - g2i
-  - g2iv
-  - g2v
-  - g5i
-  - g5ii
-  - g5iii
-  - g5iv
-  - g5v
-  - g8i
-  - g8iii
-  - g8iv
-  - g8v
-  - rg0v
-  - rg5iii
-  - rg5v
-  - wg0v
-  - wg5iii
-  - wg5v
-  - wg8iii
-  - k01ii
-  - k0iii
-  - k0iv
-  - k0v
-  - k1iii
-  - k1iv
-  - k2i
-  - k2iii
-  - k2v
-  - k34ii
-  - k3i
-  - k3iii
-  - k3iv
-  - k3v
-  - k4i
-  - k4iii
-  - k4v
-  - k5iii
-  - k5v
-  - k7v
-  - rk0iii
-  - rk0v
-  - rk1iii
-  - rk2iii
-  - rk3iii
-  - rk4iii
-  - rk5iii
-  - wk0iii
-  - wk1iii
-  - wk2iii
-  - wk3iii
-  - wk4iii
-  - m0iii
-  - m0v
-  - m1iii
-  - m1v
-  - m2.5v
-  - m2i
-  - m2iii
-  - m2v
-  - m3ii
-  - m3iii
-  - m3v
-  - m4iii
-  - m4v
-  - m5iii
-  - m5v
-  - m6iii
-  - m6v
-  - m7iii
-  - m8iii
-  - m9iii
-  - m10iii
-
-comments:
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - metal rich
-  - metal rich
-  - metal weak
-  - metal weak
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - metal rich
-  - metal rich
-  - metal rich
-  - metal weak
-  - metal weak
-  - metal weak
-  - metal weak
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - metal rich
-  - metal rich
-  - metal rich
-  - metal rich
-  - metal rich
-  - metal rich
-  - metal rich
-  - metal weak
-  - metal weak
-  - metal weak
-  - metal weak
-  - metal weak
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null
+templates:      # comments
+  o5v             : null        
+  o8iii           : null        
+  o9v             : null        
+  b0i             : null        
+  b0v             : null        
+  b12iii          : null        
+  b1i             : null        
+  b1v             : null        
+  b2ii            : null        
+  b2iv            : null        
+  b3i             : null        
+  b3iii           : null        
+  b3v             : null        
+  b57v            : null        
+  b5i             : null        
+  b5ii            : null        
+  b5iii           : null        
+  b6iv            : null        
+  b8i             : null        
+  b8v             : null        
+  b9iii           : null        
+  b9v             : null        
+  a0i             : null        
+  a0iii           : null        
+  a0iv            : null        
+  a0v             : null        
+  a2i             : null        
+  a2v             : null        
+  a3iii           : null        
+  a3v             : null        
+  a47iv           : null        
+  a5iii           : null        
+  a5v             : null        
+  a7iii           : null        
+  a7v             : null        
+  f02iv           : null        
+  f0i             : null        
+  f0ii            : null        
+  f0iii           : null        
+  f0v             : null        
+  f2ii            : null        
+  f2iii           : null        
+  f2v             : null        
+  f5i             : null        
+  f5iii           : null        
+  f5iv            : null        
+  f5v             : null        
+  f6v             : null        
+  f8i             : null        
+  f8iv            : null        
+  f8v             : null        
+  rf6v            : metal rich  
+  rf8v            : metal rich  
+  wf5v            : metal weak  
+  wf8v            : metal weak  
+  g0i             : null        
+  g0iii           : null        
+  g0iv            : null        
+  g0v             : null        
+  g2i             : null        
+  g2iv            : null        
+  g2v             : null        
+  g5i             : null        
+  g5ii            : null        
+  g5iii           : null        
+  g5iv            : null        
+  g5v             : null        
+  g8i             : null        
+  g8iii           : null        
+  g8iv            : null        
+  g8v             : null        
+  rg0v            : metal rich  
+  rg5iii          : metal rich  
+  rg5v            : metal rich  
+  wg0v            : metal weak  
+  wg5iii          : metal weak  
+  wg5v            : metal weak  
+  wg8iii          : metal weak  
+  k01ii           : null        
+  k0iii           : null        
+  k0iv            : null        
+  k0v             : null        
+  k1iii           : null        
+  k1iv            : null        
+  k2i             : null        
+  k2iii           : null        
+  k2v             : null        
+  k34ii           : null        
+  k3i             : null        
+  k3iii           : null        
+  k3iv            : null        
+  k3v             : null        
+  k4i             : null        
+  k4iii           : null        
+  k4v             : null        
+  k5iii           : null        
+  k5v             : null        
+  k7v             : null        
+  rk0iii          : metal rich  
+  rk0v            : metal rich  
+  rk1iii          : metal rich  
+  rk2iii          : metal rich  
+  rk3iii          : metal rich  
+  rk4iii          : metal rich  
+  rk5iii          : metal rich  
+  wk0iii          : metal weak  
+  wk1iii          : metal weak  
+  wk2iii          : metal weak  
+  wk3iii          : metal weak  
+  wk4iii          : metal weak  
+  m0iii           : null        
+  m0v             : null        
+  m1iii           : null        
+  m1v             : null        
+  m2.5v           : null        
+  m2i             : null        
+  m2iii           : null        
+  m2v             : null        
+  m3ii            : null        
+  m3iii           : null        
+  m3v             : null        
+  m4iii           : null        
+  m4v             : null        
+  m5iii           : null        
+  m5v             : null        
+  m6iii           : null        
+  m6v             : null        
+  m7iii           : null        
+  m8iii           : null        
+  m9iii           : null        
+  m10iii          : null
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 

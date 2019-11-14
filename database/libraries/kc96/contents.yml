@@ -51,30 +51,30 @@ data_type: fits
 
 file_extension: .fits
 
-templates:
-  - elliptical
-  - bulge
-  - s0
-  - sa
-  - sb
-  - sc
-  - starb1
-  - starb2
-  - starb3
-  - starb4
-  - starb5
-  - starb6
+templates:    # comments
+  elliptical : null
+  bulge      : null
+  s0         : null
+  sa         : null
+  sb         : null
+  sc         : null
+  starb1     : starburst with E(B-V)<0.1
+  starb2     : starburst with 0.11<E(B-V)<0.21
+  starb3     : starburst with 0.25<E(B-V)<0.35
+  starb4     : starburst with 0.39<E(B-V)<0.50
+  starb5     : starburst with 0.51<E(B-V)<0.60
+  starb6     : starburst with 0.61<E(B-V)<0.70
 
-comments:
-  - null
-  - null
-  - null
-  - null
-  - null
-  - null       
-  - starburst with E(B-V)<0.1
-  - starburst with 0.11<E(B-V)<0.21
-  - starburst with 0.25<E(B-V)<0.35
-  - starburst with 0.39<E(B-V)<0.50
-  - starburst with 0.51<E(B-V)<0.60
-  - starburst with 0.61<E(B-V)<0.70
+
+
+
+
+
+
+
+
+
+
+
+
+
