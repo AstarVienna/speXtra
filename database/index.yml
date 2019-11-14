@@ -3,6 +3,7 @@
 library_names:
    - kc96
    - pickles
+   - sdss
 
 # here go the extinction curves
 extinction:
