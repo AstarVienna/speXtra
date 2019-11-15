@@ -1,11 +1,13 @@
 # Database contents
 
 library_names:
-  - kc96    
-  - pickles 
-  - sdss
-  - irtf
-    
+  kc96      : Kinney-Calzetti Atlas
+  pickles   : Pickles Stellar Library
+  sdss      : SDSS galaxy composite spectra
+  irtf      : IRTF spectral library
+  agn       : AGN templates
+  nebulae   : Emission line nebulae
+
 # here go the extinction curves
 extinction:
 

@@ -57,7 +57,7 @@ class SpecDatabase:
 
     def __init__(self):
         self.url = database_url()
-        self.library_names = list(self.contents["library_names"])
+        self.library_names = [l for l in self.contents["library_names"]]
 
     @property
     def contents(self):
@@ -198,7 +198,7 @@ def get_template(template, path=None):
     a dictionary with the main template attributes
 
     """
-    file = None
+    newfile = None
     database = SpecDatabase()
     library_name, template_name = template.split("/")
     lib_data = database.get_library(library_name)
@@ -218,12 +218,12 @@ def get_template(template, path=None):
     else:
         filename = template_name + template_meta["file_extension"]
         url = urljoin(database.url, "libraries/", library_name, filename)
-        file = download_file(url, cache=True)
+        newfile = download_file(url, cache=True)
         if path is not None:
-            file = shutil.copy2(file, path)
-            print(file)
+            file = shutil.copy2(newfile, path)
+            print(filename)
 
-    return file, template_meta
+    return newfile, template_meta
 
 
 
