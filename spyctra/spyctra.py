@@ -83,19 +83,26 @@ class Spectrum(SourceSpectrum):
         print(location)
 
         data_type = meta["data_type"]
-        self.resolution = meta["resolution"]
-        self.wave_unit = meta["wave_unit"]
-        self.flux_unit = meta["flux_unit"]
-        self.wave_column_name = meta["wave_column_name"]
+        try:  # it should also try to read it from the file directly
+            self.wave_unit = units.validate_unit(meta["wave_unit"])
+            self.flux_unit = units.validate_unit(meta["flux_unit"])
+        except synphot.exceptions.SynphotError:
+            self.wave_unit = u.AA
+            self.flux_unit = units.FLAM
+
+        self.resolution = meta["resolution"] * self.wave_unit
+        self.wave_column_name = meta["wave_column_name"]  # same here
         self.flux_column_name = meta["flux_column_name"]
-        self.ile_extension = meta["file_extension"]
-        # This should be atrributes too
+        self.file_extension = meta["file_extension"]
 
         # make try and except here to catch most problems
         if data_type == "fits":
-            meta, lam, flux = synphot.specio.read_fits_spec(location)
+            meta, lam, flux = synphot.specio.read_fits_spec(location, ext=1,
+                                                            wave_unit=self.wave_unit, flux_unit=self.flux_unit,
+                                                            wave_col=self.wave_column_name, flux_col=self.flux_column_name)
         else:
-            meta, lam, flux = synphot.specio.read_ascii_spec(location)
+            meta, lam, flux = synphot.specio.read_ascii_spec(location,
+                                                             wave_unit=self.wave_unit, flux_unit=self.flux_unit)
 
         self.wmin = np.min(lam)
         self.wmax = np.max(lam)
