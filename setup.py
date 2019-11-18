@@ -1,23 +1,37 @@
 # -*- coding: utf-8 -*-
 """
     Setup file for spyctra.
-    Use setup.cfg to configure your project.
-
-    This file was generated with PyScaffold 3.2.1.
-    PyScaffold helps you to put up the scaffold of your new Python project.
-    Learn more under: https://pyscaffold.org/
 """
 import sys
+import setuptools
+import pytest
 
-from pkg_resources import VersionConflict, require
-from setuptools import setup
 
-try:
-    require('setuptools>=38.3')
-except VersionConflict:
-    print("Error: version of setuptools is too old (<38.3)!")
-    sys.exit(1)
+def setup_sp():
+    setuptools.setup(
+        name="Spyctra",
+        description="Tool to  manage and manipulate  astronomical spectra",
+        author="Miguel  Verdugo",
+        author_email="mverduol@gmail.com",
+        license="MIT",
+        url="https://github.com/miguelverdugo/spyctra",
+        package_dir={'spyctra': 'spyctra'},
+        packages=['spyctra'],
+        package_data={'spyctra': ['spyctra/data/*']},
+        include_package_data=True,
+        install_requires=["numpy",
+                          "astropy",
+                          "synphot>0.1",
+                          "matplotlib>1.5.0",
+                          "tynt",
+                          "pyyaml", ],
+        classifiers=["Programming Language :: Python :: 3",
+                     "License :: OSI Approved :: MIT License",
+                     "Operating System :: OS Independent",
+                     "Intended Audience :: Science/Research",
+                     "Topic :: Scientific/Engineering :: Astronomy", ]
+    )
 
 
 if __name__ == "__main__":
-    setup(use_pyscaffold=True)
+    setup_sp()

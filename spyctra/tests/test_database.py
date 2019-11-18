@@ -1,4 +1,3 @@
-import pytest
 import spyctra
 import urllib
 from astropy.table import Table
