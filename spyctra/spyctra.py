@@ -51,8 +51,10 @@ class Spectrum(SourceSpectrum):
 
     def __init__(self, template_name=None, modelclass=None, **kwargs):
 
-        if template_name is not None:
-            meta, lam, flux = self.__loader(template_name)
+        self.template_name = template_name
+
+        if self.template_name is not None:
+            meta, lam, flux = self.__loader()
             modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=flux, meta=meta)
         if modelclass is not None:
             modelclass = modelclass
@@ -61,8 +63,7 @@ class Spectrum(SourceSpectrum):
 
         super().__init__(modelclass, **kwargs)
 
-    @classmethod
-    def __loader(cls, template_name):
+    def __loader(self):
         """
         Load a template from the database
 
@@ -78,21 +79,26 @@ class Spectrum(SourceSpectrum):
         flux: flux
 
         """
-        location, meta = get_template(template_name)
+        location, meta = get_template(self.template_name)
         print(location)
+
         data_type = meta["data_type"]
-        resolution = meta["resolution"]
-        wave_unit = meta["wave_unit"]
-        flux_unit = meta["flux_unit"]
-        wave_column_name = meta["wave_column_name"]
-        flux_column_name = meta["flux_column_name"]
-        file_extension = meta["file_extension"]
+        self.resolution = meta["resolution"]
+        self.wave_unit = meta["wave_unit"]
+        self.flux_unit = meta["flux_unit"]
+        self.wave_column_name = meta["wave_column_name"]
+        self.flux_column_name = meta["flux_column_name"]
+        self.ile_extension = meta["file_extension"]
+        # This should be atrributes too
 
         # make try and except here to catch most problems
         if data_type == "fits":
             meta, lam, flux = synphot.specio.read_fits_spec(location)
         else:
             meta, lam, flux = synphot.specio.read_ascii_spec(location)
+
+        self.wmin = np.min(lam)
+        self.wmax = np.max(lam)
 
         return meta, lam, flux
 
