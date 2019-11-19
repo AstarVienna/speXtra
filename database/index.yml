@@ -14,5 +14,7 @@ extinction:
 
 # in case is needed
 filters:
+# micado : MICADO filters
+# metis  : METIS filters
 
 
