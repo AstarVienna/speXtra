@@ -24,6 +24,7 @@ from astropy.constants import c
 import synphot
 from synphot import (units, SourceSpectrum, SpectralElement, Observation, BaseUnitlessSpectrum)
 from synphot.models import (Empirical1D, GaussianFlux1D, Box1D, ConstFlux1D)
+from synphot import exceptions
 
 import tynt
 
