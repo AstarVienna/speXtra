@@ -29,10 +29,6 @@ import tynt
 
 from .database import get_template
 
-# default filter definitions now in data/default_filters.yml, including GALEX, Spitzer, HST and Y-band filters
-# with open("data/default_filters.yml") as f:
-#    FILTER_DEFAULTS = yaml.safe_load(f)
-
 
 class Spectrum(SourceSpectrum):
     """
@@ -400,57 +396,6 @@ class Spectrum(SourceSpectrum):
               not (np.isscalar(other) and isinstance(other, numbers.Real))):
             raise exceptions.IncompatibleSources(
                 'Can only operate on real scalar number')
-
-
-#------------------ BEGIN ---------------------------------------------
-# This has been copied from scopesim.effects.ter_curves_utils.py
-
-def download_svo_filter(filter_name):
-    """
-    Query the SVO service for the true transmittance for a given filter
-    Copied 1 to 1 from tynt by Brett Morris
-    Parameters
-    ----------
-    filter_name : str
-        Name of the filter as available on the spanish VO filter service
-        e.g: ``Paranal/HAWKI.Ks``
-    Returns
-    -------
-    filt_curve : ``synphot.SpectralElement``
-        Astronomical filter object.
-    """
-    path = download_file('http://svo2.cab.inta-csic.es/'
-                         'theory/fps3/fps.php?ID={}'.format(filter_name),
-                         cache=True)
-
-    true_transmittance = Table.read(path, format='votable')
-    wave = true_transmittance['Wavelength'].data.data * u.Angstrom
-    trans = true_transmittance['Transmission'].data.data
-    filt_curve = SpectralElement(Empirical1D, points=wave, lookup_table=trans)
-
-    return filt_curve
-
-
-def get_filter(filter_name):
-    # first check locally
-    # check generics
-    # check spanish_vo
-    path = find_file(filter_name, silent=True)
-
-    if path is not None:
-        tbl = ioascii.read(path)
-        wave = quantity_from_table("wavelength", tbl, u.um).to(u.um)
-        filt = SpectralElement(Empirical1D, points=wave,
-                               lookup_table=tbl["transmission"])
-    elif filter_name in FILTER_DEFAULTS:
-        filt = download_svo_filter(FILTER_DEFAULTS[filter_name])
-    else:
-        try:
-            filt = download_svo_filter(filter_name)
-        except:
-            filt = None
-
-    return filt
 
 
 

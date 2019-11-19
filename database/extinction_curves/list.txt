@@ -1,0 +1,22 @@
+lmc_30dorshell_001.fits     LMC at Supershell 30 Doradus.  R_V = 2.76.  Gordon et al. (2003, ApJ, 594, 279)   Av/E(B-V)
+lmc_diffuse_001.fits        LMC Average,  Rv=3.41, Gordon et al. (2003, ApJ, 594, 279)                        Av/E(B-V)
+milkyway_dense_001.fits     MW R_V=5.0 Average, Cardelli, Clayton, & Mathis (1989, ApJ, 345, 245)             Av/E(B-V)
+milkyway_diffuse_001.fits   MW R_V=3.1  Cardelli, Clayton, & Mathis (1989, ApJ, 345, 245)                     Av/E(B-V)
+milkyway_rv21_001.fits      MW R_V=2.1  Cardelli, Clayton, & Mathis (1989, ApJ, 345, 245)                     Av/E(B-V)
+milkyway_rv4_001.fits       MW R_V=4.0  Cardelli, Clayton, & Mathis (1989, ApJ, 345, 245)                     Av/E(B-V)
+smc_bar_001.fits            SMC Bar Aver. Rv = 2.74  Gordon et al. (2003, ApJ, 594, 279)                      Av/E(B-V)
+xgal_starburst_001.fits     Starburst Appropriate for stellar continnum Calzetti et al. (2000. ApJ, 533, 682) Av/E(B-V)
+calzetti.dat
+GalaxyExtinctionCardelli.dat
+LMC_Fitzpatrick.dat
+LMC_Fitzpatrick_noBump.dat
+MW_Allen.dat
+MW_seaton.dat
+SB_calzetti_2200bump.dat
+SB_calzetti_bump1.dat
+SB_calzetti_bump2.dat
+SB_calzetti_bump3.dat
+SB_calzetti_bump.dat
+SB_calzetti.dat
+SB_calzetti_mod.dat
+SMC_prevot.dat

@@ -10,11 +10,14 @@ library_names:
   brown     : Galaxy SEDs from the UV to the Mid-IR 
 
 # here go the extinction curves
-extinction:
+extinction_curves:
+  gordon    : LMC and SMC extinction laws
+  cardelli  : MW extinction laws
+  calzetti  : extragalactic attenuation curves
 
-# in case is needed
-filters:
-# micado : MICADO filters
+# here go filters not found at SVO
+filter_systems:
+  micado : MICADO filters
 # metis  : METIS filters
 
 

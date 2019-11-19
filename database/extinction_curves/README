@@ -1,0 +1,27 @@
+#
+# The curves are extracted from the hyper-z program
+		 [Bolzonella et al., 2000, A&A, 363, 476]
+  and includes :
+	LMC_Fitzpatrick.dat
+	MW_Allen.dat
+	MW_seaton.dat
+	SMC_prevot.dat
+	SB_calzetti.dat
+
+  and a modified version of the Calzetti law including contribution 
+  from the 2175A bump as proposed by Massaroti et al., 2001, A&A, 380
+
+	SB_calzetti_mod.dat
+	
+  The extinction curve are expressed in  k(lambda[A]) vs lambda[A]
+  therefore applying a E(B-V) means that
+      flux_attenuated=flux_intrinsic * 10^[-0.4*k(l)*E(B-V)] 
+
+#
+# The atmospheric extinction curves for other purposes 
+  There are also atmospheric extinctions from La Silla (ESO) and CTIO 
+	extinc_eso.dat    (extinction from ETC /ESO) 
+	extinc_ctio.dat
+	
+
+

@@ -5,13 +5,23 @@ Database for spyctra
 import shutil
 from posixpath import join as urljoin
 import urllib
+import os
+import inspect
 
 import yaml
 from astropy.utils.data import download_file
 from astropy.table import Table
 
+__pkg_dir__ = os.path.dirname(inspect.getfile(inspect.currentframe()))
+__data_dir__ = os.path.join(__pkg_dir__, "data")
 
-def is_url(url):
+# default filter definitions now in data/default_filters.yml,
+# including now also GALEX, Spitzer, WISE HST, Y-band and GAIA G-band
+with open(os.path.join(__data_dir__,  "default_filters.yml")) as filter_file:
+    FILTER_DEFAULTS = yaml.safe_load(filter_file)
+
+
+def is_url(url):  # TODO: Move to .utils
     """
     Checks that a given URL is reachable.
     Depending of the configuration of the server it might return True even if the page doesn't exist.
@@ -57,7 +67,9 @@ class SpecDatabase:
 
     def __init__(self):
         self.url = database_url()
-        self.library_names = [l for l in self.contents["library_names"]]
+        self.library_names = [lib for lib in self.contents["library_names"]]
+        self.extinction_curves = [ext for ext in self.contents["extinction_curves"]]
+        self.filter_systems = [filt for filt in self.contents["filter_systems"]]
 
     @property
     def contents(self):
@@ -78,25 +90,42 @@ class SpecDatabase:
         if library_name not in self.library_names:
             raise ValueError(library_name, "library not found")
 
-        path = urljoin("libraries", library_name, "contents.yml")
+        path = urljoin("libraries", library_name, "index.yml")
         return self._get_contents(path)
 
-    def display_library(self, library_name):
-        """
-        try to nicely display the contents of library
+    def get_extinction_curves(self, extinction_name):
 
+        if extinction_name not in self.extinction_curves:
+            raise ValueError(extinction_name, "extinction curves not found")
+        pass
+
+    def get_filter_system(self, filter_system):
+
+        if filter_system not in self.filter_systems:
+            raise ValueError(filter_system, "filter system not found")
+
+        path = urljoin("filter_systems", filter_system, "index.yml")
+        return self._get_contents(path)
+
+    def print_library(self, library_name):
+        """
+        just try to nicely print the contents of a library
         """
         print(yaml.dump(self.get_library(library_name),
                         indent=4, sort_keys=False, default_flow_style=False))
 
+    def print_filter_system(self, filter_system):
+        print(yaml.dump(self.get_filter_system(filter_system),
+                        indent=4, sort_keys=False, default_flow_style=False))
+
     @property
-    def as_table(self):
+    def libraries_as_table(self):
         """
-        make a summary of the database properties
+        make a summary of the libraries properties
 
         Returns
         -------
-        an astropy.table with the database contents
+        an astropy.table.Table with the database contents
         """
 
         column_names = ["library_name", "title", "type", "resolution", "spectral_coverage", "templates"]
@@ -107,7 +136,7 @@ class SpecDatabase:
         spectral_coverage = []
         templates = []
 
-        for lib in self.library_names:
+        for lib in library_names:
             contents = self.get_library(lib)
             titles.append(contents["title"])
             types.append(contents["type"])
@@ -119,6 +148,33 @@ class SpecDatabase:
         table = Table(names=column_names, data=data)
 
         return table
+
+    @property
+    def filters_as_table(self):
+        """
+        make a summary of the filters available properties
+        Returns
+        -------
+        an astropy.table.Table
+        """
+        column_names = ["filter_system", "instrument", "title", "spectral_coverage", "filters"]
+        filter_systems = self.filter_systems
+        instruments = []
+        titles = []
+        spectral_coverage = []
+        filters = []
+        for filt in filter_systems:
+            contents = self.get_filter_system(filt)
+            instruments.append(contents["instrument"])
+            titles.append(contents["title"])
+            spectral_coverage.append(contents["spectral_coverage"])
+            filters.append([f for f in contents["filters"]])
+
+        data = [filter_systems, instruments, titles, spectral_coverage, filters]
+        table = Table(names=column_names, data=data)
+
+        return table
+
 
     @property
     def as_dict(self):
@@ -138,7 +194,8 @@ class SpecDatabase:
 
     def display(self):
         """
-        Try to nicely display the whole database
+        just try to nicely print the contents of the whole database
+
         Returns
         -------
 
@@ -225,6 +282,88 @@ def get_template(template, path=None):
 
     return newfile, template_meta
 
+
+#------------------ BEGIN ---------------------------------------------
+# This is based on scopesim.effects.ter_curves_utils.py
+
+
+def get_filter(filter_name):
+    """
+    get filter from the database. It will try first to download from the Spyctra database
+    and then try to get it from the SVO service
+
+    TODO: Probably needs a refactoring
+
+    Parameters
+    ----------
+    filter_name: str with the following format "instrument/filter"
+
+    Returns
+    -------
+    a path and metadata
+    """
+    database = SpecDatabase()
+    filter_system, filt = filter_name.split("/")
+    try:
+        filter_data = database.get_filter_system(filter_system)
+        filter_meta = {"units": filter_data["wave_units"],
+                       "file_extension": filter_data["file_extension"],
+                       "data_type": filter_data["data_type"]}
+
+        filename = filter_name + filter_meta["file_extension"]
+        url = urljoin(database.url, "libraries/", filter_system, filename)
+        path = download_file(url, cache=True)
+    except ValueError:
+        if filter_name in FILTER_DEFAULTS:
+            filter_name = FILTER_DEFAULTS[filter_name]
+
+        path = download_file('http://svo2.cab.inta-csic.es/'
+                             'theory/fps3/fps.php?ID={}'.format(filter_name),
+                             cache=True)
+        filter_meta = None
+        with open(path) as f:
+            if "Filter not found" in f.read():
+                path = None
+                raise ValueError("Filter not found")
+
+    return path, filter_meta
+
+
+
+
+
+"""
+def get_filter(filter_name):
+    
+    Obtain a filter from the database.
+    First check for filters in the SpecDatabase then in SVO filter service
+    It should be also able to load a file
+
+    Parameters
+    ----------
+    filter_name
+
+    Returns
+    -------
+    synphot.SpectralElement
+
+    path = find_file(filter_name, silent=True)
+
+    if path is not None:
+        tbl = ioascii.read(path)
+        wave = quantity_from_table("wavelength", tbl, u.um).to(u.um)
+        filt = SpectralElement(Empirical1D, points=wave,
+                               lookup_table=tbl["transmission"])
+    elif filter_name in FILTER_DEFAULTS:
+        filt = download_svo_filter(FILTER_DEFAULTS[filter_name])
+    else:
+        try:
+            filt = download_svo_filter(filter_name)
+        except:
+            filt = None
+
+    return filt
+"""
 
 
 
