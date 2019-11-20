@@ -303,8 +303,9 @@ def get_filter(filter_name):
     a path and metadata
     """
     database = SpecDatabase()
-    filter_system, filt = filter_name.split("/")
+
     try:
+        filter_system, filt = filter_name.split("/")
         filter_data = database.get_filter_system(filter_system)
         filter_meta = {"wave_unit": filter_data["wave_unit"],
                        "file_extension": filter_data["file_extension"],

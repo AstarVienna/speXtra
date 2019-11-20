@@ -31,22 +31,22 @@ import tynt
 from .database import get_template, get_filter
 
 
-def make_passband(filter_name=None, filename=None):
+def make_passband(filter_name=None, filter_file=None):
     """
     Make a SpectralElement (synphot passband) out of a filter in the database
 
     Parameters
     ----------
     filter_name: str, a filter name expressed as ``instrument/filter_name``
-    filename: Optionally, make a pasband from a local file
+    filter_file: Optionally, make a pasband from a local file
 
     Returns
     -------
     passband: a synphot.SpectralElement
     """
-    if filename is not None:
+    if filter_file is not None:
         try:
-            passband = SpectralElement.from_file(filename)
+            passband = SpectralElement.from_file(filter_file)
         except (exceptions.SynphotError, FileNotFoundError, ValueError) as e:
             warnings.warn("File not found or malformed", e)
 
@@ -178,8 +178,10 @@ class Spectrum(SourceSpectrum):
         lam = spec1d.spectral_axis.value * u.AA
         flux = spec1d.flux.value * units.FLAM
 
-        modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=flux, meta=meta)
-        return Spectrum(modelclass=modelclass)
+        modelclass = SourceSpectrum(Empirical1D,
+                                    points=lam, lookup_table=flux, meta=meta)
+
+        return cls(modelclass=modelclass)
 
     def redshift(self, z=0, vel=0):
         """
@@ -207,8 +209,9 @@ class Spectrum(SourceSpectrum):
         lam = self.model.points[0] * (1 + z)
         flux = self.model.lookup_table
         meta = self.model.meta
+        modelclass = SourceSpectrum(Empirical1D,
+                                    points=lam, lookup_table=flux, meta=meta)
 
-        modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=flux, meta=meta)
         return Spectrum(modelclass=modelclass)
 
     @classmethod
@@ -243,9 +246,9 @@ class Spectrum(SourceSpectrum):
         newflux = obs.binflux
         rebin_spec = SourceSpectrum(Empirical1D, points=new_waves, lookup_table=newflux, meta=cls.meta)
 
-        return Spectrum(modelclass=rebin_spec)
+        return cls(modelclass=rebin_spec)
 
-    def add_emission_line(self, center, flux, fwhm):
+    def add_emi_lines(self, center, flux, fwhm):
         """
         TODO: accept different profiles (Lorentz1D, Voigt1D, etc)
         Parameters
@@ -270,14 +273,15 @@ class Spectrum(SourceSpectrum):
         center = np.array([center]).flatten()
         flux = np.array([flux]).flatten()
         fwhm = np.array([fwhm]).flatten()
+        print(center, flux, fwhm)
 
         for c, x, f in zip(center, flux, fwhm):
             g_em = SourceSpectrum(GaussianFlux1D(mean=c, total_flux=x, fwhm=f))
-            sp = self.__class__(self.model + g_em.model)
+            sp = self.__class__(modelclass=self.model + g_em.model)
 
         return sp
 
-    def add_absorption_line(self, center, ew, fwhm):
+    def add_abs_lines(self, center, ew, fwhm):
         """
         TODO: accept different profiles (Lorentz1D, Voigt1D, etc)
         Add a absorption line of to a spectrum with center, fwhm and equivalent width specified by the user
@@ -285,7 +289,6 @@ class Spectrum(SourceSpectrum):
 
         Parameters
         ----------
-        spectrum
         center
         fwhm
         ew
@@ -309,16 +312,18 @@ class Spectrum(SourceSpectrum):
             sign = -1 * np.sign(e)  # to keep the convention that EL are negative and ABS are positive
             left, right = center - np.abs(e / 2), center + np.abs(e / 2)
             wavelengths = self.waveset[(self.waveset.value >= left) & (self.waveset.value <= right)]
-            fluxes = units.convert_flux(wavelengths=wavelengths, fluxes=self(wavelengths),
+            fluxes = units.convert_flux(wavelengths=wavelengths,
+                                        fluxes=self(wavelengths),
                                         out_flux_unit=units.FLAM)
             flux = np.trapz(fluxes.value, wavelengths.value)
-            g_abs = Spectrum(GaussianFlux1D(total_flux=sign * flux, mean=c, fwhm=f))
-            sp = self.__class__(self.model + g_abs.model)
+            g_abs = SourceSpectrum(GaussianFlux1D(total_flux=sign * flux, mean=c, fwhm=f))
+            sp = self.__class__(modelclass=self.model + g_abs.model)
+
             if (sp(wavelengths).value < 0).any():
                 warnings.warn("Warning: Flux<0 for specified EW and FHWM, setting it to Zero")
                 waves = sp.waveset[sp(sp.waveset) < 0]
                 zero_sp = SourceSpectrum(Empirical1D, points=waves, lookup_table=-1 * sp(waves).value)
-                sp = self.__class__(sp.model + zero_sp.model)
+                sp = self.__class__(modelclass=sp.model + zero_sp.model)
 
         return sp
 
@@ -343,7 +348,7 @@ class Spectrum(SourceSpectrum):
             Ebv = Rv * Ebv
 
         extinction = synphot.ReddeningLaw.from_extinction_model(curve).extinction_curve(Ebv)
-        sp = self.__class__(self.model * extinction.model)
+        sp = self.__class__(modelclass=self.model * extinction.model)
 
         return sp
 
@@ -368,7 +373,7 @@ class Spectrum(SourceSpectrum):
             Ebv = Rv * Ebv
 
         extinction = synphot.ReddeningLaw.from_extinction_model(curve).extinction_curve(Ebv)
-        sp = self.__class__(self.model / extinction.model)
+        sp = self.__class__(modelclass=self.model / extinction.model)
 
         return sp
 
@@ -376,21 +381,22 @@ class Spectrum(SourceSpectrum):
         pass
 
     @classmethod
-    def zero_mag_spectrum(cls, system_name="AB"):
+    def ref_spectrum(cls, mag=0, system_name="AB"):
         """
         Creates a spectrum with zero magnitude in the preferred system
         Parameters
         ----------
+        mag: float,
+            magnitude of the reference spectrum, default=0
         system_name: AB, Vega or ST, default AB
 
         Returns
         -------
 
         """
-        mag = 0
         if system_name.lower() in ["vega"]:
-            vega = get_vega_spectrum()
-            spec = vega * 10 ** (-0.4 * mag)  # is this necessary?
+            spec = get_vega_spectrum()
+            spec = spec * 10**(-0.4*mag)
         elif system_name.lower() in ["ab"]:
             spec = SourceSpectrum(ConstFlux1D, amplitude=mag * u.ABmag)
         elif system_name.lower() in ["st", "hst"]:
@@ -414,20 +420,86 @@ class Spectrum(SourceSpectrum):
         """
         pass
 
-    def scale_to_magnitude(self, magnitude, unit):
-        pass
+    def scale_to_magnitude(self, amplitude, filter_name=None, filter_file=None):
+        """
+            Scales a Spectrum to a value in a filter
+            Based on scopesim.effects.ter_curves.scale_spectrum
+            Parameters
+            ----------
+            amplitude : ``astropy.Quantity``, float
+                The value that the spectrum should have in the given filter. Acceptable
+                astropy quantities are:
+                - u.mag : Vega magnitudes
+                - u.ABmag : AB magnitudes
+                - u.STmag : HST magnitudes
+                - u.Jy : Jansky per filter bandpass
+                Additionally the ``FLAM`` and ``FNU`` units from ``synphot.units`` can
+                be used when passing the quantity for ``amplitude``:
+
+            filter_name : str
+                Name of a filter from
+                - a generic filter name (see ``FILTER_DEFAULTS``)
+                - a spanish-vo filter service reference (e.g. ``"Paranal/HAWKI.Ks"``)
+                - a filter in the spyctra database
+            filter_file: str
+                A file with a transmission curve
+
+
+            Returns
+            -------
+            spectrum : a Spectrum
+                Input spectrum scaled to the given amplitude in the given filter
+        """
+
+        if filter_file is not None:
+            filter_curve = make_passband(filter_file=filter_file)
+        else:
+            filter_curve = make_passband(filter_name=filter_name)
+
+        if isinstance(amplitude, u.Quantity):
+            if amplitude.unit.physical_type == "spectral flux density":
+                if amplitude.unit != u.ABmag:
+                    amplitude = amplitude.to(u.ABmag)
+                ref_spec = self.ref_spectrum(mag=amplitude.value, system_name="AB")
+
+            elif amplitude.unit.physical_type == "spectral flux density wav":
+                if amplitude.unit != u.STmag:
+                    amplitude = amplitude.to(u.STmag)
+                ref_spec = self.ref_spectrum(mag=amplitude.value, system_name="ST")
+
+            elif amplitude.unit == u.mag:
+                ref_spec = self.ref_spectrum(mag=amplitude.value, system_name="Vega")
+
+            else:
+                raise ValueError("Units of amplitude must be one of "
+                                 "[u.mag, u.ABmag, u.STmag]: {}".format(amplitude))
+        else:
+            ref_spec = self.ref_spectrum(mag=amplitude, system_name="Vega")
+
+        ref_flux = Observation(SourceSpectrum(modelclass=ref_spec),
+                               filter_curve).effstim(flux_unit=units.PHOTLAM)
+        real_flux = Observation(SourceSpectrum(modelclass=self),
+                                filter_curve).effstim(flux_unit=units.PHOTLAM)
+        scale_factor = ref_flux / real_flux
+     #   sp = self * scale_factor
+        sp = self.__class__(modelclass=self.model * scale_factor)
+        return sp
 
     def _validate_other_add_sub(self, other):
         """
         Conditions for other to satisfy before add/sub.
-        Copied from SourceSpectrum so additions can happen with SourceSpectrum
+        Copied from synphot.SourceSpectrum so additions can happen with SourceSpectrum
         """
         if not isinstance(other, (self.__class__, SourceSpectrum)):
             raise exceptions.IncompatibleSources(
                 'Can only operate on {0}.'.format(self.__class__.__name__))
 
     def _validate_other_mul_div(self, other):
-        """Conditions for other to satisfy before mul/div."""
+        """Conditions for other to satisfy before mul/div.
+           Copied from synphot.SourceSpectrum so additions can happen with a SourceSpectrum
+
+        """
+
         if not isinstance(other, (u.Quantity, numbers.Number,
                                   BaseUnitlessSpectrum, SourceSpectrum, self.__class__)):
             raise exceptions.IncompatibleSources(
@@ -483,69 +555,7 @@ def zero_mag_flux(filter_name, photometric_system, return_filter=False):
         return flux
 
 
-def scale_spectrum(spectrum, filter_name, amplitude):
-    """
-    Scales a SourceSpectrum to a value in a filter
-    Parameters
-    ----------
-    spectrum : synphot.SourceSpectrum
-    filter_name : str
-        Name of a filter from
-        - a local instrument package (available in ``rc.__search_path__``)
-        - a generic filter name (see ``ter_curves_utils.FILTER_DEFAULTS``)
-        - a spanish-vo filter service reference (e.g. ``"Paranal/HAWKI.Ks"``)
-    amplitude : ``astropy.Quantity``, float
-        The value that the spectrum should have in the given filter. Acceptable
-        astropy quantities are:
-        - u.mag : Vega magnitudes
-        - u.ABmag : AB magnitudes
-        - u.STmag : HST magnitudes
-        - u.Jy : Jansky per filter bandpass
-        Additionally the ``FLAM`` and ``FNU`` units from ``synphot.units`` can
-        be used when passing the quantity for ``amplitude``:
-    Returns
-    -------
-    spectrum : synphot.SourceSpectrum
-        Input spectrum scaled to the given amplitude in the given filter
-    Examples
-    --------
-    ::
-        >>> from scopesim.effects.ter_curves_utils as ter_utils
-        >>>
-        >>> spec = ter_utils.vega_spectrum()
-        >>> vega_185 = ter_utils.scale_spectrum(spec, "Ks", -1.85 * u.mag)
-        >>> ab_0 = ter_utils.scale_spectrum(spec, "Ks", 0 * u.ABmag)
-        >>> jy_3630 = ter_utils.scale_spectrum(spec, "Ks", 3630 * u.Jy)
-    """
 
-    if isinstance(amplitude, u.Quantity):
-        if amplitude.unit.physical_type == "spectral flux density":
-            if amplitude.unit != u.ABmag:
-                amplitude = amplitude.to(u.ABmag)
-            ref_spec = ab_spectrum(amplitude.value)
-
-        elif amplitude.unit.physical_type == "spectral flux density wav":
-            if amplitude.unit != u.STmag:
-                amplitude = amplitude.to(u.STmag)
-            ref_spec = st_spectrum(amplitude.value)
-
-        elif amplitude.unit == u.mag:
-            ref_spec = vega_spectrum(amplitude.value)
-
-        else:
-            raise ValueError("Units of amplitude must be one of "
-                             "[u.mag, u.ABmag, u.STmag]: {}".format(amplitude))
-    else:
-        ref_spec = vega_spectrum(amplitude)
-
-    filt = get_filter(filter_name)
-    ref_flux = Observation(ref_spec, filt).effstim(flux_unit=PHOTLAM)
-
-    real_flux = Observation(spectrum, filt).effstim(flux_unit=PHOTLAM)
-    scale_factor = ref_flux / real_flux
-    spectrum *= scale_factor.value
-
-    return spectrum
 
 
 
@@ -567,7 +577,7 @@ def get_vega_spectrum():
         wave, flux = vega_sp._get_arrays(wavelengths=None)
 
     """
-    location = "http://ssb.stsci.edu/cdbs/calspec/alpha_lyr_stis_008.fits"
+    location = "http://ssb.stsci.edu/cdbs/calspec/alpha_lyr_stis_009.fits"
     remote = synphot.specio.read_remote_spec(location, cache=True)
     header = remote[0]
     wave = remote[1]
