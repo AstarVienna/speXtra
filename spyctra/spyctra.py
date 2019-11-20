@@ -18,8 +18,8 @@ import numpy as np
 from astropy.io import fits
 from astropy.table import Table
 import astropy.units as u
-from astropy.utils.data import download_file
 from astropy.constants import c
+from astropy.modeling.models import Scale
 
 import synphot
 from synphot import (units, SourceSpectrum, SpectralElement, Observation, BaseUnitlessSpectrum)
@@ -206,9 +206,9 @@ class Spectrum(SourceSpectrum):
         if z <= -1:
             raise ValueError("Redshift or velocity unphysical")
 
-        lam = self.model.points[0] * (1 + z)
-        flux = self.model.lookup_table
-        meta = self.model.meta
+        lam = self.waveset * (1 + z)
+        flux = self(self.waveset)
+        meta = self.meta
         modelclass = SourceSpectrum(Empirical1D,
                                     points=lam, lookup_table=flux, meta=meta)
 
@@ -423,7 +423,7 @@ class Spectrum(SourceSpectrum):
     def scale_to_magnitude(self, amplitude, filter_name=None, filter_file=None):
         """
             Scales a Spectrum to a value in a filter
-            Based on scopesim.effects.ter_curves.scale_spectrum
+            copied from scopesim.effects.ter_curves.scale_spectrum with slight modifications
             Parameters
             ----------
             amplitude : ``astropy.Quantity``, float
@@ -480,10 +480,42 @@ class Spectrum(SourceSpectrum):
                                filter_curve).effstim(flux_unit=units.PHOTLAM)
         real_flux = Observation(SourceSpectrum(modelclass=self),
                                 filter_curve).effstim(flux_unit=units.PHOTLAM)
+
         scale_factor = ref_flux / real_flux
-     #   sp = self * scale_factor
-        sp = self.__class__(modelclass=self.model * scale_factor)
+        sp = self * scale_factor
+
         return sp
+
+# ------ Copied from synphot.SourceSpectrum so operations can happen here too --------
+
+    def __add__(self, other):
+        """Add ``self`` with ``other``."""
+        self._validate_other_add_sub(other)
+        result = self.__class__(modelclass=self.model + other.model)
+        self._merge_meta(self, other, result)
+        return result
+
+    def __sub__(self, other):
+        """Subtract other from self."""
+        self._validate_other_add_sub(other)
+        result = self.__class__(modelclass=self.model - other.model)
+        self._merge_meta(self, other, result)
+        return result
+
+    def __mul__(self, other):
+        """Multiply self and other."""
+        self._validate_other_mul_div(other)
+
+        if isinstance(other, (u.Quantity, numbers.Number)):
+            newcls = self.__class__(modelclass=self.model | Scale(other))
+        elif isinstance(other, BaseUnitlessSpectrum):
+            newcls = self.__class__(modelclass=self.model * other.model)
+        else:  # Source spectrum
+            raise exceptions.IncompatibleSources(
+                'Cannot multiply two source spectra together')
+
+        self._merge_meta(self, other, newcls)
+        return newcls
 
     def _validate_other_add_sub(self, other):
         """
@@ -516,43 +548,6 @@ class Spectrum(SourceSpectrum):
                 'Can only operate on real scalar number')
 
 
-
-
-
-def zero_mag_flux(filter_name, photometric_system, return_filter=False):
-    """
-    Returns the zero magnitude photon flux for a filter
-    Acceptable filter names are those given in
-    ``scopesim.effects.ter_curves_utils.FILTER_DEFAULTS`` or a string with an
-    appropriate name for a filter in the Spanish-VO filter-service. Such strings
-    must use the naming convention: observatory/instrument.filter. E.g:
-    ``paranal/HAWKI.Ks``, or ``Gemini/GMOS-N.CaT``.
-    Parameters
-    ----------
-    filter_name : str
-        Name of the filter - see above
-    photometric_system : str
-        ["vega", "AB", "ST"] Name of the photometric system
-    return_filter : bool, optional
-        If True, also returns the filter curve object
-    Returns
-    -------
-    flux : float
-        [PHOTLAM]
-    filt : ``synphot.SpectralElement``
-        If ``return_filter`` is True
-    """
-
-    filt = get_filter(filter_name)
-    spec = get_zero_mag_spectrum(photometric_system)
-
-    obs = Observation(spec, filt)
-    flux = obs.effstim(flux_unit=PHOTLAM)
-
-    if return_filter:
-        return flux, filt
-    else:
-        return flux
 
 
 

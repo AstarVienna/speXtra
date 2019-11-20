@@ -3,8 +3,10 @@ Tests for class Spectrum
 """
 import pytest
 from spyctra import Spectrum, make_passband
-from synphot import SpectralElement
+from synphot import SpectralElement, units
 import astropy.units as u
+import numpy as np
+
 
 class TestPassbandInstances:
     def test_alias(self):
@@ -48,20 +50,63 @@ class TestSpectrumInstances:
         sp2 = sp.add_abs_lines(5000, 15, 10 )
         assert isinstance(sp2, Spectrum)
 
-    def test_ref_spectrum(self):
-        sp = Spectrum.ref_spectrum(mag=10, system_name="vega")
+    @pytest.mark.parametrize("system_name", ["ab", "st", "vega"])
+    def test_ref_spectrum(self, system_name):
+        sp = Spectrum.ref_spectrum(mag=10, system_name=system_name)
+        assert isinstance(sp, Spectrum)
+
+    def test_mul_with_scalar(self):
+        sp = Spectrum("kc96/s0") * 2
+        assert isinstance(sp, Spectrum)
+
+    def test_sum_spectra(self):
+        sp1 = Spectrum("kc96/s0")
+        sp2 = Spectrum("pickles/a0v")
+        sp = sp1 + sp2
         assert isinstance(sp, Spectrum)
 
     def test_scale_to_magnitude(self):
         sp = Spectrum("kc96/s0")
-        sp2 = sp.scale_to_magnitude(amplitude=13*u.AB, filter_name="g")
+        sp2 = sp.scale_to_magnitude(amplitude=13*u.ABmag, filter_name="g")
         assert isinstance(sp2, Spectrum)
+
 
 class TestSpectrum:
 
     def test_wrong_load(self):
         with pytest.raises(ValueError) as e_info:
             sp = Spectrum("kc96/wrong_name")
+
+    @pytest.mark.parametrize("system_name", ["ab", "st", "vega"])
+    def test_ref_spectrum_is_right(self, system_name):
+        sp1 = Spectrum.ref_spectrum(mag=10, system_name=system_name)
+        sp2 = Spectrum.ref_spectrum(mag=11, system_name=system_name)
+        if system_name == "vega":
+            flux1 = sp1(sp1.waveset[(sp1.waveset.value > 7000 - 200) &
+                                    (sp1.waveset.value < 7000 + 200)]).value
+            flux2 = sp2(sp2.waveset[(sp2.waveset.value > 7000 - 200) &
+                                    (sp2.waveset.value < 7000 + 200)]).value
+
+        else:
+            waves = np.arange(1000, 1e4, 1) * u.AA
+            flux1 = sp1(waves)
+            flux2 = sp2(waves)
+
+        mean = np.mean(flux1 / flux2)
+        assert np.isclose(mean, 10**0.4)
+
+    @pytest.mark.parametrize("units", [u.mag, u.ABmag, u.STmag])
+    def test_scaling_is_right(self, units):
+        sp1 = Spectrum("kc96/s0").scale_to_magnitude(amplitude=14*units, filter_name="r")
+        sp2 = Spectrum("kc96/s0").scale_to_magnitude(amplitude=15*units, filter_name="r")
+
+        flux1 = sp1(sp1.waveset[(sp1.waveset.value > 6231 - 200) &
+                                (sp1.waveset.value < 6231 + 200)]).value
+        flux2 = sp2(sp2.waveset[(sp2.waveset.value > 6231 - 200) &
+                                (sp2.waveset.value < 6231 + 200)]).value
+
+        mean = np.mean(flux1 / flux2)
+        assert np.isclose(mean, 10**0.4)
 
     def test_units(self):
         pass
