@@ -306,12 +306,13 @@ def get_filter(filter_name):
     filter_system, filt = filter_name.split("/")
     try:
         filter_data = database.get_filter_system(filter_system)
-        filter_meta = {"units": filter_data["wave_units"],
+        filter_meta = {"wave_unit": filter_data["wave_unit"],
                        "file_extension": filter_data["file_extension"],
                        "data_type": filter_data["data_type"]}
 
-        filename = filter_name + filter_meta["file_extension"]
-        url = urljoin(database.url, "libraries/", filter_system, filename)
+        filename = filt + filter_meta["file_extension"]
+        url = urljoin(database.url, "filter_systems/", filter_system, filename)
+        print(url)
         path = download_file(url, cache=True)
     except ValueError:
         if filter_name in FILTER_DEFAULTS:

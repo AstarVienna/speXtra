@@ -28,7 +28,49 @@ from synphot import exceptions
 
 import tynt
 
-from .database import get_template
+from .database import get_template, get_filter
+
+
+def make_passband(filter_name=None, filename=None):
+    """
+    Make a SpectralElement (synphot passband) out of a filter in the database
+
+    Parameters
+    ----------
+    filter_name: str, a filter name expressed as ``instrument/filter_name``
+    filename: Optionally, make a pasband from a local file
+
+    Returns
+    -------
+    passband: a synphot.SpectralElement
+    """
+    if filename is not None:
+        try:
+            passband = SpectralElement.from_file(filename)
+        except (exceptions.SynphotError, FileNotFoundError, ValueError) as e:
+            warnings.warn("File not found or malformed", e)
+
+    else:
+        path, meta = get_filter(filter_name)
+        if meta is None:  # it's a svo filter
+            trans_table = Table.read(path, format="votable")
+            wave = trans_table['Wavelength'].data.data * u.Angstrom
+            trans = trans_table['Transmission'].data.data
+        else:   # filter in spyctra database
+            wave_unit = units.validate_unit(meta["wave_unit"])
+            data_type = meta["data_type"]
+            if data_type == "fits":
+                trans_table = Table.read(path, format="fits")
+                wave = trans_table[0][:].data * wave_unit
+                trans = trans_table[1][:].data
+            elif data_type == "ascii":
+                trans_table = Table.read(path, format="ascii")
+                wave = trans_table[0][:].data * wave_unit
+                trans = trans_table[1][:].data
+
+        passband = SpectralElement(Empirical1D, points=wave, lookup_table=trans, meta=meta)
+
+    return passband
 
 
 class Spectrum(SourceSpectrum):
@@ -51,7 +93,7 @@ class Spectrum(SourceSpectrum):
         self.template_name = template_name
 
         if self.template_name is not None:
-            meta, lam, flux = self.__loader()
+            meta, lam, flux = self.__loader
             modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=flux, meta=meta)
         if modelclass is not None:
             modelclass = modelclass
@@ -60,6 +102,7 @@ class Spectrum(SourceSpectrum):
 
         super().__init__(modelclass, **kwargs)
 
+    @property
     def __loader(self):
         """
         Load a template from the database
@@ -95,8 +138,10 @@ class Spectrum(SourceSpectrum):
         # make try and except here to catch most problems
         if data_type == "fits":
             meta, lam, flux = synphot.specio.read_fits_spec(location, ext=1,
-                                                            wave_unit=self.wave_unit, flux_unit=self.flux_unit,
-                                                            wave_col=self.wave_column_name, flux_col=self.flux_column_name)
+                                                            wave_unit=self.wave_unit,
+                                                            flux_unit=self.flux_unit,
+                                                            wave_col=self.wave_column_name,
+                                                            flux_col=self.flux_column_name)
         else:
             meta, lam, flux = synphot.specio.read_ascii_spec(location,
                                                              wave_unit=self.wave_unit, flux_unit=self.flux_unit)
@@ -565,8 +610,9 @@ def get_filter_names(system=None):
     return flat_list
 
 
+"""
 def get_filter(name=None, filename=None, wave_unit=u.AA):
-    """
+
     Return a synphot SpectralElement (bandpass) from a filter in the SVO Filter Profile Service
     or from a local file (only ascii is supported atm)
 
@@ -584,7 +630,7 @@ def get_filter(name=None, filename=None, wave_unit=u.AA):
     Returns
     -------
 
-    """
+
 
     if name is not None:
         try:
@@ -610,6 +656,7 @@ def get_filter(name=None, filename=None, wave_unit=u.AA):
 
     return bandpass
 
+"""
 
 def photons_in_range(spectra, wave_min, wave_max, area, bandpass=None):
     """

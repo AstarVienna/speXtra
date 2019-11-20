@@ -11,7 +11,7 @@ def setup_sp():
     setuptools.setup(
         name="Spyctra",
         description="Tool to  manage and manipulate  astronomical spectra",
-        author="Miguel  Verdugo",
+        author="Miguel Verdugo",
         author_email="mverduol@gmail.com",
         license="MIT",
         url="https://github.com/miguelverdugo/spyctra",
@@ -21,7 +21,7 @@ def setup_sp():
         include_package_data=True,
         install_requires=["numpy",
                           "astropy",
-                          "synphot>0.1",
+                          "synphot>0.2",
                           "matplotlib>1.5.0",
                           "tynt",
                           "pyyaml", ],
