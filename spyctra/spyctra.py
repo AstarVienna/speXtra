@@ -486,6 +486,42 @@ class Spectrum(SourceSpectrum):
 
         return sp
 
+    def get_magnitude(self, filter_name=None, filter_file=None, system_name="AB"):
+        """
+            Obtain the magnitude in filter for a user specified photometric system
+
+            Parameters
+            ----------
+            filter_name : str
+                Name of a filter from
+                - a generic filter name (see ``FILTER_DEFAULTS``)
+                - a spanish-vo filter service reference (e.g. ``"Paranal/HAWKI.Ks"``)
+                - a filter in the spyctra database
+            filter_file: str
+                A file with a transmission curve
+            system_name: str
+                The photometric system Vega, AB or ST
+
+
+            Returns
+            -------
+            spectrum : a Spectrum
+                Input spectrum scaled to the given amplitude in the given filter
+        """
+
+        if filter_file is not None:
+            filter_curve = make_passband(filter_file=filter_file)
+        else:
+            filter_curve = make_passband(filter_name=filter_name)
+
+        ref_spec = self.ref_spectrum(mag=0, system_name=system_name)
+        ref_flux = Observation(SourceSpectrum(modelclass=ref_spec),
+                               filter_curve).effstim(flux_unit=units.PHOTLAM)
+        real_flux = Observation(SourceSpectrum(modelclass=self),
+                                filter_curve).effstim(flux_unit=units.PHOTLAM)
+        pass
+    
+
 # ------ Copied from synphot.SourceSpectrum so operations can happen here too --------
 
     def __add__(self, other):
@@ -721,6 +757,9 @@ def photons_in_range(spectra, wave_min, wave_max, area, bandpass=None):
     counts = np.array(counts) * u.ph * u.s**-1
 
     return counts
+
+
+
 
 
 
