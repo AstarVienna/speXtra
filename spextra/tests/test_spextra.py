@@ -9,6 +9,7 @@ import numpy as np
 import os
 import inspect
 
+
 def mock_dir():
     cur_dirname = os.path.dirname(inspect.getfile(inspect.currentframe()))
     rel_dirname = "mocks"
@@ -16,6 +17,7 @@ def mock_dir():
 
 
 MOCK_DIR = mock_dir()
+
 
 class TestPassbandInstances:
     def test_alias(self):
@@ -32,7 +34,7 @@ class TestPassbandInstances:
 
     def test_filename(self):
         filter_file = os.path.join(MOCK_DIR, 'Y.dat')
-        passband = make_passband(filter_file=filter_file)
+        passband = make_passband(filter_file=filter_file, wave_unit=u.um)
         assert isinstance(passband, SpectralElement)
 
 

@@ -1,15 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 speXtra: A python tool to manage and manipulate astronomical spectra
-
-returned spectra should  be in synphot format: do not alter attributes
-
-Database is implemented as a yaml file containing the basic information of the libraries
-each library is described by a yaml file
-
-Classes for describing the database and libraries are being implemented
-TODO: Consider @dataclass for better and more concise description of these classes (only python 3.7 though)
 """
+
 import numbers
 import warnings
 
@@ -31,25 +24,30 @@ import tynt
 from .database import get_template, get_filter
 
 
-def make_passband(filter_name=None, filter_file=None, wave_unit_in_file=u.Angstrom):
+def make_passband(filter_name=None, filter_file=None, wave_unit=u.Angstrom):
     """
-    Make a SpectralElement (synphot passband) out of a filter in the database
+    Make a SpectralElement (synphot passband) from user specified filter in the database.
+    Optionally, specify a file in disk and the wavelength units.
 
     Parameters
     ----------
     filter_name: str, a filter name expressed as ``instrument/filter_name``
     filter_file: Optionally, make a pasband from a local file
+    wave_unit: astropy.unit
 
     Returns
     -------
     passband: a synphot.SpectralElement
     """
     if filter_file is not None:
-        try:
-            passband = SpectralElement.from_file(filter_file)
-        except (exceptions.SynphotError, FileNotFoundError, ValueError) as e:
-            print("File not found or malformed", e)
-
+        if filter_file.lower().endswith("fits") or filter_file.lower().endswith("fit"):
+            meta, wave, trans = synphot.specio.read_fits_spec(filter_file,
+                                                              wave_unit=wave_unit,
+                                                              flux_unit='transmission')
+        else:
+            meta, wave, trans = synphot.specio.read_ascii_spec(filter_file,
+                                                               wave_unit=wave_unit,
+                                                               flux_unit='transmission')
     else:
         path, meta = get_filter(filter_name)
         if meta is None:  # it's a svo filter
@@ -68,21 +66,22 @@ def make_passband(filter_name=None, filter_file=None, wave_unit_in_file=u.Angstr
                 wave = trans_table[0][:].data * wave_unit
                 trans = trans_table[1][:].data
 
-        passband = SpectralElement(Empirical1D, points=wave, lookup_table=trans, meta=meta)
+    passband = SpectralElement(Empirical1D, points=wave, lookup_table=trans, meta=meta)
 
     return passband
 
 
 class Spextrum(SourceSpectrum):
     """
-    Class to handle spectra. This class stores and manipulates the spectra.
+    Class to handle spectra. This class download, load, stores and manipulates the spectra.
 
     This class can be initialized with a remote file which will be downloaded from
     the database or with a synphot.Spectrum
 
+
     Parameters
     ----------
-    template_name: Name of the template to download with format library/template
+    template_name: Name of the template to download with format library/template e.g. "kc96/s0
     modelclass, kwargs
         See `BaseSpectrum`.
 
@@ -160,12 +159,12 @@ class Spextrum(SourceSpectrum):
         TODO: More checks from units, etc.
         Parameters
         ----------
-        filename
+        filename: str a filename with the spectra
         format: format of the spectra accepted by specutils (see specutils documentation)
 
         Returns
         -------
-
+        a Spextrum instance
 
         """
         try:
@@ -189,13 +188,12 @@ class Spextrum(SourceSpectrum):
 
         Parameters
         ----------
-        spectrum: a synphot spectra
         z: redshift
         vel: radial velocity,  if no unit are present it is assumed to be in m/s
 
         Returns
         -------
-        a synphot SourceSpectrum
+        a new Spextrum instance
 
         """
         if vel != 0:
