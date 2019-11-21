@@ -48,7 +48,7 @@ def make_passband(filter_name=None, filter_file=None):
         try:
             passband = SpectralElement.from_file(filter_file)
         except (exceptions.SynphotError, FileNotFoundError, ValueError) as e:
-            warnings.warn("File not found or malformed", e)
+            print("File not found or malformed", e)
 
     else:
         path, meta = get_filter(filter_name)

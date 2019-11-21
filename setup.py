@@ -20,7 +20,7 @@ def setup_sp():
         package_data={'spextra': ['spextra/data/*']},
         include_package_data=True,
         install_requires=["numpy",
-                          "astropy",
+                          "astropy>=3.1",
                           "synphot>=0.2",
                           "matplotlib>1.5.0",
                           "tynt",
