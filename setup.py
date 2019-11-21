@@ -21,7 +21,7 @@ def setup_sp():
         include_package_data=True,
         install_requires=["numpy",
                           "astropy",
-                          "synphot>0.2",
+                          "synphot>=0.2",
                           "matplotlib>1.5.0",
                           "tynt",
                           "pyyaml", ],
