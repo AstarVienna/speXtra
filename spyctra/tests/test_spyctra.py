@@ -3,7 +3,7 @@ Tests for class Spectrum
 """
 import pytest
 from spyctra import Spectrum, make_passband
-from synphot import SpectralElement, units
+from synphot import SpectralElement, SourceSpectrum, units
 import astropy.units as u
 import numpy as np
 
@@ -27,26 +27,30 @@ class TestPassbandInstances:
         assert isinstance(passband, SpectralElement)
 
 
-
-
 class TestSpectrumInstances:
+    """
+    This class tests whether each method return the correct instances
+    it also tests whether the methods are functional
+    but it doesn't test for correct outputs see cls:TestSpectrum for that
+    """
 
-    def test_load(self):
-        sp = Spectrum("kc96/s0")
+    sp = Spectrum("kc96/s0")
+
+    def test_load(self, sp=sp):
         assert isinstance(sp, Spectrum)
 
-    def test_redshift(self):
-        sp = Spectrum("kc96/s0")
+    def test_sub_class(self):
+        assert issubclass(Spectrum, SourceSpectrum)
+
+    def test_redshift(self, sp=sp):
         sp2 = sp.redshift(z=1)
         assert isinstance(sp2, Spectrum)
 
-    def test_add_emi_lines(self):
-        sp = Spectrum("kc96/s0")
+    def test_add_emi_lines(self, sp=sp):
         sp2 = sp.add_emi_lines(5000, 1e-15, 10 )
         assert isinstance(sp2, Spectrum)
 
-    def test_add_abs_lines(self):
-        sp = Spectrum("kc96/s0")
+    def test_add_abs_lines(self, sp=sp):
         sp2 = sp.add_abs_lines(5000, 15, 10 )
         assert isinstance(sp2, Spectrum)
 
@@ -55,9 +59,9 @@ class TestSpectrumInstances:
         sp = Spectrum.ref_spectrum(mag=10, system_name=system_name)
         assert isinstance(sp, Spectrum)
 
-    def test_mul_with_scalar(self):
-        sp = Spectrum("kc96/s0") * 2
-        assert isinstance(sp, Spectrum)
+    def test_mul_with_scalar(self, sp=sp):
+        sp2 = sp * 2
+        assert isinstance(sp2, Spectrum)
 
     def test_sum_spectra(self):
         sp1 = Spectrum("kc96/s0")
@@ -65,10 +69,20 @@ class TestSpectrumInstances:
         sp = sp1 + sp2
         assert isinstance(sp, Spectrum)
 
-    def test_scale_to_magnitude(self):
-        sp = Spectrum("kc96/s0")
+    def test_scale_to_magnitude(self, sp=sp):
         sp2 = sp.scale_to_magnitude(amplitude=13*u.ABmag, filter_name="g")
         assert isinstance(sp2, Spectrum)
+
+    def test_rebin_spectra(self, sp=sp):
+        new_waves = np.linspace(np.min(sp.waveset),
+                                np.max(sp.waveset),
+                                100)
+        sp2 = sp.rebin_spectra(new_waves=new_waves)
+        assert isinstance(sp2, Spectrum)
+
+    def test_get_magnitude(self, sp=sp):
+        mag = sp.get_magnitude("g", system_name="AB")
+        assert isinstance(mag, u.Quantity)
 
 
 class TestSpectrum:

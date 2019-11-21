@@ -214,19 +214,15 @@ class Spectrum(SourceSpectrum):
 
         return Spectrum(modelclass=modelclass)
 
-    @classmethod
-    def rebin_spectra(cls, new_waves):
+    def rebin_spectra(self, new_waves):
         """
         Rebin a synphot spectra to a new wavelength grid conserving flux.
         Grid does not need to be linear and can be at higher or lower resolution
 
         TODO: To resample the spectra at lower resolution a convolution is first needed. Implement!
-        TODO: Return the new spectra in the input wavelengths units
-        TODO: Check this!!
 
         Parameters
         ----------
-        spectra: a synphot spectra
         new_waves: an array of the output wavelenghts in Angstroms but other units can be
             specified
 
@@ -239,14 +235,14 @@ class Spectrum(SourceSpectrum):
         if isinstance(new_waves, u.Quantity):
             new_waves = new_waves.to(u.AA).value
 
-        waves = cls.waveset.value
+        waves = self.waveset.value   # else assumed to be angstroms
         f = np.ones(len(waves))
         filt = SpectralElement(Empirical1D, points=waves, lookup_table=f)
-        obs = Observation(cls, filt, binset=new_waves, force='taper')
+        obs = Observation(self, filt, binset=new_waves, force='taper')
         newflux = obs.binflux
-        rebin_spec = SourceSpectrum(Empirical1D, points=new_waves, lookup_table=newflux, meta=cls.meta)
+        rebin_spec = SourceSpectrum(Empirical1D, points=new_waves, lookup_table=newflux, meta=self.meta)
 
-        return cls(modelclass=rebin_spec)
+        return Spectrum(modelclass=rebin_spec)
 
     def add_emi_lines(self, center, flux, fwhm):
         """
@@ -514,15 +510,23 @@ class Spectrum(SourceSpectrum):
         else:
             filter_curve = make_passband(filter_name=filter_name)
 
+        if system_name.lower() in ["vega"]:
+            unit = u.mag
+        elif system_name.lower() in ["st", "hst"]:
+            unit = u.STmag
+        else:
+            unit = u.ABmag
+
         ref_spec = self.ref_spectrum(mag=0, system_name=system_name)
         ref_flux = Observation(SourceSpectrum(modelclass=ref_spec),
                                filter_curve).effstim(flux_unit=units.PHOTLAM)
         real_flux = Observation(SourceSpectrum(modelclass=self),
                                 filter_curve).effstim(flux_unit=units.PHOTLAM)
-        pass
-    
+        mag = -2.5*np.log10(real_flux.value/ref_flux.value)
 
-# ------ Copied from synphot.SourceSpectrum so operations can happen here too --------
+        return mag * unit
+
+# ------ Copied from synphot.SourceSpectrum so operations can also happen here --------
 
     def __add__(self, other):
         """Add ``self`` with ``other``."""
