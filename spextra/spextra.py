@@ -377,7 +377,8 @@ class Spextrum(SourceSpectrum):
     @classmethod
     def ref_spectrum(cls, mag=0, system_name="AB"):
         """
-        Creates a spectrum with zero magnitude in the preferred system
+        Creates a reference spectrum in the preferred system scaled to a magnitude,
+        default a zero magnitude spectrum
         Parameters
         ----------
         mag: float,
@@ -386,7 +387,7 @@ class Spextrum(SourceSpectrum):
 
         Returns
         -------
-
+        a Spextrum instance
         """
         if system_name.lower() in ["vega"]:
             spec = get_vega_spectrum()
