@@ -1,8 +1,8 @@
-# Database for Spyctra
+# Database for speXtra
 
-Prototyping the Spyctra database
+Prototyping the speXtra database
 
-Spyctra will be shipped with a single data file (besides the Vega spectrum) which
+speXtra will be shipped with a single data file (besides the Vega spectrum) which
 will contain the web location of the database
 
 The database will be organized as follow (re-using a bit the synphot CDBS structure) 
@@ -11,23 +11,23 @@ The database will be organized as follow (re-using a bit the synphot CDBS struct
 ```
 database
 │   index.html
-│   index.yml    
+│   index.yml
 │
 └───templates
 │   │
 │   └─── library1
 │   │   │   contents.html
-│   │   │   contents.yml
+│   │   │   index.yml
 │   │   │   spectral_template1.fits
 │   │   │   spectral_template2.fits
 │   │   │   ...
 │   │ 
 │   └─── library2
 │       │   contents.html
-│       │   contents.yml
+│       │   index.yml
 │       │   another_spectral_template1.ascii
 │       │    ...
-│   
+│
 └───extinction
 │   │   extinction.html
 │   │   extinction.yml
@@ -35,8 +35,8 @@ database
 │   │   extinction_curve2.fits
 │   │   ...
 │
-└───filters?          
-```   
+└───filters
+```
 
 Questions marks indicate that no decision has been made yet. 
 
@@ -55,7 +55,7 @@ like list of templates, a summary and references.
 
 * Data files should be readable by synphot
 
-* **Content files should be able to be parsed by Spyctra and display the contents 
+* **Content files should be able to be parsed by speXtra and display the contents 
 to the user and/or pass them to the API**
 
 Following the same standard other datafiles can be added like filters, etc. 

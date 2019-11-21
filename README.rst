@@ -1,5 +1,5 @@
 =======
-Spyctra
+SpeXtra
 =======
 
 A python tool to manage and manipulate astronomical spectra
@@ -9,7 +9,7 @@ A python tool to manage and manipulate astronomical spectra
 Description
 ===========
 
-Spyctra is a python tool to download, load, display and manipulate spectra of astronomical sources.
+speXtra is a python tool to download, load, display and manipulate spectra of astronomical sources.
 It has developed to provide spectral sources to SpecSim but it may be helpful for other purposes too.
 
 It heavily piggybacks in funcionalities provided by ``synphot`` and ``astropy``
@@ -48,18 +48,6 @@ Wish-list
 
 TODO
 ====
-
-- Change the name, there is already another tool with the same name_. Some ideas
-   - espyctro (spyctra in spanish)
-   - spyctral (there is 2009 repo with the same name)
-   - spextra, spyxtra, spextrum or some similar variation
-   - spyctrums (spectrums is another plural form of spectrum)
-   - spyktrum (german of spectrum, spektrum is taken)
-
-
-.. _name: https://github.com/parkin/spyctra
-
-
 
 - Create a logo ;-)
 

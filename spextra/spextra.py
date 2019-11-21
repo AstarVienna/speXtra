@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Spyctra: A python tool to manage and manipulate astronomical spectra
+speXtra: A python tool to manage and manipulate astronomical spectra
 
 returned spectra should  be in synphot format: do not alter attributes
 
@@ -56,7 +56,7 @@ def make_passband(filter_name=None, filter_file=None):
             trans_table = Table.read(path, format="votable")
             wave = trans_table['Wavelength'].data.data * u.Angstrom
             trans = trans_table['Transmission'].data.data
-        else:   # filter in spyctra database
+        else:   # filter in spextra database
             wave_unit = units.validate_unit(meta["wave_unit"])
             data_type = meta["data_type"]
             if data_type == "fits":
@@ -73,7 +73,7 @@ def make_passband(filter_name=None, filter_file=None):
     return passband
 
 
-class Spectrum(SourceSpectrum):
+class Spextrum(SourceSpectrum):
     """
     Class to handle spectra. This class stores and manipulates the spectra.
 
@@ -436,7 +436,7 @@ class Spectrum(SourceSpectrum):
                 Name of a filter from
                 - a generic filter name (see ``FILTER_DEFAULTS``)
                 - a spanish-vo filter service reference (e.g. ``"Paranal/HAWKI.Ks"``)
-                - a filter in the spyctra database
+                - a filter in the spextra database
             filter_file: str
                 A file with a transmission curve
 
@@ -492,7 +492,7 @@ class Spectrum(SourceSpectrum):
                 Name of a filter from
                 - a generic filter name (see ``FILTER_DEFAULTS``)
                 - a spanish-vo filter service reference (e.g. ``"Paranal/HAWKI.Ks"``)
-                - a filter in the spyctra database
+                - a filter in the spextra database
             filter_file: str
                 A file with a transmission curve
             system_name: str
@@ -501,7 +501,7 @@ class Spectrum(SourceSpectrum):
 
             Returns
             -------
-            spectrum : a Spectrum
+            spectrum : a Spextrum
                 Input spectrum scaled to the given amplitude in the given filter
         """
 

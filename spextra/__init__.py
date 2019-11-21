@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import os
 import inspect
-from . import spyctra
+from . import spextra
 from . import database
 
-from .spyctra import Spectrum, make_passband
+from .spextra import Spextrum, make_passband
 from .database import SpecDatabase
 
 __pkg_dir__ = os.path.dirname(inspect.getfile(inspect.currentframe()))

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    Setup file for spyctra.
+    Setup file for spextra.
 """
 import sys
 import setuptools
@@ -9,15 +9,15 @@ import pytest
 
 def setup_sp():
     setuptools.setup(
-        name="Spyctra",
+        name="speXtra",
         description="Tool to  manage and manipulate  astronomical spectra",
         author="Miguel Verdugo",
         author_email="mverduol@gmail.com",
         license="MIT",
-        url="https://github.com/miguelverdugo/spyctra",
-        package_dir={'spyctra': 'spyctra'},
-        packages=['spyctra'],
-        package_data={'spyctra': ['spyctra/data/*']},
+        url="https://github.com/miguelverdugo/speXtra",
+        package_dir={'spextra': 'spextra'},
+        packages=['spextra'],
+        package_data={'spextra': ['spextra/data/*']},
         include_package_data=True,
         install_requires=["numpy",
                           "astropy",

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Database for spyctra
+Database for speXtra
 """
 import shutil
 from posixpath import join as urljoin
@@ -289,7 +289,7 @@ def get_template(template, path=None):
 
 def get_filter(filter_name):
     """
-    get filter from the database. It will try first to download from the Spyctra database
+    get filter from the database. It will try first to download from the speXtra database
     and then try to get it from the SVO service
 
     TODO: Probably needs a refactoring
