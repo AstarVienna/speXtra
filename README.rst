@@ -12,17 +12,16 @@ Description
 speXtra is a python tool to download, load, display and manipulate spectra of astronomical sources.
 It has developed to provide spectral sources to SpecSim but it may be helpful for other purposes too.
 
-It heavily piggybacks in funcionalities provided by ``synphot`` and ``astropy``
+speXtra stands in the shoulder of giants: ``synphot`` and ``astropy``
 
-TODO:
 
 Functionalities
 ===============
 
-Wish-list
+speXtra is able to:
 
-- Download spectra from known sources and return it in ``synphot`` format: We will need
-  to create a database of spectra.
+- Download spectra from known sources and return it in format compatible with ``synphot`` format
+
 
 - Load spectra from files in different formats and return it in ``synphot`` format
    - Ascii and fits tables are natively supported by ``synphot``
@@ -41,9 +40,6 @@ Wish-list
 
 - plot the spectra
 
-- Try to make sure that most units are supported but this may be limited by ``synphot`` capabilities.
-
-- save it the wcs1d format as well as tables
 
 
 TODO
