@@ -14,11 +14,12 @@ __pycache__/*
 */.ipynb_checkpoints/*
 
 # MV: some possible extensions of data files
-*.fits
-*.tfits
-*.dat
-*.ascii
-*.sed
+# Goal data is not upload to github, only the yaml files
+/database/**/*.fits
+/database/**/*.tfits
+/database/**/*.dat
+/database/**/*.ascii
+/database/**/*.sed
 
 # Project files
 .ropeproject
