@@ -31,7 +31,7 @@ import tynt
 from .database import get_template, get_filter
 
 
-def make_passband(filter_name=None, filter_file=None):
+def make_passband(filter_name=None, filter_file=None, wave_unit_in_file=u.Angstrom):
     """
     Make a SpectralElement (synphot passband) out of a filter in the database
 

@@ -1,7 +1,7 @@
 PyYAML
 tynt
-astropy
-synphot
+astropy>=3.1
+synphot>=3.2
 numpy
 # Add your pinned requirements so that they can be easily installed with:
 # pip install -r requirements.txt
