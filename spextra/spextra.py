@@ -212,7 +212,7 @@ class Spextrum(SourceSpectrum):
         modelclass = SourceSpectrum(Empirical1D,
                                     points=lam, lookup_table=flux, meta=meta)
 
-        return Spectrum(modelclass=modelclass)
+        return Spextrum(modelclass=modelclass)
 
     def rebin_spectra(self, new_waves):
         """
@@ -242,7 +242,7 @@ class Spextrum(SourceSpectrum):
         newflux = obs.binflux
         rebin_spec = SourceSpectrum(Empirical1D, points=new_waves, lookup_table=newflux, meta=self.meta)
 
-        return Spectrum(modelclass=rebin_spec)
+        return Spextrum(modelclass=rebin_spec)
 
     def add_emi_lines(self, center, flux, fwhm):
         """

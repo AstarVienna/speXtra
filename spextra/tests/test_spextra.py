@@ -6,6 +6,8 @@ from spextra import Spextrum, make_passband
 from synphot import SpectralElement, SourceSpectrum, units
 import astropy.units as u
 import numpy as np
+import os
+import inspect
 
 def mock_dir():
     cur_dirname = os.path.dirname(inspect.getfile(inspect.currentframe()))
