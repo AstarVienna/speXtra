@@ -10,6 +10,7 @@ import os
 import inspect
 
 
+# utility function
 def mock_dir():
     cur_dirname = os.path.dirname(inspect.getfile(inspect.currentframe()))
     rel_dirname = "mocks"

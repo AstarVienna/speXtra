@@ -40,14 +40,12 @@ def make_passband(filter_name=None, filter_file=None, wave_unit=u.Angstrom):
     passband: a synphot.SpectralElement
     """
     if filter_file is not None:
-        if filter_file.lower().endswith("fits") or filter_file.lower().endswith("fit"):
-            meta, wave, trans = synphot.specio.read_fits_spec(filter_file,
-                                                              wave_unit=wave_unit,
-                                                              flux_unit='transmission')
-        else:
-            meta, wave, trans = synphot.specio.read_ascii_spec(filter_file,
-                                                               wave_unit=wave_unit,
-                                                               flux_unit='transmission')
+        try:
+            meta, wave, trans = synphot.specio.read_spec(filter_file,
+                                                         wave_unit=wave_unit,
+                                                         flux_unit='transmission')
+        except (FileNotFoundError, synphot.exceptions.SynphotError) as e:
+            print("File not found or malformed", e)
     else:
         path, meta = get_filter(filter_name)
         if meta is None:  # it's a svo filter
