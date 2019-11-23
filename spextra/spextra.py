@@ -265,11 +265,13 @@ class Spextrum(SourceSpectrum):
         center = np.array([center]).flatten()
         flux = np.array([flux]).flatten()
         fwhm = np.array([fwhm]).flatten()
-        print(center, flux, fwhm)
+        #print(center, flux, fwhm)
 
+        sp = self.__class__(modelclass=self.model)
         for c, x, f in zip(center, flux, fwhm):
             g_em = SourceSpectrum(GaussianFlux1D(mean=c, total_flux=x, fwhm=f))
-            sp = self.__class__(modelclass=self.model + g_em.model)
+
+            sp = self.__class__(modelclass=sp.model + g_em.model)
 
         return sp
 
@@ -300,6 +302,7 @@ class Spextrum(SourceSpectrum):
         ew = np.array([ew]).flatten()
         fwhm = np.array([fwhm]).flatten()
 
+        sp = self.__class__(modelclass=self.model)
         for c, e, f in zip(center, ew, fwhm):
             sign = -1 * np.sign(e)  # to keep the convention that EL are negative and ABS are positive
             left, right = center - np.abs(e / 2), center + np.abs(e / 2)
@@ -309,7 +312,7 @@ class Spextrum(SourceSpectrum):
                                         out_flux_unit=units.FLAM)
             flux = np.trapz(fluxes.value, wavelengths.value)
             g_abs = SourceSpectrum(GaussianFlux1D(total_flux=sign * flux, mean=c, fwhm=f))
-            sp = self.__class__(modelclass=self.model + g_abs.model)
+            sp = self.__class__(modelclass=sp.model + g_abs.model)
 
             if (sp(wavelengths).value < 0).any():
                 warnings.warn("Warning: Flux<0 for specified EW and FHWM, setting it to Zero")
@@ -373,7 +376,7 @@ class Spextrum(SourceSpectrum):
         pass
 
     @classmethod
-    def ref_spectrum(cls, mag=0, system_name="AB"):
+    def ref_spectrum(cls, mag=0, system_name="AB", wavelengths=None):
         """
         Creates a reference spectrum in the preferred system scaled to a magnitude,
         default a zero magnitude spectrum
@@ -383,19 +386,30 @@ class Spextrum(SourceSpectrum):
             magnitude of the reference spectrum, default=0
         system_name: AB, Vega or ST, default AB
 
+        wavelengths: The waveset of the reference spectrum if not Vega
+
         Returns
         -------
         a Spextrum instance
         """
+        if wavelengths is None: # set a default waveset
+            wavelengths = np.geomspace(100, 5e4, num=5000) * u.AA # constant R~800
+
         if system_name.lower() in ["vega"]:
             spec = get_vega_spectrum()
             spec = spec * 10**(-0.4*mag)
         elif system_name.lower() in ["ab"]:
             spec = SourceSpectrum(ConstFlux1D, amplitude=mag * u.ABmag)
+            spec = SourceSpectrum(Empirical1D, points=wavelengths,
+                                  lookup_table=spec(wavelengths, flux_unit=u.ABmag))
         elif system_name.lower() in ["st", "hst"]:
             spec = SourceSpectrum(ConstFlux1D, amplitude=mag * u.STmag)
+            spec = SourceSpectrum(Empirical1D, points=wavelengths,
+                                  lookup_table=spec(wavelengths, flux_unit=u.STmag))
 
         return cls(modelclass=spec)
+
+
 
     @classmethod
     def black_body_spectrum(cls, temperature, wmin, wmax):
