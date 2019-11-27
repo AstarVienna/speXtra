@@ -59,7 +59,7 @@ class TestSpextrumInstances:
         assert isinstance(sp2, Spextrum)
 
     def test_add_emi_lines(self, sp=sp):
-        sp2 = sp.add_emi_lines(5000, 1e-15, 10 )
+        sp2 = sp.add_emi_lines(5000, 1e-15, 10)
         assert isinstance(sp2, Spextrum)
 
     def test_add_abs_lines(self, sp=sp):
