@@ -68,7 +68,7 @@ class TestSpextrumInstances:
 
     @pytest.mark.parametrize("system_name", ["ab", "st", "vega"])
     def test_ref_spectrum(self, system_name):
-        sp = Spextrum.ref_spectrum(mag=10, system_name=system_name)
+        sp = Spextrum.flat_spectrum(mag=10, system_name=system_name)
         assert isinstance(sp, Spextrum)
 
     def test_mul_with_scalar(self, sp=sp):
@@ -96,6 +96,10 @@ class TestSpextrumInstances:
         mag = sp.get_magnitude("g", system_name="AB")
         assert isinstance(mag, u.Quantity)
 
+    def test_black_body_spectrum(self):
+        sp = Spextrum.black_body_spectrum(filter_name="g")
+        assert isinstance(sp, Spextrum)
+
 
 class TestSpextrum:
 
@@ -105,8 +109,8 @@ class TestSpextrum:
 
     @pytest.mark.parametrize("system_name", ["ab", "st", "vega"])
     def test_ref_spectrum_is_right(self, system_name):
-        sp1 = Spextrum.ref_spectrum(mag=10, system_name=system_name)
-        sp2 = Spextrum.ref_spectrum(mag=11, system_name=system_name)
+        sp1 = Spextrum.flat_spectrum(mag=10, system_name=system_name)
+        sp2 = Spextrum.flat_spectrum(mag=11, system_name=system_name)
         if system_name == "vega":
             flux1 = sp1(sp1.waveset[(sp1.waveset.value > 7000 - 200) &
                                     (sp1.waveset.value < 7000 + 200)]).value

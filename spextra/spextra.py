@@ -16,7 +16,7 @@ from astropy.modeling.models import Scale
 
 import synphot
 from synphot import (units, SourceSpectrum, SpectralElement, Observation, BaseUnitlessSpectrum)
-from synphot.models import (Empirical1D, GaussianFlux1D, Box1D, ConstFlux1D)
+from synphot.models import (Empirical1D, GaussianFlux1D, Box1D, ConstFlux1D, BlackBody1D)
 from synphot import exceptions
 
 import tynt
@@ -376,9 +376,9 @@ class Spextrum(SourceSpectrum):
         pass
 
     @classmethod
-    def ref_spectrum(cls, mag=0, system_name="AB", wavelengths=None):
+    def flat_spectrum(cls, mag=0, system_name="AB", wavelengths=None):
         """
-        Creates a reference spectrum in the preferred system scaled to a magnitude,
+        Creates a flat spectrum in the preferred system scaled to a magnitude,
         default a zero magnitude spectrum
         Parameters
         ----------
@@ -406,26 +406,49 @@ class Spextrum(SourceSpectrum):
             spec = SourceSpectrum(ConstFlux1D, amplitude=mag * u.STmag)
             spec = SourceSpectrum(Empirical1D, points=wavelengths,
                                   lookup_table=spec(wavelengths, flux_unit=u.STmag))
+        else:
+            raise ValueError("only AB, ST and Vega systems are supported")
 
         return cls(modelclass=spec)
 
-
-
     @classmethod
-    def black_body_spectrum(cls, temperature, wmin, wmax):
+    def black_body_spectrum(cls, temperature=9500, amplitude=0, filter_name=None, filter_file=None):
         """
-        Produce a blackbody spectrum for a given temperature and cut it between wmin and wmax
+        Produce a blackbody spectrum for a given temperature and scale it to a magnitude
+        in a filter
+
         Parameters
         ----------
-        temperature
-        wmin
-        wmax
+        temperature: the temperature in Kelvin degrees
+        amplitude: `astropy.Quantity``, float
+                The value that the spectrum should have in the given filter. Acceptable
+                astropy quantities are:
+                - u.mag : Vega magnitudes
+                - u.ABmag : AB magnitudes
+                - u.STmag : HST magnitudes
+                - u.Jy : Jansky per filter bandpass
+                Additionally the ``FLAM`` and ``FNU`` units from ``synphot.units`` can
+                be used when passing the quantity for ``amplitude``:
+
+        filter_name : str
+                Name of a filter from
+                - a generic filter name (see ``FILTER_DEFAULTS``)
+                - a spanish-vo filter service reference (e.g. ``"Paranal/HAWKI.Ks"``)
+                - a filter in the spextra database
+
+        filter_file: str
+                A file with a transmission curve
 
         Returns
         -------
-
+        a black-body spectrum
         """
-        pass
+        bb = SourceSpectrum(BlackBody1D, temperature=temperature)
+        sp = cls(modelclass=bb)
+
+        return sp.scale_to_magnitude(amplitude=amplitude,
+                                     filter_name=filter_name,
+                                     filter_file=filter_file)
 
     def scale_to_magnitude(self, amplitude, filter_name=None, filter_file=None):
         """
@@ -467,21 +490,21 @@ class Spextrum(SourceSpectrum):
             if amplitude.unit.physical_type == "spectral flux density":
                 if amplitude.unit != u.ABmag:
                     amplitude = amplitude.to(u.ABmag)
-                ref_spec = self.ref_spectrum(mag=amplitude.value, system_name="AB")
+                ref_spec = self.flat_spectrum(mag=amplitude.value, system_name="AB")
 
             elif amplitude.unit.physical_type == "spectral flux density wav":
                 if amplitude.unit != u.STmag:
                     amplitude = amplitude.to(u.STmag)
-                ref_spec = self.ref_spectrum(mag=amplitude.value, system_name="ST")
+                ref_spec = self.flat_spectrum(mag=amplitude.value, system_name="ST")
 
             elif amplitude.unit == u.mag:
-                ref_spec = self.ref_spectrum(mag=amplitude.value, system_name="Vega")
+                ref_spec = self.flat_spectrum(mag=amplitude.value, system_name="Vega")
 
             else:
                 raise ValueError("Units of amplitude must be one of "
                                  "[u.mag, u.ABmag, u.STmag]: {}".format(amplitude))
         else:
-            ref_spec = self.ref_spectrum(mag=amplitude, system_name="Vega")
+            ref_spec = self.flat_spectrum(mag=amplitude, system_name="Vega")
 
         ref_flux = Observation(SourceSpectrum(modelclass=ref_spec),
                                filter_curve).effstim(flux_unit=units.PHOTLAM)
@@ -528,7 +551,7 @@ class Spextrum(SourceSpectrum):
         else:
             unit = u.ABmag
 
-        ref_spec = self.ref_spectrum(mag=0, system_name=system_name)
+        ref_spec = self.flat_spectrum(mag=0, system_name=system_name)
         ref_flux = Observation(SourceSpectrum(modelclass=ref_spec),
                                filter_curve).effstim(flux_unit=units.PHOTLAM)
         real_flux = Observation(SourceSpectrum(modelclass=self),
