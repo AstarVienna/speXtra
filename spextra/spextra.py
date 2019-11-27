@@ -560,6 +560,9 @@ class Spextrum(SourceSpectrum):
 
         return mag * unit
 
+    def photons_in_range(self, wmin, wmax):
+        pass
+
 # ------ Copied from synphot.SourceSpectrum so operations can also happen here --------
 
     def __add__(self, other):
