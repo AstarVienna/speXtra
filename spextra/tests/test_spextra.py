@@ -105,6 +105,11 @@ class TestSpextrumInstances:
         counts = sp.photons_in_range(wmin=4000, wmax=5000)
         assert isinstance(counts, u.Quantity)
 
+    def test_smooth(self):
+        sp = Spextrum.black_body_spectrum(filter_name="g")
+        sp2 = sp.smooth(10*u.AA)
+        assert isinstance(sp2, Spextrum)
+
 
 class TestSpextrum:
 

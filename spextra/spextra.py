@@ -13,6 +13,7 @@ from astropy.table import Table
 import astropy.units as u
 from astropy.constants import c
 from astropy.modeling.models import Scale
+from astropy.convolution import convolve, Gaussian1DKernel
 
 import synphot
 from synphot import (units, SourceSpectrum, SpectralElement, Observation, BaseUnitlessSpectrum)
@@ -236,7 +237,8 @@ class Spextrum(SourceSpectrum):
         filt = SpectralElement(Empirical1D, points=waves, lookup_table=f)
         obs = Observation(self, filt, binset=new_waves, force='taper')
         newflux = obs.binflux
-        rebin_spec = SourceSpectrum(Empirical1D, points=new_waves, lookup_table=newflux, meta=self.meta)
+        rebin_spec = SourceSpectrum(Empirical1D, points=new_waves,
+                                    lookup_table=newflux, meta=self.meta)
 
         return Spextrum(modelclass=rebin_spec)
 
@@ -372,8 +374,30 @@ class Spextrum(SourceSpectrum):
 
         return sp
 
-    def smooth(self, kernel):
-        pass
+    def smooth(self, sigma):
+        """
+        Smooth the Spectrum with a Gaussian Kernel
+        TODO: Implement a wavelength dependent smoothing
+        Parameters
+        ----------
+        sigma: u.Quantity, width of the Kernel
+
+        Returns
+        -------
+        smoothed spextrum
+        """
+        if isinstance(sigma, u.Quantity):
+            sigma = sigma.to(u.AA).value
+
+        lam = self.waveset
+        flux = self(self.waveset)
+        meta = self.meta
+        smoothed_flux = convolve(flux, Gaussian1DKernel(sigma))
+        modelclass = SourceSpectrum(Empirical1D, points=lam,
+                                    lookup_table=smoothed_flux,
+                                    meta=meta)
+        return Spextrum(modelclass=modelclass)
+
 
     @classmethod
     def flat_spectrum(cls, mag=0, system_name="AB", wavelengths=None):
@@ -608,9 +632,9 @@ class Spextrum(SourceSpectrum):
 
         return counts
 
-    def add_noise(self):
+    def add_noise(self, wmin, wmax):
         """
-        Create a spectra with a given S/N in the wavelength range
+        Returns a spectra with a given S/N in the specified wavelength range
         Returns
         -------
 
