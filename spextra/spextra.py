@@ -47,9 +47,10 @@ def make_passband(filter_name=None, filter_file=None, wave_unit=u.Angstrom):
                                                          flux_unit='transmission')
         except (FileNotFoundError, synphot.exceptions.SynphotError) as e:
             print("File not found or malformed", e)
+            raise
     else:
         path, meta = get_filter(filter_name)
-        if meta is None:  # it's a svo filter
+        if meta is None:  # it's a svo filter!
             trans_table = Table.read(path, format="votable")
             wave = trans_table['Wavelength'].data.data * u.Angstrom
             trans = trans_table['Transmission'].data.data
@@ -703,16 +704,7 @@ class Spextrum(SourceSpectrum):
                 'Can only operate on real scalar number')
 
 
-
-
-
-
-
-
-
 #------------------------------ END    -------------------------------------------
-
-
 
 
 def get_vega_spectrum():
@@ -768,55 +760,6 @@ def get_filter_names(system=None):
         flat_list = [f for f in filter_list if s in f]
 
     return flat_list
-
-
-"""
-def get_filter(name=None, filename=None, wave_unit=u.AA):
-
-    Return a synphot SpectralElement (bandpass) from a filter in the SVO Filter Profile Service
-    or from a local file (only ascii is supported atm)
-
-    TODO: It should be also able to read a SpectralElement (bandpass) from synphot
-    See ScopeSim.effects.TER_curve_utils
-
-
-    Parameters
-    ----------
-    name: Name of the filter in the SVO Filter Profile Service, an incomplete list supplied by tynt
-          can be obtained with get_filter_names()
-    filename: Filename where filter is stored, only ascii is supported, col1 is assumed to be wavelength, col2 transmittance
-    wave_unit: unit of the wavelength column, default is u.AA (Angstroms)
-
-    Returns
-    -------
-
-
-
-    if name is not None:
-        try:
-            f = tynt.FilterGenerator()
-            filt = f.download_true_transmittance(name)
-            waves = filt.wavelength.value
-            trans = filt.transmittance
-
-        except ValueError as e:
-            print(e, "Filter not found in SVO Filter Profile Service")
-
-    if filename is not None:
-        try:
-            filter_table = Table.read(filename, format="ascii")
-            waves = filter_table["col1"].data * wave_unit
-            waves = waves.to(u.AA).value
-            trans = filter_table["col2"].data
-
-        except FileNotFoundError as e:
-            print(e, "File not found")
-
-    bandpass = SpectralElement(Empirical1D(points=waves, lookup_table=trans))
-
-    return bandpass
-
-"""
 
 
 

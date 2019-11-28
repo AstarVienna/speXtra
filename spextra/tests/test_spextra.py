@@ -20,7 +20,15 @@ def mock_dir():
 MOCK_DIR = mock_dir()
 
 
+def test_make_passband_no_file():
+    with pytest.raises(FileNotFoundError) as e_info:
+        pb = make_passband(filter_file="blablabla")
+        print(e_info)
+
+
+
 class TestPassbandInstances:
+
     def test_alias(self):
         passband = make_passband("W1")
         assert isinstance(passband, SpectralElement)
@@ -150,9 +158,6 @@ class TestSpextrum:
         assert np.isclose(mean, 10**0.4)
 
     def test_units(self):
-        pass
-
-    def test_scale_to_magnitude(self):
         pass
 
 
