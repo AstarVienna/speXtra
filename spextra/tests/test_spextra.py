@@ -100,12 +100,18 @@ class TestSpextrumInstances:
         sp = Spextrum.black_body_spectrum(filter_name="g")
         assert isinstance(sp, Spextrum)
 
+    def test_photons_in_range(self):
+        sp = Spextrum.black_body_spectrum(filter_name="g")
+        counts = sp.photons_in_range(wmin=4000, wmax=5000)
+        assert isinstance(counts, u.Quantity)
+
 
 class TestSpextrum:
 
     def test_wrong_load(self):
         with pytest.raises(ValueError) as e_info:
             sp = Spextrum("kc96/wrong_name")
+            print(e_info)
 
     @pytest.mark.parametrize("system_name", ["ab", "st", "vega"])
     def test_ref_spectrum_is_right(self, system_name):

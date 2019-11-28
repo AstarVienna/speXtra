@@ -560,10 +560,64 @@ class Spextrum(SourceSpectrum):
 
         return mag * unit
 
-    def photons_in_range(self, wmin, wmax):
+    def photons_in_range(self, wmin, wmax, area=1*u.cm**2,
+                         filter_name=None, filter_file=None):
+        """
+        Return the number of photons between wave_min and wave_max or within
+        a bandpass (filter)
+
+        Parameters
+        ----------
+        wmin :
+            [Angstrom]
+        wmax :
+            [Angstrom]
+        area : u.Quantity
+            [cm2]
+        filter_name :
+        filter_file :
+
+        Returns
+        -------
+        counts : u.Quantity array
+
+        """
+        if isinstance(area, u.Quantity):
+            area = area.to(u.cm ** 2).value  #
+        if isinstance(wmin, u.Quantity):
+            wmin = wmin.to(u.Angstrom).value
+        if isinstance(wmax, u.Quantity):
+            wmin = wmax.to(u.Angstrom).value
+
+        if (filter_name is None) and (filter_file is None):
+            # this makes a bandpass out of wmin and wmax
+            try:
+                mid_point = 0.5 * (wmin + wmax)
+                width = abs(wmax - wmin)
+                filter_curve = SpectralElement(Box1D, amplitude=1, x_0=mid_point, width=width)
+            except ValueError("Please specify wmin/wmax or a filter"):
+                raise
+
+        elif filter_file is not None:
+            filter_curve = make_passband(filter_file=filter_file)
+        else:
+            filter_curve = make_passband(filter_name=filter_name)
+
+        obs = Observation(self, filter_curve)
+        counts = obs.countrate(area=area * u.cm ** 2)
+
+        return counts
+
+    def add_noise(self):
+        """
+        Create a spectra with a given S/N in the wavelength range
+        Returns
+        -------
+
+        """
         pass
 
-# ------ Copied from synphot.SourceSpectrum so operations can also happen here --------
+    # ------ Copied from synphot.SourceSpectrum so operations can also happen here --------
 
     def __add__(self, other):
         """Add ``self`` with ``other``."""
@@ -739,89 +793,6 @@ def get_filter(name=None, filename=None, wave_unit=u.AA):
     return bandpass
 
 """
-
-def photons_in_range(spectra, wave_min, wave_max, area, bandpass=None):
-    """
-    Return the number of photons between wave_min and wave_max or within
-    a bandpass (filter)
-
-    TODO: Write wrapper functions make_synphot_bandpass and make_synphot_spectra
-        to allow a variety of bandpasses and spectra.
-
-
-
-    Parameters
-    ----------
-    spectra: a synphot spectrum
-    wave_min
-        [Angstrom]
-    wave_max
-        [Angstrom]
-    area : Quantity
-        [cm2]
-    bandpass : SpectralElement
-
-
-    Returns
-    -------
-    counts : u.Quantity array
-
-    """
-    if isinstance(area, u.Quantity):
-        area = area.to(u.cm**2).value  #
-    if isinstance(wave_min, u.Quantity):
-        wave_min = wave_min.to(u.Angstrom).value
-    if isinstance(wave_max, u.Quantity):
-        wave_max = wave_max.to(u.Angstrom).value
-    if isinstance(spectra, list) is False:
-        spectra = [spectra]
-
-    if bandpass is None:
-        # this makes a bandpass out of wmin and wmax
-        mid_point = 0.5*(wave_min + wave_max)
-        width = abs(wave_max - wave_min)
-        bandpass = SpectralElement(Box1D, amplitude=1, x_0=mid_point, width=width)
-
-    if (bandpass is not None) and (isinstance(bandpass, synphot.spectrum.SpectralElement) is False) :
-        # bandpass = make_synphot_bandpass(bandpass) # try to make a synphot bandpass from e.g. filter file
-        pass
-
-    counts = []
-    for spec in spectra:
-        if isinstance(spec, synphot.spectrum.SourceSpectrum) is False:
-            #spec = make_synphot_spectrum(spec) # Try to make a synphot spectrum from e.g. file/np.array
-            pass
-
-        obs = Observation(spec, bandpass)
-        counts.append(obs.countrate(area=area*u.m**2).value)
-
-    counts = np.array(counts) * u.ph * u.s**-1
-
-    return counts
-
-
-
-
-
-
-def black_body(t, wmin, wmax):
-    """
-    TODO: It is needed?
-    Unitility function to create SourceSpectrum with a black body with temperature T
-
-    Parameters
-    ----------
-    t: Temperature in Kelvin
-    wmin
-    wmax
-
-    Returns
-    -------
-
-
-    """
-    pass
-
 
 
 
