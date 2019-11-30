@@ -20,7 +20,15 @@ def mock_dir():
 MOCK_DIR = mock_dir()
 
 
+def test_make_passband_no_file():
+    with pytest.raises(FileNotFoundError) as e_info:
+        pb = make_passband(filter_file="blablabla")
+        print(e_info)
+
+
+
 class TestPassbandInstances:
+
     def test_alias(self):
         passband = make_passband("W1")
         assert isinstance(passband, SpectralElement)
@@ -100,12 +108,23 @@ class TestSpextrumInstances:
         sp = Spextrum.black_body_spectrum(filter_name="g")
         assert isinstance(sp, Spextrum)
 
+    def test_photons_in_range(self):
+        sp = Spextrum.black_body_spectrum(filter_name="g")
+        counts = sp.photons_in_range(wmin=4000, wmax=5000)
+        assert isinstance(counts, u.Quantity)
+
+    def test_smooth(self):
+        sp = Spextrum.black_body_spectrum(filter_name="g")
+        sp2 = sp.smooth(10*u.AA)
+        assert isinstance(sp2, Spextrum)
+
 
 class TestSpextrum:
 
     def test_wrong_load(self):
         with pytest.raises(ValueError) as e_info:
             sp = Spextrum("kc96/wrong_name")
+            print(e_info)
 
     @pytest.mark.parametrize("system_name", ["ab", "st", "vega"])
     def test_ref_spectrum_is_right(self, system_name):
@@ -139,9 +158,6 @@ class TestSpextrum:
         assert np.isclose(mean, 10**0.4)
 
     def test_units(self):
-        pass
-
-    def test_scale_to_magnitude(self):
         pass
 
 

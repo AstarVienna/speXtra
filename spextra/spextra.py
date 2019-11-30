@@ -13,6 +13,7 @@ from astropy.table import Table
 import astropy.units as u
 from astropy.constants import c
 from astropy.modeling.models import Scale
+from astropy.convolution import convolve, Gaussian1DKernel
 
 import synphot
 from synphot import (units, SourceSpectrum, SpectralElement, Observation, BaseUnitlessSpectrum)
@@ -46,9 +47,10 @@ def make_passband(filter_name=None, filter_file=None, wave_unit=u.Angstrom):
                                                          flux_unit='transmission')
         except (FileNotFoundError, synphot.exceptions.SynphotError) as e:
             print("File not found or malformed", e)
+            raise
     else:
         path, meta = get_filter(filter_name)
-        if meta is None:  # it's a svo filter
+        if meta is None:  # it's a svo filter!
             trans_table = Table.read(path, format="votable")
             wave = trans_table['Wavelength'].data.data * u.Angstrom
             trans = trans_table['Transmission'].data.data
@@ -236,7 +238,8 @@ class Spextrum(SourceSpectrum):
         filt = SpectralElement(Empirical1D, points=waves, lookup_table=f)
         obs = Observation(self, filt, binset=new_waves, force='taper')
         newflux = obs.binflux
-        rebin_spec = SourceSpectrum(Empirical1D, points=new_waves, lookup_table=newflux, meta=self.meta)
+        rebin_spec = SourceSpectrum(Empirical1D, points=new_waves,
+                                    lookup_table=newflux, meta=self.meta)
 
         return Spextrum(modelclass=rebin_spec)
 
@@ -372,8 +375,30 @@ class Spextrum(SourceSpectrum):
 
         return sp
 
-    def smooth(self, kernel):
-        pass
+    def smooth(self, sigma):
+        """
+        Smooth the Spectrum with a Gaussian Kernel
+        TODO: Implement a wavelength dependent smoothing
+        Parameters
+        ----------
+        sigma: u.Quantity, width of the Kernel
+
+        Returns
+        -------
+        smoothed spextrum
+        """
+        if isinstance(sigma, u.Quantity):
+            sigma = sigma.to(u.AA).value
+
+        lam = self.waveset
+        flux = self(self.waveset)
+        meta = self.meta
+        smoothed_flux = convolve(flux, Gaussian1DKernel(sigma))
+        modelclass = SourceSpectrum(Empirical1D, points=lam,
+                                    lookup_table=smoothed_flux,
+                                    meta=meta)
+        return Spextrum(modelclass=modelclass)
+
 
     @classmethod
     def flat_spectrum(cls, mag=0, system_name="AB", wavelengths=None):
@@ -560,10 +585,64 @@ class Spextrum(SourceSpectrum):
 
         return mag * unit
 
-    def photons_in_range(self, wmin, wmax):
+    def photons_in_range(self, wmin, wmax, area=1*u.cm**2,
+                         filter_name=None, filter_file=None):
+        """
+        Return the number of photons between wave_min and wave_max or within
+        a bandpass (filter)
+
+        Parameters
+        ----------
+        wmin :
+            [Angstrom]
+        wmax :
+            [Angstrom]
+        area : u.Quantity
+            [cm2]
+        filter_name :
+        filter_file :
+
+        Returns
+        -------
+        counts : u.Quantity array
+
+        """
+        if isinstance(area, u.Quantity):
+            area = area.to(u.cm ** 2).value  #
+        if isinstance(wmin, u.Quantity):
+            wmin = wmin.to(u.Angstrom).value
+        if isinstance(wmax, u.Quantity):
+            wmin = wmax.to(u.Angstrom).value
+
+        if (filter_name is None) and (filter_file is None):
+            # this makes a bandpass out of wmin and wmax
+            try:
+                mid_point = 0.5 * (wmin + wmax)
+                width = abs(wmax - wmin)
+                filter_curve = SpectralElement(Box1D, amplitude=1, x_0=mid_point, width=width)
+            except ValueError("Please specify wmin/wmax or a filter"):
+                raise
+
+        elif filter_file is not None:
+            filter_curve = make_passband(filter_file=filter_file)
+        else:
+            filter_curve = make_passband(filter_name=filter_name)
+
+        obs = Observation(self, filter_curve)
+        counts = obs.countrate(area=area * u.cm ** 2)
+
+        return counts
+
+    def add_noise(self, wmin, wmax):
+        """
+        Returns a spectra with a given S/N in the specified wavelength range
+        Returns
+        -------
+
+        """
         pass
 
-# ------ Copied from synphot.SourceSpectrum so operations can also happen here --------
+    # ------ Copied from synphot.SourceSpectrum so operations can also happen here --------
 
     def __add__(self, other):
         """Add ``self`` with ``other``."""
@@ -625,16 +704,7 @@ class Spextrum(SourceSpectrum):
                 'Can only operate on real scalar number')
 
 
-
-
-
-
-
-
-
 #------------------------------ END    -------------------------------------------
-
-
 
 
 def get_vega_spectrum():
@@ -690,138 +760,6 @@ def get_filter_names(system=None):
         flat_list = [f for f in filter_list if s in f]
 
     return flat_list
-
-
-"""
-def get_filter(name=None, filename=None, wave_unit=u.AA):
-
-    Return a synphot SpectralElement (bandpass) from a filter in the SVO Filter Profile Service
-    or from a local file (only ascii is supported atm)
-
-    TODO: It should be also able to read a SpectralElement (bandpass) from synphot
-    See ScopeSim.effects.TER_curve_utils
-
-
-    Parameters
-    ----------
-    name: Name of the filter in the SVO Filter Profile Service, an incomplete list supplied by tynt
-          can be obtained with get_filter_names()
-    filename: Filename where filter is stored, only ascii is supported, col1 is assumed to be wavelength, col2 transmittance
-    wave_unit: unit of the wavelength column, default is u.AA (Angstroms)
-
-    Returns
-    -------
-
-
-
-    if name is not None:
-        try:
-            f = tynt.FilterGenerator()
-            filt = f.download_true_transmittance(name)
-            waves = filt.wavelength.value
-            trans = filt.transmittance
-
-        except ValueError as e:
-            print(e, "Filter not found in SVO Filter Profile Service")
-
-    if filename is not None:
-        try:
-            filter_table = Table.read(filename, format="ascii")
-            waves = filter_table["col1"].data * wave_unit
-            waves = waves.to(u.AA).value
-            trans = filter_table["col2"].data
-
-        except FileNotFoundError as e:
-            print(e, "File not found")
-
-    bandpass = SpectralElement(Empirical1D(points=waves, lookup_table=trans))
-
-    return bandpass
-
-"""
-
-def photons_in_range(spectra, wave_min, wave_max, area, bandpass=None):
-    """
-    Return the number of photons between wave_min and wave_max or within
-    a bandpass (filter)
-
-    TODO: Write wrapper functions make_synphot_bandpass and make_synphot_spectra
-        to allow a variety of bandpasses and spectra.
-
-
-
-    Parameters
-    ----------
-    spectra: a synphot spectrum
-    wave_min
-        [Angstrom]
-    wave_max
-        [Angstrom]
-    area : Quantity
-        [cm2]
-    bandpass : SpectralElement
-
-
-    Returns
-    -------
-    counts : u.Quantity array
-
-    """
-    if isinstance(area, u.Quantity):
-        area = area.to(u.cm**2).value  #
-    if isinstance(wave_min, u.Quantity):
-        wave_min = wave_min.to(u.Angstrom).value
-    if isinstance(wave_max, u.Quantity):
-        wave_max = wave_max.to(u.Angstrom).value
-    if isinstance(spectra, list) is False:
-        spectra = [spectra]
-
-    if bandpass is None:
-        # this makes a bandpass out of wmin and wmax
-        mid_point = 0.5*(wave_min + wave_max)
-        width = abs(wave_max - wave_min)
-        bandpass = SpectralElement(Box1D, amplitude=1, x_0=mid_point, width=width)
-
-    if (bandpass is not None) and (isinstance(bandpass, synphot.spectrum.SpectralElement) is False) :
-        # bandpass = make_synphot_bandpass(bandpass) # try to make a synphot bandpass from e.g. filter file
-        pass
-
-    counts = []
-    for spec in spectra:
-        if isinstance(spec, synphot.spectrum.SourceSpectrum) is False:
-            #spec = make_synphot_spectrum(spec) # Try to make a synphot spectrum from e.g. file/np.array
-            pass
-
-        obs = Observation(spec, bandpass)
-        counts.append(obs.countrate(area=area*u.m**2).value)
-
-    counts = np.array(counts) * u.ph * u.s**-1
-
-    return counts
-
-
-
-
-
-
-def black_body(t, wmin, wmax):
-    """
-    TODO: It is needed?
-    Unitility function to create SourceSpectrum with a black body with temperature T
-
-    Parameters
-    ----------
-    t: Temperature in Kelvin
-    wmin
-    wmax
-
-    Returns
-    -------
-
-
-    """
-    pass
-
 
 
 
