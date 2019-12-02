@@ -1,0 +1,25 @@
+# Calzetti Extragalactic Extinction Curve
+
+name: calzetti
+
+title : EC for Starburst Appropriate for stellar continnum
+
+summary: |
+  Contains Extintion curve for Starbust Extintion/Attenuation law.
+  This is an attenuation law; i.e. it has radiative transfer effects of
+  mixing the stars & dust together which modifies the shape of the
+  curve. These effects are not present in the other extinction laws
+  as they are derived for single stars behind a screen of dust.
+
+source : Calzetti et al. 2000. ApJ, 533, 682
+
+wave_unit : Angstrom
+
+extinction_unit : Av/E(B-V)
+
+data_type : fits
+
+file_extension : .fits
+
+curves: # comment
+  starburst:  extragalactic starburst

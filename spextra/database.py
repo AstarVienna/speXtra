@@ -175,7 +175,6 @@ class SpecDatabase:
 
         return table
 
-
     @property
     def as_dict(self):
         """
@@ -205,7 +204,7 @@ class SpecDatabase:
 
     def browse(self, keys):
         """
-
+        TODO: Implement
         Parameters
         ----------
         keys
@@ -283,10 +282,6 @@ def get_template(template, path=None):
     return newfile, template_meta
 
 
-#------------------ BEGIN ---------------------------------------------
-# This is based on scopesim.effects.ter_curves_utils.py
-
-
 def get_filter(filter_name):
     """
     get filter from the database. It will try first to download from the speXtra database
@@ -313,7 +308,6 @@ def get_filter(filter_name):
 
         filename = filt + filter_meta["file_extension"]
         url = urljoin(database.url, "filter_systems/", filter_system, filename)
-        print(url)
         path = download_file(url, cache=True)
     except ValueError:
         if filter_name in FILTER_DEFAULTS:
@@ -331,46 +325,21 @@ def get_filter(filter_name):
     return path, filter_meta
 
 
-
-
-
-"""
-def get_filter(filter_name):
-    
-    Obtain a filter from the database.
-    First check for filters in the SpecDatabase then in SVO filter service
-    It should be also able to load a file
+def get_extinction_curve(curve_name):
+    """
+    Download a extinction curve from the database
 
     Parameters
     ----------
-    filter_name
+    curve_name: extinction curve, e.g.
 
     Returns
     -------
-    synphot.SpectralElement
 
-    path = find_file(filter_name, silent=True)
-
-    if path is not None:
-        tbl = ioascii.read(path)
-        wave = quantity_from_table("wavelength", tbl, u.um).to(u.um)
-        filt = SpectralElement(Empirical1D, points=wave,
-                               lookup_table=tbl["transmission"])
-    elif filter_name in FILTER_DEFAULTS:
-        filt = download_svo_filter(FILTER_DEFAULTS[filter_name])
-    else:
-        try:
-            filt = download_svo_filter(filter_name)
-        except:
-            filt = None
-
-    return filt
-"""
+    """
+    database = SpecDatabase()
+    pass
 
 
-
-
-
-
-
+# This is based on scopesim.effects.ter_curves_utils.py
 

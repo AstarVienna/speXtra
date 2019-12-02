@@ -2,7 +2,7 @@
 Spyctra
 =======
 
-This is the documentation of **Spyctra**.
+This is the documentation of **speXtra**.
 
 .. note::
 
