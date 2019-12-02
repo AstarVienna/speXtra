@@ -342,8 +342,3 @@ def get_extinction_curve(curve_name):
 
 # This is based on scopesim.effects.ter_curves_utils.py
 
-
-
-
-
-
