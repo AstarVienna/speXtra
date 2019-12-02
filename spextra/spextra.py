@@ -22,7 +22,7 @@ from synphot import exceptions
 
 import tynt
 
-from .database import get_template, get_filter
+from .database import get_template, get_filter, get_extinction_curve
 
 
 def make_passband(filter_name=None, filter_file=None, wave_unit=u.Angstrom):
@@ -270,11 +270,10 @@ class Spextrum(SourceSpectrum):
         fwhm = np.array([fwhm]).flatten()
         #print(center, flux, fwhm)
 
-        sp = self.__class__(modelclass=self.model)
+        sp = Spextrum(modelclass=self.model)
         for c, x, f in zip(center, flux, fwhm):
             g_em = SourceSpectrum(GaussianFlux1D(mean=c, total_flux=x, fwhm=f))
-
-            sp = self.__class__(modelclass=sp.model + g_em.model)
+            sp = Spextrum(modelclass=sp.model + g_em.model)
 
         return sp
 
@@ -315,17 +314,17 @@ class Spextrum(SourceSpectrum):
                                         out_flux_unit=units.FLAM)
             flux = np.trapz(fluxes.value, wavelengths.value)
             g_abs = SourceSpectrum(GaussianFlux1D(total_flux=sign * flux, mean=c, fwhm=f))
-            sp = self.__class__(modelclass=sp.model + g_abs.model)
+            sp = Spextrum(modelclass=sp.model + g_abs.model)
 
             if (sp(wavelengths).value < 0).any():
                 warnings.warn("Warning: Flux<0 for specified EW and FHWM, setting it to Zero")
                 waves = sp.waveset[sp(sp.waveset) < 0]
                 zero_sp = SourceSpectrum(Empirical1D, points=waves, lookup_table=-1 * sp(waves).value)
-                sp = self.__class__(modelclass=sp.model + zero_sp.model)
+                sp = Spextrum(modelclass=sp.model + zero_sp.model)
 
         return sp
 
-    def redden(self, curve, Av=None, Ebv=0, Rv=3.1):
+    def redden(self, curve_name,  Ebv=0, Av=None, Rv=3.1):
         """
         This function attenuate  a spectrum with a extinction curve normalized to a E(B-V)
 
@@ -343,14 +342,15 @@ class Spextrum(SourceSpectrum):
 
         """
         if Av is not None:
-            Ebv = Rv * Ebv
+            Ebv = Av / Rv
 
+        curve = get_extinction_curve(curve_name)
         extinction = synphot.ReddeningLaw.from_extinction_model(curve).extinction_curve(Ebv)
-        sp = self.__class__(modelclass=self.model * extinction.model)
+        sp = Spextrum(modelclass=self.model * extinction.model)
 
         return sp
 
-    def deredden(self, curve, Av=None, Ebv=0, Rv=3.1):
+    def deredden(self, curve_name, Av=None, Ebv=0, Rv=3.1):
         """
         This function de-redden a spectrum.
 
@@ -368,10 +368,12 @@ class Spextrum(SourceSpectrum):
 
         """
         if Av is not None:
-            Ebv = Rv * Ebv
+            Ebv = Av / Rv
+
+        curve = get_extinction_curve(curve_name=curve_name)
 
         extinction = synphot.ReddeningLaw.from_extinction_model(curve).extinction_curve(Ebv)
-        sp = self.__class__(modelclass=self.model / extinction.model)
+        sp = Spextrum(modelclass=self.model / extinction.model)
 
         return sp
 

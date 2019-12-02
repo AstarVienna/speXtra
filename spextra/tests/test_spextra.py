@@ -124,7 +124,6 @@ class TestSpextrum:
     def test_wrong_load(self):
         with pytest.raises(ValueError) as e_info:
             sp = Spextrum("kc96/wrong_name")
-            print(e_info)
 
     @pytest.mark.parametrize("system_name", ["ab", "st", "vega"])
     def test_ref_spectrum_is_right(self, system_name):

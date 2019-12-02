@@ -338,7 +338,24 @@ def get_extinction_curve(curve_name):
 
     """
     database = SpecDatabase()
-    pass
+    extinction_family, extinction_curve = curve_name.split("/")
+    ext_data = database.get_extinction_curves(extinction_family)
+    ext_meta = {"name": ext_data["name"],
+                "wave_unit": ext_data["wave_unit"],
+                "data_type": ext_data["data_type"],
+                "file_extension": ext_data["file_extension"],
+                "curves": ext_data["curves"]}
+    try:
+        assert extinction_curve in ext_meta["curves"]
+    except AssertionError as error:
+        print(error)
+        print(curve_name, "not found")
+    else:
+        filename = extinction_curve + ext_meta["file_extension"]
+        url = urljoin(database.url, "extinction_curves/", extinction_family, filename)
+        newfile = download_file(url, cache=True)
+
+    return newfile
 
 
 # This is based on scopesim.effects.ter_curves_utils.py
