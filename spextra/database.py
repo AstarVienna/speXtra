@@ -337,6 +337,7 @@ def get_extinction_curve(curve_name):
     -------
 
     """
+    database = SpecDatabase()
     pass
 
 
