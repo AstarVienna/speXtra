@@ -97,7 +97,9 @@ class SpecDatabase:
 
         if extinction_name not in self.extinction_curves:
             raise ValueError(extinction_name, "extinction curves not found")
-        pass
+
+        path = urljoin("extinction_curves", extinction_name, "index.yml")
+        return self._get_contents(path)
 
     def get_filter_system(self, filter_system):
 
@@ -337,6 +339,7 @@ def get_extinction_curve(curve_name):
     -------
 
     """
+    newfile = None
     database = SpecDatabase()
     extinction_family, extinction_curve = curve_name.split("/")
     ext_data = database.get_extinction_curves(extinction_family)
@@ -355,7 +358,7 @@ def get_extinction_curve(curve_name):
         url = urljoin(database.url, "extinction_curves/", extinction_family, filename)
         newfile = download_file(url, cache=True)
 
-    return newfile
+    return newfile, ext_meta
 
 
 # This is based on scopesim.effects.ter_curves_utils.py

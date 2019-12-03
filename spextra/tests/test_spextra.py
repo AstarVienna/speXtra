@@ -118,6 +118,16 @@ class TestSpextrumInstances:
         sp2 = sp.smooth(10*u.AA)
         assert isinstance(sp2, Spextrum)
 
+    def test_redden(self):
+        sp = Spextrum.black_body_spectrum(filter_name="r")
+        sp2 = sp.redden("calzetti/starburst", Ebv=0.1)
+        assert isinstance(sp2, Spextrum)
+
+    def test_deredden(self):
+        sp = Spextrum.black_body_spectrum(filter_name="F110W")
+        sp2 = sp.redden("gordon/smc_bar", Ebv=0.1)
+        assert isinstance(sp2, Spextrum)
+
 
 class TestSpextrum:
 

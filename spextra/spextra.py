@@ -328,11 +328,8 @@ class Spextrum(SourceSpectrum):
         """
         This function attenuate  a spectrum with a extinction curve normalized to a E(B-V)
 
-        TODO: We also need a library of extinction curves and a way to read them
-
         Parameters
         ----------
-        spectrum: a synphot spectrum
         curve: the extinction curve
         EBV: E(B-V)
 
@@ -344,8 +341,15 @@ class Spextrum(SourceSpectrum):
         if Av is not None:
             Ebv = Av / Rv
 
-        curve = get_extinction_curve(curve_name)
-        extinction = synphot.ReddeningLaw.from_extinction_model(curve).extinction_curve(Ebv)
+        curve, meta = get_extinction_curve(curve_name)
+
+        if meta["data_type"] == "fits":
+            header, wavelengths, rvs = synphot.specio.read_fits_spec(curve, flux_col='Av/E(B-V)')
+        else:
+            header, wavelengths, rvs = synphot.specio.read_ascii_spec(curve)
+
+        red_law = synphot.ReddeningLaw(Empirical1D, points=wavelengths, lookup_table=rvs, meta={'header': header})
+        extinction = red_law.extinction_curve(Ebv)
         sp = Spextrum(modelclass=self.model * extinction.model)
 
         return sp
@@ -354,8 +358,6 @@ class Spextrum(SourceSpectrum):
         """
         This function de-redden a spectrum.
 
-        TODO: We also need a library of extinction curves and a way to read them
-
         Parameters
         ----------
         spectrum: a synphot spectrum
@@ -370,9 +372,15 @@ class Spextrum(SourceSpectrum):
         if Av is not None:
             Ebv = Av / Rv
 
-        curve = get_extinction_curve(curve_name=curve_name)
+        curve, meta = get_extinction_curve(curve_name)
 
-        extinction = synphot.ReddeningLaw.from_extinction_model(curve).extinction_curve(Ebv)
+        if meta["data_type"] == "fits":
+            header, wavelengths, rvs = synphot.specio.read_fits_spec(curve, flux_col='Av/E(B-V)')
+        else:
+            header, wavelengths, rvs = synphot.specio.read_ascii_spec(curve)
+
+        red_law = synphot.ReddeningLaw(Empirical1D, points=wavelengths, lookup_table=rvs, meta={'header': header})
+        extinction = red_law.extinction_curve(Ebv)
         sp = Spextrum(modelclass=self.model / extinction.model)
 
         return sp
