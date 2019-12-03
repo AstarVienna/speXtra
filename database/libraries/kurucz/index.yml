@@ -1,0 +1,79 @@
+# THE 1993 KURUCZ STELLAR ATMOSPHERES ATLAS
+
+library_name : kurucz
+
+type : stars 
+
+title : The 1993 Kurucz Stellar Atmospheres Atlas (excerpt) 
+
+summary : |
+  This is an excerpt of the Kurucz Stellar Atmospheres Atlas with stellar parameters selected to match 
+  common types. 
+
+reference : Kurucz CD-ROM, Cambridge, MA; Smithsonian Astrophysical Observatory, c1993, December 4, 1993
+
+link : "http://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/kurucz-1993-models"
+
+spectral_coverage :
+  - uv
+  - vis
+  - nir
+  - mir
+
+resolution : 20
+
+wave_unit: Angstrom
+
+flux_unit : FLAM
+
+wave_column_name : WAVELENGTH
+
+flux_column_name : FLUX
+
+data_type: fits
+
+file_extension: .fits
+
+templates:  #comments
+  o3v:   T=50000, M/H=0, log(g)=5.0
+  o5v:   T=44500, M/H=0, log(g)=5.0
+  o6v:   T=41000, M/H=0, log(g)=5.0
+  o8v:   T=35800, M/H=0, log(g)=4.5
+  b0v:   T=30000, M/H=0, log(g)=3.9
+  b3v:   T=18700, M/H=0, log(g)=3.94
+  b5v:   T=15400, M/H=0, log(g)=4.04
+  b8v:   T=11900, M/H=0, log(g)=4.04
+  a0v:   T=9520, M/H=0, log(g)=4.14
+  a5v:   T=8200, M/H=0, log(g)=4.29
+  f0v:   T=7200, M/H=0, log(g)=4.34
+  f5v:   T=6440, M/H=0, log(g)=4.34
+  g0v:   T=6030, M/H=0, log(g)=4.39
+  g2v:   T=5860, M/H=0, log(g)=4.4
+  k0v:   T=5250, M/H=0, log(g)=4.49
+  k5v:   T=4350, M/H=0, log(g)=4.54
+  m0v:   T=3850, M/H=0, log(g)=4.59
+  m2v:   T=3580, M/H=0, log(g)=4.64
+  m5v:   T=3500, M/H=0, log(g)=4.94
+  b0iii:   T=29000, M/H=0, log(g)=3.5
+  b5iii:   T=15000, M/H=0, log(g)=3.49
+  g0iii:   T=5850, M/H=0, log(g)=2.94
+  g5iii:   T=5150, M/H=0, log(g)=2.54
+  k0iii:   T=4750, M/H=0, log(g)=2.14
+  k5iii:   T=3950, M/H=0, log(g)=1.74
+  m0iii:   T=3800, M/H=0, log(g)=1.34
+  o5i:   T=40000, M/H=0, log(g)=4.5
+  o6i:   T=39000, M/H=0, log(g)=4.5
+  o8i:   T=34200, M/H=0, log(g)=4.0
+  boi:   T=26000, M/H=0, log(g)=3.0
+  b5i:   T=13600, M/H=0, log(g)=2.5
+  aoi:   T=9730, M/H=0, log(g)=2.14
+  a5i:   T=8510, M/H=0, log(g)=2.04
+  f0i:   T=7700, M/H=0, log(g)=1.74
+  f5i:   T=6900, M/H=0, log(g)=1.44
+  g0i:   T=5550, M/H=0, log(g)=1.34
+  g5i:   T=4850, M/H=0, log(g)=1.14
+  k0i:   T=4420, M/H=0, log(g)=0.94
+  k5i:   T=3850, M/H=0, log(g)=0.0
+  m0i:   T=3650, M/H=0, log(g)=0.0
+  m2i:   T=3600, M/H=0, log(g)=0.0
+
