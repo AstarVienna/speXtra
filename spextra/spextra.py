@@ -90,9 +90,12 @@ class Spextrum(SourceSpectrum):
     def __init__(self, template_name=None, modelclass=None, **kwargs):
 
         self.template_name = template_name
+        self.resolution = None
+        self.wmin = None
+        self.wmax = None
 
         if self.template_name is not None:
-            meta, lam, flux = self.__loader
+            meta, lam, flux = self._loader
             modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=flux, meta=meta)
         if modelclass is not None:
             modelclass = modelclass
@@ -102,11 +105,10 @@ class Spextrum(SourceSpectrum):
         super().__init__(modelclass, **kwargs)
 
     @property
-    def __loader(self):
+    def _loader(self):
         """
         Load a template from the database
 
-        TODO: Checks for units etc in the library to correctly call read_*__spec for most possible cases
         Parameters
         ----------
         template_name: The name of the spectral template in the speclibrary, format: library/template_name
@@ -123,28 +125,27 @@ class Spextrum(SourceSpectrum):
 
         data_type = meta["data_type"]
         try:  # it should also try to read it from the file directly
-            self.wave_unit = units.validate_unit(meta["wave_unit"])
-            self.flux_unit = units.validate_unit(meta["flux_unit"])
+            wave_unit = units.validate_unit(meta["wave_unit"])
+            flux_unit = units.validate_unit(meta["flux_unit"])
         except synphot.exceptions.SynphotError:
-            self.wave_unit = u.AA
-            self.flux_unit = units.FLAM
+            wave_unit = u.AA
+            flux_unit = units.FLAM
 
-        self.resolution = meta["resolution"] * self.wave_unit
-        self.wave_column_name = meta["wave_column_name"]  # same here
-        self.flux_column_name = meta["flux_column_name"]
-        self.file_extension = meta["file_extension"]
+        self.resolution = meta["resolution"] * wave_unit
+        wave_column_name = meta["wave_column_name"]  # same here
+        flux_column_name = meta["flux_column_name"]
+        file_extension = meta["file_extension"]
 
         # make try and except here to catch most problems
         if data_type == "fits":
             meta, lam, flux = synphot.specio.read_fits_spec(location, ext=1,
-                                                            wave_unit=self.wave_unit,
-                                                            flux_unit=self.flux_unit,
-                                                            wave_col=self.wave_column_name,
-                                                            flux_col=self.flux_column_name)
+                                                            wave_unit=wave_unit,
+                                                            flux_unit=flux_unit,
+                                                            wave_col=wave_column_name,
+                                                            flux_col=flux_column_name)
         else:
             meta, lam, flux = synphot.specio.read_ascii_spec(location,
-                                                             wave_unit=self.wave_unit, flux_unit=self.flux_unit)
-
+                                                             wave_unit=wave_unit, flux_unit=flux_unit)
         self.wmin = np.min(lam)
         self.wmax = np.max(lam)
 
@@ -173,10 +174,9 @@ class Spextrum(SourceSpectrum):
             print(ie, "specutils not installed, cannot import spectra")
 
         spec1d = Spectrum1D.read(filename, format=format, **kwargs)
-        meta = {'header': dict(fits.getheader(filename))}
-        lam = spec1d.spectral_axis.value * u.AA
-        flux = spec1d.flux.value * units.FLAM
-
+        meta = spec1d.meta
+        lam = spec1d.spectral_axis
+        flux = spec1d.flux
         modelclass = SourceSpectrum(Empirical1D,
                                     points=lam, lookup_table=flux, meta=meta)
 
@@ -207,8 +207,7 @@ class Spextrum(SourceSpectrum):
         lam = self.waveset * (1 + z)
         flux = self(self.waveset)
         meta = self.meta
-        modelclass = SourceSpectrum(Empirical1D,
-                                    points=lam, lookup_table=flux, meta=meta)
+        modelclass = Empirical1D(points=lam, lookup_table=flux, meta=meta)
 
         return Spextrum(modelclass=modelclass)
 
@@ -238,8 +237,7 @@ class Spextrum(SourceSpectrum):
         filt = SpectralElement(Empirical1D, points=waves, lookup_table=f)
         obs = Observation(self, filt, binset=new_waves, force='taper')
         newflux = obs.binflux
-        rebin_spec = SourceSpectrum(Empirical1D, points=new_waves,
-                                    lookup_table=newflux, meta=self.meta)
+        rebin_spec = Empirical1D(points=new_waves, lookup_table=newflux, meta=self.meta)
 
         return Spextrum(modelclass=rebin_spec)
 
@@ -268,12 +266,11 @@ class Spextrum(SourceSpectrum):
         center = np.array([center]).flatten()
         flux = np.array([flux]).flatten()
         fwhm = np.array([fwhm]).flatten()
-        #print(center, flux, fwhm)
+        sp = self #Spextrum(modelclass=self.model)
 
-        sp = Spextrum(modelclass=self.model)
         for c, x, f in zip(center, flux, fwhm):
             g_em = SourceSpectrum(GaussianFlux1D(mean=c, total_flux=x, fwhm=f))
-            sp = Spextrum(modelclass=sp.model + g_em.model)
+            sp = sp + g_em     #Spextrum(modelclass=sp.model + g_em.model)
 
         return sp
 
@@ -304,23 +301,23 @@ class Spextrum(SourceSpectrum):
         ew = np.array([ew]).flatten()
         fwhm = np.array([fwhm]).flatten()
 
-        sp = self.__class__(modelclass=self.model)
+        sp = self  #.__class__(modelclass=self.model)
         for c, e, f in zip(center, ew, fwhm):
             sign = -1 * np.sign(e)  # to keep the convention that EL are negative and ABS are positive
-            left, right = center - np.abs(e / 2), center + np.abs(e / 2)
+            left, right = c - np.abs(e / 2), c + np.abs(e / 2)
             wavelengths = self.waveset[(self.waveset.value >= left) & (self.waveset.value <= right)]
             fluxes = units.convert_flux(wavelengths=wavelengths,
                                         fluxes=self(wavelengths),
                                         out_flux_unit=units.FLAM)
             flux = np.trapz(fluxes.value, wavelengths.value)
             g_abs = SourceSpectrum(GaussianFlux1D(total_flux=sign * flux, mean=c, fwhm=f))
-            sp = Spextrum(modelclass=sp.model + g_abs.model)
+            sp = sp + g_abs # Spextrum(modelclass=sp.model + g_abs.model)
 
             if (sp(wavelengths).value < 0).any():
                 warnings.warn("Warning: Flux<0 for specified EW and FHWM, setting it to Zero")
                 waves = sp.waveset[sp(sp.waveset) < 0]
                 zero_sp = SourceSpectrum(Empirical1D, points=waves, lookup_table=-1 * sp(waves).value)
-                sp = Spextrum(modelclass=sp.model + zero_sp.model)
+                sp = sp + zero_sp  # Spextrum(modelclass=sp.model + zero_sp.model)
 
         return sp
 
@@ -404,9 +401,8 @@ class Spextrum(SourceSpectrum):
         flux = self(self.waveset)
         meta = self.meta
         smoothed_flux = convolve(flux, Gaussian1DKernel(sigma))
-        modelclass = SourceSpectrum(Empirical1D, points=lam,
-                                    lookup_table=smoothed_flux,
-                                    meta=meta)
+        modelclass = Empirical1D(points=lam, lookup_table=smoothed_flux, meta=meta)
+
         return Spextrum(modelclass=modelclass)
 
 
@@ -476,10 +472,9 @@ class Spextrum(SourceSpectrum):
 
         Returns
         -------
-        a black-body spectrum
+        a scaled black-body spectrum
         """
-        bb = SourceSpectrum(BlackBody1D, temperature=temperature)
-        sp = cls(modelclass=bb)
+        sp = cls(modelclass=BlackBody1D, temperature=temperature)
 
         return sp.scale_to_magnitude(amplitude=amplitude,
                                      filter_name=filter_name,
@@ -589,8 +584,7 @@ class Spextrum(SourceSpectrum):
         ref_spec = self.flat_spectrum(mag=0, system_name=system_name)
         ref_flux = Observation(SourceSpectrum(modelclass=ref_spec),
                                filter_curve).effstim(flux_unit=units.PHOTLAM)
-        real_flux = Observation(SourceSpectrum(modelclass=self),
-                                filter_curve).effstim(flux_unit=units.PHOTLAM)
+        real_flux = Observation(self, filter_curve).effstim(flux_unit=units.PHOTLAM)
         mag = -2.5*np.log10(real_flux.value/ref_flux.value)
 
         return mag * unit

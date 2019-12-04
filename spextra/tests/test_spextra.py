@@ -67,11 +67,11 @@ class TestSpextrumInstances:
         assert isinstance(sp2, Spextrum)
 
     def test_add_emi_lines(self, sp=sp):
-        sp2 = sp.add_emi_lines(5000, 1e-15, 10)
+        sp2 = sp.add_emi_lines([5000, 6000], [1e-15, 2e-15], [10, 20])
         assert isinstance(sp2, Spextrum)
 
     def test_add_abs_lines(self, sp=sp):
-        sp2 = sp.add_abs_lines(5000, 15, 10 )
+        sp2 = sp.add_abs_lines([5000, 6000], [15, 20], [10, 12])
         assert isinstance(sp2, Spextrum)
 
     @pytest.mark.parametrize("system_name", ["ab", "st", "vega"])

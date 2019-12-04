@@ -11,6 +11,7 @@ import inspect
 import yaml
 from astropy.utils.data import download_file
 from astropy.table import Table
+from astropy.utils.decorators import lazyproperty
 
 __pkg_dir__ = os.path.dirname(inspect.getfile(inspect.currentframe()))
 __data_dir__ = os.path.join(__pkg_dir__, "data")
@@ -120,7 +121,7 @@ class SpecDatabase:
         print(yaml.dump(self.get_filter_system(filter_system),
                         indent=4, sort_keys=False, default_flow_style=False))
 
-    @property
+    @lazyproperty
     def libraries_as_table(self):
         """
         make a summary of the libraries properties
@@ -151,7 +152,7 @@ class SpecDatabase:
 
         return table
 
-    @property
+    @lazyproperty
     def filters_as_table(self):
         """
         make a summary of the filters available properties
@@ -177,7 +178,7 @@ class SpecDatabase:
 
         return table
 
-    @property
+    @lazyproperty
     def as_dict(self):
         """
         Represent the whole database as a dictionary
