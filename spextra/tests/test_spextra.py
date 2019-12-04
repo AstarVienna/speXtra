@@ -75,7 +75,7 @@ class TestSpextrumInstances:
         assert isinstance(sp2, Spextrum)
 
     @pytest.mark.parametrize("system_name", ["ab", "st", "vega"])
-    def test_ref_spectrum(self, system_name):
+    def test_flat_spectrum(self, system_name):
         sp = Spextrum.flat_spectrum(mag=10, system_name=system_name)
         assert isinstance(sp, Spextrum)
 

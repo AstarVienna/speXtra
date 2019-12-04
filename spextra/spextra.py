@@ -423,9 +423,9 @@ class Spextrum(SourceSpectrum):
         -------
         a Spextrum instance
         """
-        if wavelengths is None: # set a default waveset with R~805
-            wavelengths = synphot.utils.generate_wavelengths(minwave=100, maxwave=50000, num=5000,
-                                                             log=True, wave_unit=u.AA)
+        if wavelengths is None:  # set a default waveset with R~805
+            wavelengths, info = synphot.utils.generate_wavelengths(minwave=100, maxwave=50000, num=5000,
+                                                                   log=True, wave_unit=u.AA)
         if system_name.lower() in ["vega"]:
             spec = get_vega_spectrum()
             spec = spec * 10**(-0.4*mag)
