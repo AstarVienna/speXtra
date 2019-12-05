@@ -734,7 +734,7 @@ def get_vega_spectrum():
     flux = remote[2]
     url = 'Vega from ' + location
     meta = {'header': header, 'expr': url}
-    vega_sp = Spextrum(modelclass=Empirical1D(points=wave, lookup_table=flux, meta=meta))
+    vega_sp = Spextrum(modelclass=Empirical1D, points=wave, lookup_table=flux, meta=meta)
     return vega_sp
 
 
