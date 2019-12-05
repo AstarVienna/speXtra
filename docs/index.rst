@@ -1,26 +1,48 @@
 =======
-Spyctra
+speXtra
 =======
 
 This is the documentation of **speXtra**.
 
+speXtra is a python module to manage and manipulate astronomical spectra. It stands on
+the shoulders of giants, `astropy`_ and `synphot`_. In particular, it includes
+many `synphot`_ algorithms and workflows to make easier the manipulation of spectra.
+
 .. note::
 
-    This is the main page of your project's `Sphinx`_ documentation.
-    It is formatted in `reStructuredText`_. Add additional pages
-    by creating rst-files in ``docs`` and adding them to the `toctree`_ below.
-    Use then `references`_ in order to link them from this page, e.g.
-    :ref:`authors` and :ref:`changes`.
+    **speXtra** is being developed with the main purpose to become the spectral engine
+    for future telescope simulation software like `ScopeSim`_. However it may be
+    useful for many other purposes.
 
-    It is also possible to refer to the documentation of other Python packages
-    with the `Python domain syntax`_. By default you can reference the
-    documentation of `Sphinx`_, `Python`_, `NumPy`_, `SciPy`_, `matplotlib`_,
-    `Pandas`_, `Scikit-Learn`_. You can add more by extending the
-    ``intersphinx_mapping`` in your Sphinx's ``conf.py``.
+    **speXtra** is compatible only with python 3.5 and above
 
-    The pretty useful extension `autodoc`_ is activated by default and lets
-    you include documentation from docstrings. Docstrings can be written in
-    `Google style`_ (recommended!), `NumPy style`_ and `classical style`_.
+
+Installation
+============
+
+At the moment, the best way to install it is to download or clone the package, e.g.
+
+    wget https://github.com/miguelverdugo/speXtra/archive/master.zip
+
+    unzip master.zip
+
+    python3 setup.py install
+
+or
+
+    pip install git+https://github.com/miguelverdugo/speXtra.git
+
+In the near future, there will also be a PyPi version
+
+The following dependencies are necessary to run **speXtra**:
+
+    - astropy
+    - synphot
+    - numpy
+    - PyYAML
+    - tynt
+    - matplotlib (if you want to plot the spectra)
+    - specutils (optional)
 
 
 Contents
@@ -46,14 +68,6 @@ Indices and tables
 .. _reStructuredText: http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
 .. _references: http://www.sphinx-doc.org/en/stable/markup/inline.html
 .. _Python domain syntax: http://sphinx-doc.org/domains.html#the-python-domain
-.. _Sphinx: http://www.sphinx-doc.org/
-.. _Python: http://docs.python.org/
-.. _Numpy: http://docs.scipy.org/doc/numpy
-.. _SciPy: http://docs.scipy.org/doc/scipy/reference/
-.. _matplotlib: https://matplotlib.org/contents.html#
-.. _Pandas: http://pandas.pydata.org/pandas-docs/stable
-.. _Scikit-Learn: http://scikit-learn.org/stable
-.. _autodoc: http://www.sphinx-doc.org/en/stable/ext/autodoc.html
-.. _Google style: https://github.com/google/styleguide/blob/gh-pages/pyguide.md#38-comments-and-docstrings
-.. _NumPy style: https://numpydoc.readthedocs.io/en/latest/format.html
-.. _classical style: http://www.sphinx-doc.org/en/stable/domains.html#info-field-lists
+.. _astropy:  https://docs.astropy.org/en/stable/
+.. _synphot: https://synphot.readthedocs.io/en/latest/
+.. _ScopeSim: https://scopesim.readthedocs.io/en/latest/

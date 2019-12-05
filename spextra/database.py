@@ -13,13 +13,21 @@ from astropy.utils.data import download_file
 from astropy.table import Table
 from astropy.utils.decorators import lazyproperty
 
+import tynt
+# Configurations
+
+__all__ = ["SpecDatabase", "get_filter", "get_template", "get_extinction_curve"]
+
 __pkg_dir__ = os.path.dirname(inspect.getfile(inspect.currentframe()))
 __data_dir__ = os.path.join(__pkg_dir__, "data")
 
-# default filter definitions now in data/default_filters.yml,
-# including now also GALEX, Spitzer, WISE HST, Y-band and GAIA G-band
+# Default filters
 with open(os.path.join(__data_dir__,  "default_filters.yml")) as filter_file:
     FILTER_DEFAULTS = yaml.safe_load(filter_file)
+
+# Tables are displayed with a jsviewer by default
+Table.show_in_browser.__defaults__ = (5000, True, 'default', {'use_local_files': True},
+                                              None, 'display compact', None, 'idx')
 
 
 def is_url(url):  # TODO: Move to .utils
@@ -130,7 +138,6 @@ class SpecDatabase:
         -------
         an astropy.table.Table with the database contents
         """
-
         column_names = ["library_name", "title", "type", "resolution", "spectral_coverage", "templates"]
         library_names = self.library_names
         titles = []
@@ -290,7 +297,7 @@ def get_filter(filter_name):
     get filter from the database. It will try first to download from the speXtra database
     and then try to get it from the SVO service
 
-    TODO: Probably needs a refactoring
+    TODO: Probably needs some refactoring
 
     Parameters
     ----------
@@ -364,3 +371,34 @@ def get_extinction_curve(curve_name):
 
 # This is based on scopesim.effects.ter_curves_utils.py
 
+
+def get_filter_systems():
+    """
+    Return a set of the different filter system available
+
+    Returns
+    -------
+
+    """
+    filters = tynt.FilterGenerator().available_filters()
+    systems = {f.split("/")[0] for f in filters}
+    return systems
+
+
+def get_filter_names(system=None):
+    """
+    This function just returns the filters available from tynt
+    if system= None returns all
+
+    Returns
+    -------
+
+    """
+    filter_list = tynt.FilterGenerator().available_filters()
+    ord_list = [[f for f in filter_list if s in f] for s in get_filter_systems()]
+    flat_list = [item for sublist in ord_list for item in sublist]
+
+    if system is not None:
+        flat_list = [f for f in filter_list if s in f]
+
+    return flat_list

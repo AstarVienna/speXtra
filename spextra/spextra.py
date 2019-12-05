@@ -8,12 +8,12 @@ import warnings
 
 import numpy as np
 
-from astropy.io import fits
 from astropy.table import Table
 import astropy.units as u
 from astropy.constants import c as speed_of_light
 from astropy.modeling.models import Scale
 from astropy.convolution import convolve, Gaussian1DKernel
+from astropy.utils.decorators import lazyproperty
 
 import synphot
 from synphot import (units, SourceSpectrum, SpectralElement, Observation, BaseUnitlessSpectrum)
@@ -25,20 +25,28 @@ import tynt
 from .database import get_template, get_filter, get_extinction_curve
 
 
+__all__ = ["Spextrum", "make_passband",  "get_vega_spectrum"]
+
+
 def make_passband(filter_name=None, filter_file=None, wave_unit=u.Angstrom):
     """
-    Make a SpectralElement (synphot passband) from user specified filter in the database.
+    Make a SpectralElement (aka a synphot passband) from an
+    user specified filter in the database.
     Optionally, specify a file in disk and the wavelength units.
 
     Parameters
     ----------
-    filter_name: str, a filter name expressed as ``instrument/filter_name``
-    filter_file: Optionally, make a pasband from a local file
-    wave_unit: astropy.unit
+    filter_name : str
+                  a filter name expressed as ``instrument/filter_name``
+    filter_file : str,
+                  Optionally, make a pasband from a local file
+    wave_unit : u.Quantity, optional
+                if not specified in the file
+                default: u.Angstrom
 
     Returns
     -------
-    passband: a synphot.SpectralElement
+    passband : a ``synphot.SpectralElement``
     """
     if filter_file is not None:
         try:
@@ -76,14 +84,13 @@ class Spextrum(SourceSpectrum):
     Class to handle spectra. This class download, load, stores and manipulates the spectra.
 
     This class can be initialized with a remote file which will be downloaded from
-    the database or with a synphot.Spectrum
+    the database or with a synphot.BaseSpectrum or SourceSpectrum
 
 
     Parameters
     ----------
-    template_name: Name of the template to download with format library/template e.g. "kc96/s0
-    modelclass, kwargs
-        See `BaseSpectrum`.
+    template_name : Name of the template to download with format library/template e.g. "kc96/s0"
+    modelclass : SourceSpectrum or BaseSpectrum
 
     """
 
@@ -93,6 +100,8 @@ class Spextrum(SourceSpectrum):
         self.resolution = None
         self.wmin = None
         self.wmax = None
+        self.path = None
+        self.data_type = None
 
         if self.template_name is not None:
             meta, lam, flux = self._loader
@@ -109,21 +118,16 @@ class Spextrum(SourceSpectrum):
         """
         Load a template from the database
 
-        Parameters
-        ----------
-        template_name: The name of the spectral template in the speclibrary, format: library/template_name
-
         Returns
         -------
         meta: metadata of the spectra (header)
         lam: wavelengths
         flux: flux
-
         """
         location, meta = get_template(self.template_name)
-        print(location)
+        self.path = location
+        self.data_type = meta["data_type"]
 
-        data_type = meta["data_type"]
         try:  # it should also try to read it from the file directly
             wave_unit = units.validate_unit(meta["wave_unit"])
             flux_unit = units.validate_unit(meta["flux_unit"])
@@ -137,7 +141,7 @@ class Spextrum(SourceSpectrum):
         file_extension = meta["file_extension"]
 
         # make try and except here to catch most problems
-        if data_type == "fits":
+        if self.data_type == "fits":
             meta, lam, flux = synphot.specio.read_fits_spec(location, ext=1,
                                                             wave_unit=wave_unit,
                                                             flux_unit=flux_unit,
@@ -146,22 +150,25 @@ class Spextrum(SourceSpectrum):
         else:
             meta, lam, flux = synphot.specio.read_ascii_spec(location,
                                                              wave_unit=wave_unit, flux_unit=flux_unit)
-        self.wmin = np.min(lam)
-        self.wmax = np.max(lam)
 
         return meta, lam, flux
+
+    @lazyproperty
+    def spectral_edges(self):
+        self.wmin = np.min(self.waveset)
+        self.wmax = np.max(self.waveset)
+
+        return self.wmin, self.wmax
 
     @classmethod
     def from1dspec(cls, filename, format="wcs1d-fits", **kwargs):
         """
         This function _tries_ to create a Spectrum from 1d fits files.
         It relies in specutils for its job
-
-        TODO: More checks from units, etc.
         Parameters
         ----------
         filename: str a filename with the spectra
-        format: format of the spectra accepted by specutils (see specutils documentation)
+        format: format of the spectra accepted by `specutils` (see `specutils` documentation)
 
         Returns
         -------
@@ -216,8 +223,6 @@ class Spextrum(SourceSpectrum):
         Rebin a synphot spectra to a new wavelength grid conserving flux.
         Grid does not need to be linear and can be at higher or lower resolution
 
-        TODO: To resample the spectra at lower resolution a convolution is first needed. Implement!
-
         Parameters
         ----------
         new_waves: an array of the output wavelenghts in Angstroms but other units can be
@@ -225,8 +230,7 @@ class Spextrum(SourceSpectrum):
 
         Returns
         -------
-
-        A synphot spectra in the new wavelengths
+        a new Spextrum instance
 
         """
         if isinstance(new_waves, u.Quantity):
@@ -253,7 +257,7 @@ class Spextrum(SourceSpectrum):
 
         Returns
         -------
-        the spectrum with the emission line
+        the spectrum with the emission lines
 
         """
         if isinstance(center, u.Quantity) is True:
@@ -730,40 +734,9 @@ def get_vega_spectrum():
     flux = remote[2]
     url = 'Vega from ' + location
     meta = {'header': header, 'expr': url}
-    vega_sp = SourceSpectrum(Empirical1D, points=wave, lookup_table=flux, meta=meta)
+    vega_sp = Spextrum(modelclass=Empirical1D(points=wave, lookup_table=flux, meta=meta))
     return vega_sp
 
-
-def get_filter_systems():
-    """
-    Return a set of the different filter system available
-
-    Returns
-    -------
-
-    """
-    filters = tynt.FilterGenerator().available_filters()
-    systems = {f.split("/")[0] for f in filters}
-    return systems
-
-
-def get_filter_names(system=None):
-    """
-    This function just returns the filters available from tynt
-    if system= None returns all
-
-    Returns
-    -------
-
-    """
-    filter_list = tynt.FilterGenerator().available_filters()
-    ord_list = [[f for f in filter_list if s in f] for s in get_filter_systems()]
-    flat_list = [item for sublist in ord_list for item in sublist]
-
-    if system is not None:
-        flat_list = [f for f in filter_list if s in f]
-
-    return flat_list
 
 
 
