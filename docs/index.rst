@@ -4,8 +4,9 @@ speXtra
 
 This is the documentation of **speXtra**.
 
-speXtra is a python module to manage and manipulate astronomical spectra. It stands on
-the shoulders of giants, `astropy`_ and `synphot`_. In particular, it includes
+**speXtra** is a python module to manage and manipulate astronomical spectra. 
+
+**speXtra** stands on the shoulders of giants, `astropy`_ and `synphot`_. In particular, it includes
 many `synphot`_ algorithms and workflows to make easier the manipulation of spectra.
 
 .. note::
