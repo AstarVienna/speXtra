@@ -1,0 +1,53 @@
+# Supernova Spectra 
+
+library_name : sne
+
+type : supernova
+
+title : Supernova spectral library
+
+summary : |
+  A collection of supernova spectra obtained with the sncosmo package https://sncosmo.readthedocs.io/en/v2.0.x/index.html. 
+  Please see there for the appropiated references. 
+
+  Spectra are normalized to the maximum flux. Most spectra are only for phase 0, time of maximum brightness, unless otherwise
+  noted
+
+
+reference : http://sncosmo.github.io/
+
+link : https://sncosmo.readthedocs.io/en/v2.0.x/about.html
+
+spectral_coverage :
+  - uv
+  - vis
+  - nir
+
+resolution : 5
+
+wave_unit: Angstrom
+
+flux_unit : FLAM
+
+wave_column_name : WAVELENGTH
+
+flux_column_name : FLUX
+
+data_type: ascii
+
+file_extension: .dat
+
+templates:    # comments
+  salt2-extended: SALT2-extended SNIa, phase 0
+  s11-2005hl:     SNIb
+  snana-2004gv:   SNIb
+  s11-2006fo:     SNIc
+  snana-2006lc:   SNIc
+  s11-2004hx:     SNIL
+  s11-2005lc:     SNIIP
+  snana-2007pg:   SNIIP
+  snana-2006ez:   SNIIn
+  snana-2006ix:   SNIIn
+  nugent-hyper:   hyper-SN SNIb/c phase 5
+  whalen-z25g:    PopIII, phase 3
+  whalen-z15g:     PopIII, phase 15
