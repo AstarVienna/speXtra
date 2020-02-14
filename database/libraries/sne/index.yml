@@ -38,16 +38,14 @@ data_type: ascii
 file_extension: .dat
 
 templates:    # comments
-  salt2-extended: SALT2-extended SNIa, phase 0
-  s11-2005hl:     SNIb
-  snana-2004gv:   SNIb
-  s11-2006fo:     SNIc
-  snana-2006lc:   SNIc
-  s11-2004hx:     SNIL
-  s11-2005lc:     SNIIP
-  snana-2007pg:   SNIIP
-  snana-2006ez:   SNIIn
-  snana-2006ix:   SNIIn
-  nugent-hyper:   hyper-SN SNIb/c phase 5
-  whalen-z25g:    PopIII, phase 3
-  whalen-z15g:     PopIII, phase 15
+  sn1a: SALT2-extended SNIa, phase 0
+  sn1b: SN1b s11-2005hl   
+  sn1c: SNIc s11-2006fo
+  sn2l: SNIIL s11-2004hx
+  sn2p: SNIIP s11-2005lc
+  sn2n: SNIIn snana-2006ez
+  hyper: nugent hyper-SN SNIb/c phase 5
+  pop3_3d: whalen-z25g PopIII, phase 3
+  pop3_15d: whalen-z15g PopIII, phase 15
+
+
