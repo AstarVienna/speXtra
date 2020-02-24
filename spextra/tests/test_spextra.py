@@ -90,7 +90,7 @@ class TestSpextrumInstances:
         assert isinstance(sp, Spextrum)
 
     def test_scale_to_magnitude(self, sp=sp):
-        sp2 = sp.scale_to_magnitude(amplitude=13*u.ABmag, filter_name="g")
+        sp2 = sp.scale_to_magnitude(amplitude=15*u.ABmag, filter_name="g")
         assert isinstance(sp2, Spextrum)
 
     def test_rebin_spectra(self, sp=sp):
@@ -127,6 +127,13 @@ class TestSpextrumInstances:
         sp = Spextrum.black_body_spectrum(filter_name="F110W")
         sp2 = sp.redden("gordon/smc_bar", Ebv=0.1)
         assert isinstance(sp2, Spextrum)
+
+    def testing_nesting(self):
+
+        sp = Spextrum("kc96/s0").redshift(z=1).\
+            scale_to_magnitude(amplitude=15*u.ABmag, filter_name="g").\
+            redden("calzetti/starburst", Ebv=0.1)
+        assert isinstance(sp, Spextrum)
 
 
 class TestSpextrum:

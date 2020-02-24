@@ -7,11 +7,13 @@ type : supernova
 title : Supernova spectral library
 
 summary : |
-  A collection of supernova spectra obtained with the sncosmo package https://sncosmo.readthedocs.io/en/v2.0.x/index.html. 
+  A collection of supernova spectra obtained with the sncosmo 
+  package https://sncosmo.readthedocs.io/en/v2.0.x/index.html. 
   Please see there for the appropiated references. 
 
-  Spectra are normalized to the maximum flux. Most spectra are only for phase 0, time of maximum brightness, unless otherwise
-  noted
+  Spectra are normalized to the maximum flux. 
+  Most spectra are only for phase 0, time of maximum brightness, 
+  unless otherwise noted
 
 
 reference : http://sncosmo.github.io/

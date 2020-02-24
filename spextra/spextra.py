@@ -214,7 +214,7 @@ class Spextrum(SourceSpectrum):
         lam = self.waveset * (1 + z)
         flux = self(self.waveset)
         meta = self.meta
-        modelclass = Empirical1D(points=lam, lookup_table=flux, meta=meta)
+        modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=flux, meta=meta)
 
         return Spextrum(modelclass=modelclass)
 
