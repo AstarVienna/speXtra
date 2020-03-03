@@ -153,7 +153,6 @@ class Spextrum(SourceSpectrum):
 
         return meta, lam, flux
 
-    @lazyproperty
     def spectral_edges(self):
         self.wmin = np.min(self.waveset)
         self.wmax = np.max(self.waveset)
@@ -179,6 +178,7 @@ class Spextrum(SourceSpectrum):
             from specutils import Spectrum1D
         except ImportError as ie:
             print(ie, "specutils not installed, cannot import spectra")
+            raise
 
         spec1d = Spectrum1D.read(filename, format=format, **kwargs)
         meta = spec1d.meta
@@ -274,7 +274,7 @@ class Spextrum(SourceSpectrum):
 
         for c, x, f in zip(center, flux, fwhm):
             g_em = SourceSpectrum(GaussianFlux1D(mean=c, total_flux=x, fwhm=f))
-            sp = sp + g_em     #Spextrum(modelclass=sp.model + g_em.model)
+            sp = sp + g_em
 
         return sp
 
