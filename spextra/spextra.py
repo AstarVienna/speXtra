@@ -7,13 +7,13 @@ import numbers
 import warnings
 
 import numpy as np
+from scipy.ndimage import gaussian_filter1d
 
 from astropy.table import Table
 import astropy.units as u
 from astropy.constants import c as speed_of_light
 from astropy.modeling.models import Scale
-from astropy.convolution import convolve, Gaussian1DKernel
-from astropy.utils.decorators import lazyproperty
+
 
 import synphot
 from synphot import (units, SourceSpectrum, SpectralElement, Observation, BaseUnitlessSpectrum)
@@ -213,37 +213,11 @@ class Spextrum(SourceSpectrum):
 
         lam = self.waveset * (1 + z)
         flux = self(self.waveset)
-        meta = self.meta
+        meta = self.meta.update({"redshift": z})
         modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=flux, meta=meta)
 
         return Spextrum(modelclass=modelclass)
 
-    def rebin_spectra(self, new_waves):
-        """
-        Rebin a synphot spectra to a new wavelength grid conserving flux.
-        Grid does not need to be linear and can be at higher or lower resolution
-
-        Parameters
-        ----------
-        new_waves: an array of the output wavelenghts in Angstroms but other units can be
-            specified
-
-        Returns
-        -------
-        a new Spextrum instance
-
-        """
-        if isinstance(new_waves, u.Quantity):
-            new_waves = new_waves.to(u.AA).value
-
-        waves = self.waveset.value   # else assumed to be angstroms
-        f = np.ones(len(waves))
-        filt = SpectralElement(Empirical1D, points=waves, lookup_table=f)
-        obs = Observation(self, filt, binset=new_waves, force='taper')
-        newflux = obs.binflux
-        rebin_spec = Empirical1D(points=new_waves, lookup_table=newflux, meta=self.meta)
-
-        return Spextrum(modelclass=rebin_spec)
 
     def add_emi_lines(self, center, flux, fwhm):
         """
@@ -386,6 +360,48 @@ class Spextrum(SourceSpectrum):
 
         return sp
 
+    def rebin_spectra(self, new_waves):
+        """
+        Rebin a synphot spectra to a new wavelength grid conserving flux.
+        Grid does not need to be linear and can be at higher or lower resolution
+
+        Parameters
+        ----------
+        new_waves: an array of the output wavelenghts in Angstroms but other units can be
+            specified
+
+        Returns
+        -------
+        a new Spextrum instance
+
+        """
+        if isinstance(new_waves, u.Quantity):
+            new_waves = new_waves.to(u.AA).value
+
+        waves = self.waveset.value   # else assumed to be angstroms
+        f = np.ones(len(waves))
+        filt = SpectralElement(Empirical1D, points=waves, lookup_table=f)
+        obs = Observation(self, filt, binset=new_waves, force='taper')
+        newflux = obs.binflux
+        rebin_spec = Empirical1D(points=new_waves, lookup_table=newflux, meta=self.meta)
+
+        return Spextrum(modelclass=rebin_spec)
+
+    def logrebin(self):
+        """
+        TODO: Estimate optimal rebinning factors here.
+        Returns
+        -------
+        a Spectrum with a log rebinned in wavelength
+        """
+
+        waves = self.waveset.value
+        logwaves = np.geomspace(np.min(waves),
+                                np.max(waves),
+                                waves.size)
+
+        return self.rebin_spectra(logwaves)
+
     def smooth(self, sigma):
         """
         Smooth the Spectrum with a Gaussian Kernel
@@ -398,14 +414,29 @@ class Spextrum(SourceSpectrum):
         -------
         smoothed spextrum
         """
-        if isinstance(sigma, u.Quantity):
-            sigma = sigma.to(u.AA).value
+        if isinstance(sigma, u.Quantity) is False:
+            sigma = sigma * u.km / u.s
 
-        lam = self.waveset
-        flux = self(self.waveset)
+        sigma = sigma.to(u.km / u.s)
+
+        sp_log = self.logrebin()
+        lam = sp_log.waveset.value
+        flux = sp_log(sp_log.waveset)
+        steps = np.array([lam[i+1] - lam[i] for i in range(lam.size - 1)])
+        vel_steps = steps * speed_of_light.to(u.km/u.s)
+        step_size = np.median(vel_steps)
+        print(step_size)
+        if step_size > sigma:
+            warnings.warn("spectra is undersampled for the provided sigma value")
+
+        conv_sigma = sigma / step_size
+
+        flux_unit = flux.unit
         meta = self.meta
-        smoothed_flux = convolve(flux, Gaussian1DKernel(sigma))
-        modelclass = Empirical1D(points=lam, lookup_table=smoothed_flux, meta=meta)
+        smoothed_flux = gaussian_filter1d(flux, conv_sigma.value)
+        modelclass = SourceSpectrum(Empirical1D,
+                                    points=lam, lookup_table=smoothed_flux,
+                                    meta=meta)
 
         return Spextrum(modelclass=modelclass)
 
