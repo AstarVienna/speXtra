@@ -403,7 +403,7 @@ class Spextrum(SourceSpectrum):
         """
 
         waves = self.waveset.value
-        steps = [waves[i+1] - waves[i] for i in range(waves.size - 1)]
+        steps = waves[1:] - waves[:-1]
         min_step = np.min(steps)
         wmin, wmax = np.min(waves), np.max(waves)
         print(wmin, wmax, min_step)
@@ -432,7 +432,7 @@ class Spextrum(SourceSpectrum):
         sp_log = self.logrebin()
         lam = sp_log.waveset.value
         flux = sp_log(sp_log.waveset)
-        steps = np.array([lam[i+1] - lam[i] for i in range(lam.size - 1)]) / lam[:1]
+        steps = (lam[1:] - lam[:-1]) / lam[:1]
         vel_steps = steps * speed_of_light.to(u.km/u.s)
         step_size = np.median(vel_steps)
         print(step_size)
