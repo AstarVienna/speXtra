@@ -246,8 +246,15 @@ class Spextrum(SourceSpectrum):
         fwhm = np.array([fwhm]).flatten()
         sp = self #Spextrum(modelclass=self.model)
 
+        meta = self.meta
+
         for c, x, f in zip(center, flux, fwhm):
-            g_em = SourceSpectrum(GaussianFlux1D(mean=c, total_flux=x, fwhm=f))
+            meta.update({"flux_line_" + str(c): x})
+            meta.update({"fwhm_line_" + str(c): f})
+
+            line = GaussianFlux1D(mean=c, total_flux=x, fwhm=f)
+            lam = line.sampleset(factor_step=0.35)  # bit better than Nyquist
+            g_em = SourceSpectrum(Empirical1D, points=lam, lookup_table=line(lam), meta=meta)
             sp = sp + g_em
 
         return sp
@@ -396,9 +403,12 @@ class Spextrum(SourceSpectrum):
         """
 
         waves = self.waveset.value
-        logwaves = np.geomspace(np.min(waves),
-                                np.max(waves),
-                                waves.size)
+        steps = [waves[i+1] - waves[i] for i in range(waves.size - 1)]
+        min_step = np.min(steps)
+        wmin, wmax = np.min(waves), np.max(waves)
+        print(wmin, wmax, min_step)
+        nbins = int((wmax - wmin)/min_step)
+        logwaves = np.geomspace(wmin, wmax, nbins)
 
         return self.rebin_spectra(logwaves)
 
@@ -422,7 +432,7 @@ class Spextrum(SourceSpectrum):
         sp_log = self.logrebin()
         lam = sp_log.waveset.value
         flux = sp_log(sp_log.waveset)
-        steps = np.array([lam[i+1] - lam[i] for i in range(lam.size - 1)])
+        steps = np.array([lam[i+1] - lam[i] for i in range(lam.size - 1)]) / lam[:1]
         vel_steps = steps * speed_of_light.to(u.km/u.s)
         step_size = np.median(vel_steps)
         print(step_size)
