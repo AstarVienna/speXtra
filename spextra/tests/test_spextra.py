@@ -115,7 +115,7 @@ class TestSpextrumInstances:
 
     def test_smooth(self):
         sp = Spextrum.black_body_spectrum(filter_name="g")
-        sp2 = sp.smooth(10*u.AA)
+        sp2 = sp.smooth(10*(u.m / u.s))
         assert isinstance(sp2, Spextrum)
 
     def test_redden(self):

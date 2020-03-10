@@ -414,11 +414,15 @@ class Spextrum(SourceSpectrum):
 
     def smooth(self, sigma):
         """
-        Smooth the Spectrum with a Gaussian Kernel
-        TODO: Implement a wavelength dependent smoothing
+        Smooth the Spectrum with a Gaussian Kernel, expressed in km/s (or other velocity unit).
+
+        The spectra is first log-rebinned so it has a constant velocity spacing and after
+        is smoothed with a gaussian kernel
+
+
         Parameters
         ----------
-        sigma: u.Quantity, width of the Kernel
+        sigma: u.Quantity, width of the Kernel in
 
         Returns
         -------
@@ -435,18 +439,20 @@ class Spextrum(SourceSpectrum):
         steps = (lam[1:] - lam[:-1]) / lam[:1]
         vel_steps = steps * speed_of_light.to(u.km/u.s)
         step_size = np.median(vel_steps)
-        print(step_size)
+
         if step_size > sigma:
             warnings.warn("spectra is undersampled for the provided sigma value")
 
         conv_sigma = sigma / step_size
+        smoothed_flux = gaussian_filter1d(flux, conv_sigma.value)
 
         flux_unit = flux.unit
         meta = self.meta
-        smoothed_flux = gaussian_filter1d(flux, conv_sigma.value)
+
+        meta.update({"KERNEL_SIZE": sigma.value})
         modelclass = SourceSpectrum(Empirical1D,
                                     points=lam, lookup_table=smoothed_flux,
-                                    meta=meta)
+                                    meta=meta, flux_unit=flux_unit)
 
         return Spextrum(modelclass=modelclass)
 
