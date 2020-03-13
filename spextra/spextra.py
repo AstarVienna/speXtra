@@ -249,12 +249,12 @@ class Spextrum(SourceSpectrum):
         meta = self.meta
 
         for c, x, f in zip(center, flux, fwhm):
-            meta.update({"flux_line_" + str(c): x})
-            meta.update({"fwhm_line_" + str(c): f})
+            self.meta.update({"flux_line_" + str(c): str(x)})
+            self.meta.update({"fwhm_line_" + str(c): str(f)})
 
             line = GaussianFlux1D(mean=c, total_flux=x, fwhm=f)
             lam = line.sampleset(factor_step=0.35)  # bit better than Nyquist
-            g_em = SourceSpectrum(Empirical1D, points=lam, lookup_table=line(lam), meta=meta)
+            g_em = SourceSpectrum(Empirical1D, points=lam, lookup_table=line(lam))
             sp = sp + g_em
 
         return sp
@@ -282,6 +282,7 @@ class Spextrum(SourceSpectrum):
         if isinstance(fwhm, u.Quantity) is True:
             fwhm = fwhm.to(u.AA).value
 
+
         center = np.array([center]).flatten()
         ew = np.array([ew]).flatten()
         fwhm = np.array([fwhm]).flatten()
@@ -295,8 +296,13 @@ class Spextrum(SourceSpectrum):
                                         fluxes=self(wavelengths),
                                         out_flux_unit=units.FLAM)
             flux = np.trapz(fluxes.value, wavelengths.value)
-            g_abs = SourceSpectrum(GaussianFlux1D(total_flux=sign * flux, mean=c, fwhm=f))
-            sp = sp + g_abs # Spextrum(modelclass=sp.model + g_abs.model)
+            line = GaussianFlux1D(mean=c, total_flux=sign * flux, fwhm=f)
+            lam = line.sampleset(factor_step=0.35)  # bit better than Nyquist
+            g_abs = SourceSpectrum(Empirical1D, points=lam, lookup_table=line(lam))
+
+            sp = sp + g_abs
+            self.meta.update({"EW_line_" + str(c): str(e)})
+            self.meta.update({"fwhm_line_" + str(c): str(f)})
 
             if (sp(wavelengths).value < 0).any():
                 warnings.warn("Warning: Flux<0 for specified EW and FHWM, setting it to Zero")
@@ -449,10 +455,11 @@ class Spextrum(SourceSpectrum):
         flux_unit = flux.unit
         meta = self.meta
 
+
         meta.update({"KERNEL_SIZE": sigma.value})
         modelclass = SourceSpectrum(Empirical1D,
                                     points=lam, lookup_table=smoothed_flux,
-                                    meta=meta, flux_unit=flux_unit)
+                                    meta=meta)
 
         return Spextrum(modelclass=modelclass)
 
