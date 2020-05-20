@@ -11,7 +11,6 @@ import inspect
 import yaml
 from astropy.utils.data import download_file
 from astropy.table import Table
-from astropy.utils.decorators import lazyproperty
 
 import tynt
 # Configurations
@@ -129,8 +128,7 @@ class SpecDatabase:
         print(yaml.dump(self.get_filter_system(filter_system),
                         indent=4, sort_keys=False, default_flow_style=False))
 
-    @lazyproperty
-    def libraries_as_table(self):
+    def as_table(self):
         """
         make a summary of the libraries properties
 
@@ -159,7 +157,6 @@ class SpecDatabase:
 
         return table
 
-    @lazyproperty
     def filters_as_table(self):
         """
         make a summary of the filters available properties
@@ -185,7 +182,6 @@ class SpecDatabase:
 
         return table
 
-    @lazyproperty
     def as_dict(self):
         """
         Represent the whole database as a dictionary

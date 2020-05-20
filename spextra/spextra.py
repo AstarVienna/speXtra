@@ -422,7 +422,7 @@ class Spextrum(SourceSpectrum):
         """
         Smooth the Spectrum with a Gaussian Kernel, expressed in km/s (or other velocity unit).
 
-        The spectra is first log-rebinned so it has a constant velocity spacing and after
+        The spectra is first log-rebinned so it has a constant velocity spacing and after that
         is smoothed with a gaussian kernel
 
 
@@ -455,14 +455,12 @@ class Spextrum(SourceSpectrum):
         flux_unit = flux.unit
         meta = self.meta
 
-
         meta.update({"KERNEL_SIZE": sigma.value})
         modelclass = SourceSpectrum(Empirical1D,
                                     points=lam, lookup_table=smoothed_flux,
                                     meta=meta)
 
         return Spextrum(modelclass=modelclass)
-
 
     @classmethod
     def flat_spectrum(cls, mag=0, system_name="AB", wavelengths=None):
