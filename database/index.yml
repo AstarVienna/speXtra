@@ -9,6 +9,7 @@ library_names:
   nebulae   : Emission line nebulae
   brown     : Galaxy SEDs from the UV to the Mid-IR 
   kurucz    : Excerpt of Kurucz 1993 Models
+  sne       : Supernova Legacy Survey
 
 # here go the extinction curves
 extinction_curves:
