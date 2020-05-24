@@ -18,5 +18,5 @@ database = spextra.database.SpecDatabase()
 class TestDatabase:
 
     def test_table(self):
-        t = database.libraries_as_table
+        t = database.as_table
         assert isinstance(t, Table)
