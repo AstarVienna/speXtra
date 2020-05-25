@@ -218,7 +218,6 @@ class Spextrum(SourceSpectrum):
 
         return Spextrum(modelclass=modelclass)
 
-
     def add_emi_lines(self, center, flux, fwhm):
         """
         TODO: accept different profiles (Lorentz1D, Voigt1D, etc)
@@ -645,7 +644,7 @@ class Spextrum(SourceSpectrum):
 
         return mag * unit
 
-    def photons_in_range(self, wmin, wmax, area=1*u.cm**2,
+    def photons_in_range(self, wmin=None, wmax=None, area=1*u.cm**2,
                          filter_name=None, filter_file=None):
         """
         Return the number of photons between wave_min and wave_max or within
