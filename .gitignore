@@ -12,6 +12,7 @@ __pycache__/*
 .cache/*
 .*.swp
 */.ipynb_checkpoints/*
+/docs/notebooks/.ipynb_checkpoints/*
 
 # MV: some possible extensions of data files
 # Goal data is not upload to github, only the yaml files
