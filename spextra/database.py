@@ -11,11 +11,14 @@ import inspect
 import yaml
 from astropy.utils.data import download_file
 from astropy.table import Table
+from box import Box
 
 import tynt
 # Configurations
 
-__all__ = ["SpecDatabase", "get_filter", "get_template", "get_extinction_curve"]
+__all__ = ["SpecDatabase", "SpecLibrary",
+           "get_filter", "get_template", "get_extinction_curve",
+           "is_url"]
 
 __pkg_dir__ = os.path.dirname(inspect.getfile(inspect.currentframe()))
 __data_dir__ = os.path.join(__pkg_dir__, "data")
@@ -245,6 +248,93 @@ class SpecDatabase:
                 data = yaml.safe_load(f)
 
         return data
+
+    def __repr__(self):
+        return self.as_table()._base_repr_()
+
+    def __getattr__(self, library_name):
+        return self.print_library(library_name=library_name)
+
+
+class SpecLibrary:
+    """
+    This class contains the information of a library
+
+    """
+    def __init__(self, name):
+        self.name = name
+        self.location = urljoin(database_url(), "libraries",
+                                self.name, "index.yml")
+        self.data = get_yaml_contents(self.location)
+
+    @property
+    def fields(self):
+        """
+        Returns
+        -------
+        a Box dictionary
+        """
+        return Box(self.data)
+
+    def dump(self):
+        """
+        Nicely dump the contents of the library
+
+        Returns
+        -------
+
+        """
+        print(yaml.dump(self.data,
+                        indent=4, sort_keys=False, default_flow_style=False))
+
+    def list_templates(self):
+        """
+
+        Returns
+        -------
+
+        """
+        print( '%s %s' % ("name", "comment"))
+        for t in self.fields.templates:
+            print('%s : %s' % (t, self.fields.templates[t]))
+
+
+    def __repr__(self):
+        return '%s(%s): %s' % (self.__class__.__name__,
+                               self.name, self.fields.title)
+
+
+
+
+def get_yaml_contents(url):
+    """
+    read a yaml file from a relative url
+
+    Parameters
+    ----------
+    path
+
+    Returns
+    -------
+    dict with the contents of the yaml file
+    """
+    try:
+        assert is_url(url)
+    except urllib.error.URLError:
+        print(url, "library not reachable")
+    else:
+        filename = download_file(url, cache=True)
+        with open(filename) as f:
+            data = yaml.safe_load(f)
+
+    return data
+
+
+
+
+
+
+
 
 
 def get_template(template, path=None):
