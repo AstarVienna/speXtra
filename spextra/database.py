@@ -266,15 +266,22 @@ class SpecLibrary:
         self.location = urljoin(database_url(), "libraries",
                                 self.name, "index.yml")
         self.data = get_yaml_contents(self.location)
-
-    @property
-    def fields(self):
-        """
-        Returns
-        -------
-        a Box dictionary
-        """
-        return Box(self.data)
+        self.library_name = self.data["library_name"]
+        self.title = self.data["title"]
+        self.type = self.data["type"]
+        self.summary = self.data["summary"]
+        self.reference = self.data["reference"]
+        self.link = self.data["link"]
+        self.spectral_coverage = self.data["spectral_coverage"]
+        self.resolution = self.data["resolution"]
+        self.wave_unit = self.data["wave_unit"]
+        self.flux_unit = self.data["flux_unit"]
+        self.wave_column_name = self.data["wave_column_name"]
+        self.flux_column_name = self.data["flux_column_name"]
+        self.data_type = self.data["data_type"]
+        self.file_extension = self.data["file_extension"]
+        self.templates = list(self.data["templates"].keys())
+        self.template_comments = [self.data["templates"][k] for k in self.templates]
 
     def dump(self):
         """
@@ -287,22 +294,33 @@ class SpecLibrary:
         print(yaml.dump(self.data,
                         indent=4, sort_keys=False, default_flow_style=False))
 
-    def list_templates(self):
-        """
+    def __repr__(self):
+        description = "Spectral Library: " + self.name + " " + self.title
+        spec_cov = "spectral coverage: " + str(self.spectral_coverage)
+        units = "wave_unit: " + self.wave_unit + "  flux_unit: " + self.flux_unit
+        templates = "Templates: " + str(self.templates)
 
-        Returns
-        -------
+        return ' %s \n %s \n %s \n %s' % (description, spec_cov, units, templates)
 
-        """
-        print( '%s %s' % ("name", "comment"))
-        for t in self.fields.templates:
-            print('%s : %s' % (t, self.fields.templates[t]))
 
+class Database:
+    """
+    This class contains the database.
+    """
+
+    def __init__(self):
+        self.url = database_url() + "index.yml"
+        self.contents = get_yaml_contents(self.url)
+        self.library_names = [lib for lib in self.contents["library_names"]]
+        self.extinction_curves = [ext for ext in self.contents["extinction_curves"]]
+        self.filter_systems = [filt for filt in self.contents["filter_systems"]]
 
     def __repr__(self):
-        return '%s(%s): %s' % (self.__class__.__name__,
-                               self.name, self.fields.title)
+        libs = "libraries:" + ' ' + str(self.library_names)
+        exts = "extinction curves:" + ' ' + str(self.extinction_curves)
+        filts = "filter systems:" + ' ' + str(self.filter_systems)
 
+        return ' %s \n %s \n %s \n %s' % ('Database contents:', libs, exts, filts)
 
 
 
@@ -328,13 +346,6 @@ def get_yaml_contents(url):
             data = yaml.safe_load(f)
 
     return data
-
-
-
-
-
-
-
 
 
 def get_template(template, path=None):

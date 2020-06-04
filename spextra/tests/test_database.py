@@ -27,15 +27,15 @@ class TestSpecLibrary:
         lib = SpecLibrary(name)
         assert is_url(lib.location)
 
-    def test_box(self):
+    def test_data(self):
         name = "kc96"
         lib = SpecLibrary(name)
-        assert isinstance(lib.fields, dict)
+        assert isinstance(lib.data, dict)
 
-    def test_fields(self):
+    def test_templates(self):
         name = "kc96"
         lib = SpecLibrary(name)
-        assert isinstance(lib.fields.templates, dict)
+        print(lib.templates, lib.type, lib.template_comments)
 
 
 
