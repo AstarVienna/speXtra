@@ -11,7 +11,6 @@ import inspect
 import yaml
 from astropy.utils.data import download_file
 from astropy.table import Table
-from box import Box
 
 import tynt
 # Configurations
