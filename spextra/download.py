@@ -5,10 +5,13 @@ import os
 import inspect
 from astropy.config import ConfigItem, ConfigNamespace, get_cache_dir
 
-#from astropy.utils.data import download_file, clear_download_cache, cache_contents
-
+#from astropy.utils.data import download_file, clear_download_cache, 
+from astropy.utils.data import clear_download_cache, cache_contents
+import yaml
 #clear_download_cache()
 
+
+# %%%%% shamefully copied from SNCOSMO
 class _Conf(ConfigNamespace):
     """Configuration parameters for sncosmo."""
     data_dir = ConfigItem(
@@ -17,12 +20,7 @@ class _Conf(ConfigNamespace):
         "resources. If None, ASTROPY_CACHE_DIR/sncosmo is created and "
         "used. Example: data_dir = /home/user/data/sncosmo",
         cfgtype='string(default=None)')
-    sfd98_dir = ConfigItem(
-        None,
-        "Directory containing SFD (1998) dust maps, with names: "
-        "'SFD_dust_4096_ngp.fits' and 'SFD_dust_4096_sgp.fits'. "
-        "Example: sfd98_dir = /home/user/data/sfd98",
-        cfgtype='string(default=None)')
+    
     remote_timeout = ConfigItem(
         10.0, "Remote timeout in seconds.")
 
@@ -201,7 +199,10 @@ def download_dir(remote_url, dirname):
 
 
 class DataMirror(object):
-    """Lazy fetcher for remote data.
+    """
+    TODO: merge in SpecDatabase
+    
+    Lazy fetcher for remote data.
     When asked for local absolute path to a file or directory, DataMirror
     checks if the file or directory exists locally and, if so, returns it.
     If it doesn't exist, it first determines where to get it from.
@@ -229,10 +230,10 @@ class DataMirror(object):
             remote_root = remote_root + '/'
 
         self._checked_rootdir = None
-        self._rootdir = rootdir
-        self._remote_root = remote_root
+        self.rootdir = rootdir
+        self.remote_root = remote_root
 
-        self._redirects = None
+    
 
     def rootdir(self):
         """Return the path to the local data directory, ensuring that it
@@ -256,23 +257,7 @@ class DataMirror(object):
 
         return self._checked_rootdir
 
-    def _fetch_redirects(self):
-        from urllib.request import urlopen
-        import json
 
-        f = urlopen(self._remote_root + "redirects.json")
-        reader = codecs.getreader("utf-8")
-        self._redirects = json.load(reader(f))
-        f.close()
-
-    def _get_url(self, remote_relpath):
-        if self._redirects is None:
-            self._fetch_redirects()
-
-        if remote_relpath in self._redirects:
-            return self._redirects[remote_relpath]
-        else:
-            return self._remote_root + remote_relpath
 
     def abspath(self, relpath, isdir=False):
         """Return absolute path to file or directory, ensuring that it exists.
@@ -285,8 +270,8 @@ class DataMirror(object):
 
         if not os.path.exists(abspath):
             if isdir:
-                url = self._get_url(relpath + ".tar.gz")
-
+                url = urljoin(self.remote_root, relpath)
+                
                 # Download and unpack a directory.
                 download_dir(url, os.path.dirname(abspath))
 
@@ -295,24 +280,106 @@ class DataMirror(object):
                     raise RuntimeError("Tarfile not unpacked into expected "
                                        "subdirectory. Please file an issue.")
             else:
-                url = self._get_url(relpath)
+                url = urljoin(self.remote_root, relpath)
                 download_file(url, abspath)
 
         return abspath
 
-
+#
 
 rootdir = get_rootdir()
+DATADIR = DataMirror(get_rootdir, "https://homepage.univie.ac.at/miguel.verdugo/database/")
+
+
+def get_yaml_contents(relpath):
+    """
+    read a yaml file from a relative url
+
+    Parameters
+    ----------
+    path
+
+    Returns
+    -------
+    dict with the contents of the yaml file
+    """
+
+
+    filename = DATADIR.abspath(relpath)
+    with open(filename) as f:
+        data = yaml.safe_load(f)
+
+    return data
+
+
+def get_library(library_name):
+    
+    relpath = urljoin("libraries", library_name, library_name + ".yml")
+
+    data = get_yaml_contents(relpath)
+    
+    return data
+
+def get_template(template):
+    """
+    
+
+    Parameters
+    ----------
+    relpath : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    None.
+
+    """
+    library_name, template_name = template.split("/")
+    lib_data = database.get_library(library_name)
+    template_meta = {"resolution": lib_data["resolution"],
+                     "wave_unit": lib_data["wave_unit"],
+                     "flux_unit": lib_data["flux_unit"],
+                     "wave_column_name": lib_data["wave_column_name"],
+                     "flux_column_name": lib_data["flux_column_name"],
+                     "data_type": lib_data["data_type"],
+                     "file_extension": lib_data["file_extension"]}
+ 
+    filename = template_name + template_meta["file_extension"]
+    relpath =  urljoin("libraries", library_name, filename)
+
+    try:
+        assert template_name in lib_data["templates"]
+    except AssertionError as error:
+        print(error)
+        print(template_name, "not found")
+    else:
+        filename = DATADIR.abspath(relpath)
+
+    return newfile, template_meta
+
+
+
 print(rootdir)
 
-DATADIR = DataMirror(get_rootdir, "http://sncosmo.github.io/data")
 
 
-remote_file = "https://homepage.univie.ac.at/miguel.verdugo/database/libraries/kc96/index.yml"
-file = download_file(remote_file)
+print("*"*15)
+print(DATADIR.rootdir())
+print("*"*15)
+print(DATADIR.remote_root)
 
-print(file)
+print("%"*20)
 
-#print(cache_contents("spextra"))
+#abspath = DATADIR.abspath("libraries/kc96/index.yml")
+#print(abspath)
+
+data = get_yaml_contents("libraries/kc96/index.yml")
+print(data)
+#remote_file = "https://homepage.univie.ac.at/miguel.verdugo/database/libraries/kc96/index.yml"
+#file = download_file(remote_file, rootdir)
+
+#print(file)
+
+print(cache_contents("spextra"), "*"*15)
 
 
