@@ -2,22 +2,24 @@
 """
 Database for speXtra
 """
-import shutil
-from posixpath import join as urljoin
-import urllib
-import os
+
 import inspect
 
-import yaml
 from astropy.utils.data import download_file
 from astropy.table import Table
+from posixpath import join as urljoin
+import os
+import yaml
+from .utils import get_rootdir, database_url, download_file
+
 
 import tynt
 # Configurations
 
-__all__ = ["SpecDatabase", "SpecLibrary",
-           "get_filter", "get_template", "get_extinction_curve",
-           "is_url"]
+__all__ = ["SpecDatabase", "SpecLibrary", "SpectralTemplate",
+           "ExtinctionCurve", "Filter"]
+
+
 
 __pkg_dir__ = os.path.dirname(inspect.getfile(inspect.currentframe()))
 __data_dir__ = os.path.join(__pkg_dir__, "data")
@@ -31,199 +33,98 @@ Table.show_in_browser.__defaults__ = (5000, True, 'default', {'use_local_files':
                                               None, 'display compact', None, 'idx')
 
 
-def is_url(url):  # TODO: Move to .utils
-    """
-    Checks that a given URL is reachable.
-    Depending of the configuration of the server it might return True even if the page doesn't exist.
-
-    Parameters
-    -----------
-    url: A URL
-
-    Returns
-    -------
-    Boolean
-    """
-    try:
-        request = urllib.request.Request(url)
-        request.get_method = lambda: 'HEAD'
-        urllib.request.urlopen(request)
-        output = True
-    except urllib.error.URLError:
-        output = False
-    except ValueError:
-        output = False
-    finally:
-        return output
-
-
-def database_url():
-    """
-    TODO: it should read it from a file
-    Returns
-    -------
-    the database_location
-    """
-    loc = "https://homepage.univie.ac.at/miguel.verdugo/database/"
-    try:
-        assert is_url(loc)
-    except AssertionError as error:
-        print(error)
-        print("Database address not reachable", loc)
-    return loc
-
 
 class SpecDatabase:
+    """
+    This class contains the database.
 
-    def __init__(self):
-        self.url = database_url()
+
+    It also acts as a lazy fetcher for remote data.
+    When asked for local absolute path to a file or directory, Database
+    checks if the file or directory exists locally and, if so, returns it.
+    If it doesn't exist, it first determines where to get it from.
+    It first downloads the file ``{remote_root}/redirects.json`` and checks
+    it for a redirect from ``{relative_path}`` to a full URL. If no redirect
+    exists, it uses ``{remote_root}/{relative_path}`` as the URL.
+    It downloads then downloads the URL to ``{rootdir}/{relative_path}``.
+    For directories, ``.tar.gz`` is appended to the
+    ``{relative_path}`` before the above is done and then the
+    directory is unpacked locally.
+    Parameters
+    ----------
+    rootdir : str or callable
+        The local root directory, or a callable that returns the local root
+        directory given no parameters. (The result of the call is cached.)
+        Using a callable allows one to customize the discovery of the root
+        directory (e.g., from a config file), and to defer that discovery
+        until it is needed.
+    remote_root : str
+        Root URL of the remote server.
+    """
+
+    def __init__(self, rootdir, remote_root):
+        if not remote_root.endswith('/'):
+            remote_root = remote_root + '/'
+
+        self._checked_rootdir = None
+        self.rootdir = rootdir
+        self.remote_root = remote_root
+
+        self.url = remote_root + "index.yml"
+        self.contents = self.get_yaml_contents("index.yml")
         self.library_names = [lib for lib in self.contents["library_names"]]
         self.extinction_curves = [ext for ext in self.contents["extinction_curves"]]
         self.filter_systems = [filt for filt in self.contents["filter_systems"]]
 
-    @property
-    def contents(self):
-        return self._get_contents("index.yml")
+    def rootdir(self):
+        """Return the path to the local data directory, ensuring that it
+        exists"""
 
-    def get_library(self, library_name):
-        """
-        get the contents of a particular library
-        Parameters
-        ----------
-        library_name
+        if self._checked_rootdir is None:
 
-        Returns
-        -------
-        a dictionary with the library contents
-        """
+            # If the supplied value is a string, use it. Otherwise
+            # assume it is a callable that returns a string)
+            rootdir = (self._rootdir
+                       if isinstance(self._rootdir, str)
+                       else self._rootdir())
 
-        if library_name not in self.library_names:
-            raise ValueError(library_name, "library not found")
+            # Check existance
+            if not os.path.isdir(rootdir):
+                raise Exception("data directory {!r} not an existing "
+                                "directory".format(rootdir))
 
-        path = urljoin("libraries", library_name, "index.yml")
-        return self._get_contents(path)
+            # Cache value for future calls
+            self._checked_rootdir = rootdir
 
-    def get_extinction_curves(self, extinction_name):
+        return self._checked_rootdir
 
-        if extinction_name not in self.extinction_curves:
-            raise ValueError(extinction_name, "extinction curves not found")
+    def abspath(self, relpath, isdir=False):
+        """Return absolute path to file or directory, ensuring that it exists.
+        If ``isdir``, look for ``{relpath}.tar.gz`` on the remote server and
+        unpackage it.
+        Otherwise, just look for ``{relpath}``. If redirect points to a gz, it
+        will be uncompressed."""
 
-        path = urljoin("extinction_curves", extinction_name, "index.yml")
-        return self._get_contents(path)
+        abspath = os.path.join(self.rootdir(), relpath)
 
-    def get_filter_system(self, filter_system):
+        if not os.path.exists(abspath):
+            if isdir:
+                url = urljoin(self.remote_root, relpath)
 
-        if filter_system not in self.filter_systems:
-            raise ValueError(filter_system, "filter system not found")
+                # Download and unpack a directory.
+                download_dir(url, os.path.dirname(abspath))
 
-        path = urljoin("filter_systems", filter_system, "index.yml")
-        return self._get_contents(path)
+                # ensure that tarfile unpacked into the expected directory
+                if not os.path.exists(abspath):
+                    raise RuntimeError("Tarfile not unpacked into expected "
+                                       "subdirectory. Please file an issue.")
+            else:
+                url = urljoin(self.remote_root, relpath)
+                download_file(url, abspath)
 
-    def print_library(self, library_name):
-        """
-        just try to nicely print the contents of a library
-        """
-        print(yaml.dump(self.get_library(library_name),
-                        indent=4, sort_keys=False, default_flow_style=False))
+        return abspath
 
-    def print_filter_system(self, filter_system):
-        print(yaml.dump(self.get_filter_system(filter_system),
-                        indent=4, sort_keys=False, default_flow_style=False))
-
-    def as_table(self):
-        """
-        make a summary of the libraries properties
-
-        Returns
-        -------
-        an astropy.table.Table with the database contents
-        """
-        column_names = ["library_name", "title", "type", "resolution", "spectral_coverage", "templates"]
-        library_names = self.library_names
-        titles = []
-        types = []
-        resolution = []
-        spectral_coverage = []
-        templates = []
-
-        for lib in library_names:
-            contents = self.get_library(lib)
-            titles.append(contents["title"])
-            types.append(contents["type"])
-            resolution.append(contents["resolution"])
-            spectral_coverage.append(contents["spectral_coverage"])
-            templates.append([t for t in contents["templates"]])
-
-        data = [library_names, titles, types, resolution, spectral_coverage, templates]
-        table = Table(names=column_names, data=data)
-
-        return table
-
-    def filters_as_table(self):
-        """
-        make a summary of the filters available properties
-        Returns
-        -------
-        an astropy.table.Table
-        """
-        column_names = ["filter_system", "instrument", "title", "spectral_coverage", "filters"]
-        filter_systems = self.filter_systems
-        instruments = []
-        titles = []
-        spectral_coverage = []
-        filters = []
-        for filt in filter_systems:
-            contents = self.get_filter_system(filt)
-            instruments.append(contents["instrument"])
-            titles.append(contents["title"])
-            spectral_coverage.append(contents["spectral_coverage"])
-            filters.append([f for f in contents["filters"]])
-
-        data = [filter_systems, instruments, titles, spectral_coverage, filters]
-        table = Table(names=column_names, data=data)
-
-        return table
-
-    def as_dict(self):
-        """
-        Represent the whole database as a dictionary
-
-        Returns
-        -------
-
-        """
-        database = {}
-        for lib in self.library_names:
-            contents = self.get_library(lib)
-            database[lib] = contents
-
-        return database
-
-    def display(self):
-        """
-        just try to nicely print the contents of the whole database
-
-        Returns
-        -------
-
-        """
-        print(yaml.dump(self.as_dict,
-                        indent=4, sort_keys=False, default_flow_style=False))
-
-    def browse(self, keys):
-        """
-        TODO: Implement
-        Parameters
-        ----------
-        keys
-
-        Returns
-        -------
-        libraries and templates that fulfill the criteria (type, spectral coverage, resolution etc
-        """
-        pass
-
-    def _get_contents(self, path=""):
+    def get_yaml_contents(self, relpath):
         """
         read a yaml file from a relative url
 
@@ -235,24 +136,21 @@ class SpecDatabase:
         -------
         dict with the contents of the yaml file
         """
-
-        url = urljoin(self.url, path)
-        try:
-            assert is_url(url)
-        except urllib.error.URLError:
-            print(url, "library not reachable")
-        else:
-            filename = download_file(url, cache=True)
-            with open(filename) as f:
-                data = yaml.safe_load(f)
+        filename = self.abspath(relpath)
+        with open(filename) as f:
+            data = yaml.safe_load(f)
 
         return data
 
     def __repr__(self):
-        return self.as_table()._base_repr_()
+        rootdir = "local data directory: " + self.rootdir()
+        database_url = "data base url: " + self.remote_root
+        libs = "libraries:" + ' ' + str(self.library_names)
+        exts = "extinction curves:" + ' ' + str(self.extinction_curves)
+        filts = "filter systems:" + ' ' + str(self.filter_systems)
 
-    def __getattr__(self, library_name):
-        return self.print_library(library_name=library_name)
+        return '%s \n %s \n %s \n %s \n %s \n %s' % (rootdir, database_url,
+                                                     'Database contents:', libs, exts, filts)
 
 
 class SpecLibrary:
@@ -260,11 +158,12 @@ class SpecLibrary:
     This class contains the information of a library
 
     """
+
     def __init__(self, name):
         self.name = name
         self.location = urljoin(database_url(), "libraries",
                                 self.name, "index.yml")
-        self.data = get_yaml_contents(self.location)
+        self.data = self.get_data()
         self.library_name = self.data["library_name"]
         self.title = self.data["title"]
         self.type = self.data["type"]
@@ -281,6 +180,12 @@ class SpecLibrary:
         self.file_extension = self.data["file_extension"]
         self.templates = list(self.data["templates"].keys())
         self.template_comments = [self.data["templates"][k] for k in self.templates]
+
+    def get_data(self):
+        relpath = urljoin("libraries", self.name, "index.yml")
+        database = SpecDatabase(get_rootdir(), database_url())
+
+        return database.get_yaml_contents(relpath)
 
     def dump(self):
         """
@@ -302,167 +207,34 @@ class SpecLibrary:
         return ' %s \n %s \n %s \n %s' % (description, spec_cov, units, templates)
 
 
-class Database:
-    """
-    This class contains the database.
-    """
+class SpectralTemplate:
 
-    def __init__(self):
-        self.url = database_url() + "index.yml"
-        self.contents = get_yaml_contents(self.url)
-        self.library_names = [lib for lib in self.contents["library_names"]]
-        self.extinction_curves = [ext for ext in self.contents["extinction_curves"]]
-        self.filter_systems = [filt for filt in self.contents["filter_systems"]]
+    def __init__(self, template):
+        self.library_name, self.template_name = template.split("/")
+        library = SpecLibrary(self.library_name)
+        self.resolution = library.resolution
+        self.wave_unit = library.wave_unit
+        self.flux_unit = library.flux_unit
+        self.wave_column_name = library.wave_column_name
+        self.flux_column_name = library.flux_column_name
+        self.data_type = library.data_type
+        self.file_extension = library.file_extension
+        self.filename = self.template_name + self.file_extension
+        self.path = self.get_data()
 
-    def __repr__(self):
-        libs = "libraries:" + ' ' + str(self.library_names)
-        exts = "extinction curves:" + ' ' + str(self.extinction_curves)
-        filts = "filter systems:" + ' ' + str(self.filter_systems)
+    def get_data(self):
+        relpath = urljoin("libraries", self.library_name, self.filename)
+        database = SpecDatabase(get_rootdir(), database_url())
 
-        return ' %s \n %s \n %s \n %s' % ('Database contents:', libs, exts, filts)
-
-
-
-def get_yaml_contents(url):
-    """
-    read a yaml file from a relative url
-
-    Parameters
-    ----------
-    path
-
-    Returns
-    -------
-    dict with the contents of the yaml file
-    """
-    try:
-        assert is_url(url)
-    except urllib.error.URLError:
-        print(url, "library not reachable")
-    else:
-        filename = download_file(url, cache=True)
-        with open(filename) as f:
-            data = yaml.safe_load(f)
-
-    return data
+        return database.abspath(relpath)
 
 
-def get_template(template, path=None):
-    """
-    Parameters
-    ----------
-    template: the name of the template, specified as library_name/template_name
-    path: the path were the downloaded template will be downloaded (optional)
-
-    Returns
-    -------
-    a file
-    a dictionary with the main template attributes
-
-    """
-    newfile = None
-    database = SpecDatabase()
-    library_name, template_name = template.split("/")
-    lib_data = database.get_library(library_name)
-    template_meta = {"resolution": lib_data["resolution"],
-                     "wave_unit": lib_data["wave_unit"],
-                     "flux_unit": lib_data["flux_unit"],
-                     "wave_column_name": lib_data["wave_column_name"],
-                     "flux_column_name": lib_data["flux_column_name"],
-                     "data_type": lib_data["data_type"],
-                     "file_extension": lib_data["file_extension"]}
-
-    try:
-        assert template_name in lib_data["templates"]
-    except AssertionError as error:
-        print(error)
-        print(template_name, "not found")
-    else:
-        filename = template_name + template_meta["file_extension"]
-        url = urljoin(database.url, "libraries/", library_name, filename)
-        newfile = download_file(url, cache=True)
-        if path is not None:
-            file = shutil.copy2(newfile, path)
-            print(filename)
-
-    return newfile, template_meta
+class ExtinctionCurve:
+    pass
 
 
-def get_filter(filter_name):
-    """
-    get filter from the database. It will try first to download from the speXtra database
-    and then try to get it from the SVO service
-
-    TODO: Probably needs some refactoring
-
-    Parameters
-    ----------
-    filter_name: str with the following format "instrument/filter"
-
-    Returns
-    -------
-    a path and metadata
-    """
-    database = SpecDatabase()
-
-    try:
-        filter_system, filt = filter_name.split("/")
-        filter_data = database.get_filter_system(filter_system)
-        filter_meta = {"wave_unit": filter_data["wave_unit"],
-                       "file_extension": filter_data["file_extension"],
-                       "data_type": filter_data["data_type"]}
-
-        filename = filt + filter_meta["file_extension"]
-        url = urljoin(database.url, "filter_systems/", filter_system, filename)
-        path = download_file(url, cache=True)
-    except ValueError:
-        if filter_name in FILTER_DEFAULTS:
-            filter_name = FILTER_DEFAULTS[filter_name]
-
-        path = download_file('http://svo2.cab.inta-csic.es/'
-                             'theory/fps3/fps.php?ID={}'.format(filter_name),
-                             cache=True)
-        filter_meta = None
-        with open(path) as f:
-            if "Filter not found" in f.read():
-                path = None
-                raise ValueError("Filter not found")
-
-    return path, filter_meta
-
-
-def get_extinction_curve(curve_name):
-    """
-    Download a extinction curve from the database
-
-    Parameters
-    ----------
-    curve_name: extinction curve, e.g.
-
-    Returns
-    -------
-
-    """
-    newfile = None
-    database = SpecDatabase()
-    extinction_family, extinction_curve = curve_name.split("/")
-    ext_data = database.get_extinction_curves(extinction_family)
-    ext_meta = {"name": ext_data["name"],
-                "wave_unit": ext_data["wave_unit"],
-                "data_type": ext_data["data_type"],
-                "file_extension": ext_data["file_extension"],
-                "curves": ext_data["curves"]}
-    try:
-        assert extinction_curve in ext_meta["curves"]
-    except AssertionError as error:
-        print(error)
-        print(curve_name, "not found")
-    else:
-        filename = extinction_curve + ext_meta["file_extension"]
-        url = urljoin(database.url, "extinction_curves/", extinction_family, filename)
-        newfile = download_file(url, cache=True)
-
-    return newfile, ext_meta
+class Filter:
+    pass
 
 
 # This is based on scopesim.effects.ter_curves_utils.py
