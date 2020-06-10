@@ -11,8 +11,8 @@ import yaml
 #clear_download_cache()
 
 
-# %%%%% shamefully copied from SNCOSMO
-class _Conf(ConfigNamespace):
+# ------ shamefully copied from SNCOSMO ------
+class Conf(ConfigNamespace):
     """Configuration parameters for sncosmo."""
     data_dir = ConfigItem(
         None,
@@ -28,12 +28,12 @@ class _Conf(ConfigNamespace):
 # Create an instance of the class we just defined.
 # This needs to be done before the imports below because `conf` is used
 # in some parts of the library.
-conf = _Conf()
+conf = Conf()
 
 
 def get_rootdir():
     # use the environment variable if set
-    data_dir = os.environ.get('SNCOSMO_DATA_DIR')
+    data_dir = os.environ.get('SPEXTRA_DATA_DIR')
 
     # otherwise, use config file value if set.
     if data_dir is None:
@@ -62,7 +62,7 @@ def _download_file(remote_url, target):
     from urllib.request import urlopen, Request
     from urllib.error import URLError, HTTPError
     from astropy.utils.console import ProgressBarOrSpinner
-    from . import conf
+
 
     timeout = conf.remote_timeout
     download_block_size = 32768
@@ -120,8 +120,7 @@ def _download_file(remote_url, target):
 
 def download_file(remote_url, local_name):
     """
-    Download a remote file to local path, unzipping if the URL ends in '.gz'.
-    Parameters
+    Download a remote file to local path
     ----------
     remote_url : str
         The URL of the file to download
@@ -137,73 +136,71 @@ def download_file(remote_url, local_name):
     dn = os.path.dirname(local_name)
     if not os.path.exists(dn):
         os.makedirs(dn)
-
-    if remote_url.endswith(".gz"):
-        import io
-        import gzip
-
-        buf = io.BytesIO()
-        _download_file(remote_url, buf)
-        buf.seek(0)
-        f = gzip.GzipFile(fileobj=buf, mode='rb')
-
-        with open(local_name, 'wb') as target:
-            target.write(f.read())
-        f.close()
-
-    else:
-        try:
-            with open(local_name, 'wb') as target:
-                _download_file(remote_url, target)
-        except:  # noqa
+    
+    try:
+       with open(local_name, 'wb') as target:
+           _download_file(remote_url, target)
+    except:  # noqa
             # in case of error downloading, remove file.
-            if os.path.exists(local_name):
-                os.remove(local_name)
+        if os.path.exists(local_name):
+            os.remove(local_name)
             raise
 
 
-def download_dir(remote_url, dirname):
+class SpecLibrary:
     """
-    Download a remote tar file to a local directory.
-    Parameters
-    ----------
-    remote_url : str
-        The URL of the file to download
-    dirname : str
-        Directory in which to place contents of tarfile. Created if it
-        doesn't exist.
-    Raises
-    ------
-    URLError (from urllib2 on PY2, urllib.request on PY3)
-        Whenever there's a problem getting the remote file.
+    This class contains the information of a library
+
     """
+    def __init__(self, name):
+        self.name = name
+        self.location = urljoin(database_url(), "libraries",
+                                self.name, "index.yml")
+        self.data = get_yaml_contents(self.location)
+        self.library_name = self.data["library_name"]
+        self.title = self.data["title"]
+        self.type = self.data["type"]
+        self.summary = self.data["summary"]
+        self.reference = self.data["reference"]
+        self.link = self.data["link"]
+        self.spectral_coverage = self.data["spectral_coverage"]
+        self.resolution = self.data["resolution"]
+        self.wave_unit = self.data["wave_unit"]
+        self.flux_unit = self.data["flux_unit"]
+        self.wave_column_name = self.data["wave_column_name"]
+        self.flux_column_name = self.data["flux_column_name"]
+        self.data_type = self.data["data_type"]
+        self.file_extension = self.data["file_extension"]
+        self.templates = list(self.data["templates"].keys())
+        self.template_comments = [self.data["templates"][k] for k in self.templates]
 
-    import io
-    import tarfile
+    def dump(self):
+        """
+        Nicely dump the contents of the library
 
-    if not os.path.exists(dirname):
-        os.makedirs(dirname)
+        Returns
+        -------
 
-    mode = 'r:gz' if remote_url.endswith(".gz") else None
+        """
+        print(yaml.dump(self.data,
+                        indent=4, sort_keys=False, default_flow_style=False))
 
-    # download file to buffer
-    buf = io.BytesIO()
-    _download_file(remote_url, buf)
-    buf.seek(0)
+    def __repr__(self):
+        description = "Spectral Library: " + self.name + " " + self.title
+        spec_cov = "spectral coverage: " + str(self.spectral_coverage)
+        units = "wave_unit: " + self.wave_unit + "  flux_unit: " + self.flux_unit
+        templates = "Templates: " + str(self.templates)
 
-    # create a tarfile with the buffer and extract
-    tf = tarfile.open(fileobj=buf, mode=mode)
-    tf.extractall(path=dirname)
-    tf.close()
-    buf.close()  # buf not closed when tf is closed.
+        return ' %s \n %s \n %s \n %s' % (description, spec_cov, units, templates)
 
 
-class DataMirror(object):
+class Database:
     """
-    TODO: merge in SpecDatabase
+    This class contains the database.
     
-    Lazy fetcher for remote data.
-    When asked for local absolute path to a file or directory, DataMirror
+    
+    It also acts as a lazy fetcher for remote data.
+    When asked for local absolute path to a file or directory, Database
     checks if the file or directory exists locally and, if so, returns it.
     If it doesn't exist, it first determines where to get it from.
     It first downloads the file ``{remote_root}/redirects.json`` and checks
@@ -228,13 +225,18 @@ class DataMirror(object):
     def __init__(self, rootdir, remote_root):
         if not remote_root.endswith('/'):
             remote_root = remote_root + '/'
-
+                
         self._checked_rootdir = None
         self.rootdir = rootdir
         self.remote_root = remote_root
-
-    
-
+        
+        self.url = remote_root + "index.yml"
+        self.contents = self.get_yaml_contents("index.yml")
+        self.library_names = [lib for lib in self.contents["library_names"]]
+        self.extinction_curves = [ext for ext in self.contents["extinction_curves"]]
+        self.filter_systems = [filt for filt in self.contents["filter_systems"]]
+        
+        
     def rootdir(self):
         """Return the path to the local data directory, ensuring that it
         exists"""
@@ -256,7 +258,6 @@ class DataMirror(object):
             self._checked_rootdir = rootdir
 
         return self._checked_rootdir
-
 
 
     def abspath(self, relpath, isdir=False):
@@ -284,39 +285,55 @@ class DataMirror(object):
                 download_file(url, abspath)
 
         return abspath
+    
+    def get_yaml_contents(self, relpath):
+        """
+        read a yaml file from a relative url
+
+        Parameters
+        ----------
+        path
+
+        Returns
+        -------
+        dict with the contents of the yaml file
+        """
+        filename = self.abspath(relpath)
+        with open(filename) as f:
+            data = yaml.safe_load(f)
+        
+        return data
+
+
+
+    def __repr__(self):
+        rootdir = "local data directory: " +   self.rootdir()
+        database_url = "data base url: " + self.remote_root
+        libs = "libraries:" + ' ' + str(self.library_names)
+        exts = "extinction curves:" + ' ' + str(self.extinction_curves)
+        filts = "filter systems:" + ' ' + str(self.filter_systems)
+
+        return '%s \n %s \n %s \n %s \n %s \n %s' % (rootdir, database_url,
+            'Database contents:', libs, exts, filts)
+
+
+
+
 
 #
 
 rootdir = get_rootdir()
-DATADIR = DataMirror(get_rootdir, "https://homepage.univie.ac.at/miguel.verdugo/database/")
+DATADIR = Database(get_rootdir, "https://homepage.univie.ac.at/miguel.verdugo/database/")
 
 
-def get_yaml_contents(relpath):
-    """
-    read a yaml file from a relative url
 
-    Parameters
-    ----------
-    path
-
-    Returns
-    -------
-    dict with the contents of the yaml file
-    """
-
-
-    filename = DATADIR.abspath(relpath)
-    with open(filename) as f:
-        data = yaml.safe_load(f)
-
-    return data
 
 
 def get_library(library_name):
     
     relpath = urljoin("libraries", library_name, library_name + ".yml")
 
-    data = get_yaml_contents(relpath)
+    data = DATADIR.get_yaml_contents(relpath)
     
     return data
 
@@ -373,7 +390,7 @@ print("%"*20)
 #abspath = DATADIR.abspath("libraries/kc96/index.yml")
 #print(abspath)
 
-data = get_yaml_contents("libraries/kc96/index.yml")
+data = DATADIR.get_yaml_contents("libraries/kc96/index.yml")
 print(data)
 #remote_file = "https://homepage.univie.ac.at/miguel.verdugo/database/libraries/kc96/index.yml"
 #file = download_file(remote_file, rootdir)
