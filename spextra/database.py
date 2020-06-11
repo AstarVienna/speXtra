@@ -11,7 +11,7 @@ from posixpath import join as urljoin
 import os
 import yaml
 from .utils import get_rootdir, database_url, download_file
-
+from urllib.error import URLError, HTTPError
 
 import tynt
 # Configurations
@@ -229,11 +229,40 @@ class SpectralTemplate:
         return database.abspath(relpath)
 
 
-class ExtinctionCurve:
-    pass
-
 
 class Filter:
+
+    def __init__(self, filter_name):
+
+        try:
+            self.filter_system, self.filter = filter_name.split("/")
+
+        except ValueError
+            if filter_name in FILTER_DEFAULTS:
+                filter_name = FILTER_DEFAULTS(filter_name)
+                self.filter_system, self.filter = filter_name.split("/")
+
+        self.data = self.get_data()
+
+
+
+    def get_data(self):
+        relpath = urljoin("filters", self.filter_system, self.filter)
+        try:
+            database = SpecDatabase(get_rootdir(), database_url())
+            path  = database.abspath(relpath)
+        except URLError:
+            path = download_file('http://svo2.cab.inta-csic.es/'
+                                 'theory/fps3/fps.php?ID={}'.format(self.filter_name),
+                                 os.path.join(get_rootdir(), relpath)
+
+
+        return path
+
+
+
+
+class ExtinctionCurve:
     pass
 
 

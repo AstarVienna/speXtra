@@ -62,7 +62,7 @@ class Conf(ConfigNamespace):
         None,
         "Directory where spextra will store and read downloaded data "
         "resources. If None, ASTROPY_CACHE_DIR/spextra is created and "
-        "used. Example: data_dir = /home/user/data/sncosmo",
+        "used. Example: data_dir = /home/user/data/spextra",
         cfgtype='string(default=None)')
 
     remote_timeout = ConfigItem(
