@@ -1,22 +1,26 @@
 import os
 import inspect
-from astropy.config import ConfigItem, ConfigNamespace, get_cache_dir
+from astropy.config import get_cache_dir
 from contextlib import closing
 from urllib.request import urlopen, Request
 from urllib.error import URLError, HTTPError
 from astropy.utils.console import ProgressBarOrSpinner
 
+from .conf import Conf
 
-__all__ = ["is_url", "database_url", "download_file",  "Conf", "get_rootdir"]
+
+__all__ = ["is_url", "download_file", "get_rootdir", "database_url"]
 
 __pkg_dir__ = os.path.dirname(inspect.getfile(inspect.currentframe()))
 __data_dir__ = os.path.join(__pkg_dir__, "data")
+
+conf = Conf()
 
 
 def is_url(url):  #
     """
     Checks that a given URL is reachable.
-    Depending of the configuration of the server it might return True even if the page doesn't exist.
+    Depending on the configuration of the server it might return True even if the page doesn't exist.
 
     Parameters
     -----------
@@ -41,40 +45,24 @@ def is_url(url):  #
 
 def database_url():
     """
-    TODO: it should read it from a file
+    Check if the database is reachable
+
     Returns
     -------
     the database_location
     """
-    loc = "https://homepage.univie.ac.at/miguel.verdugo/database/"
+    loc = conf.database_url
     try:
         assert is_url(loc)
     except AssertionError as error:
         print(error)
         print("Database address not reachable", loc)
+        raise
+
     return loc
 
 
 # ------ shamefully copied from SNCOSMO ------
-class Conf(ConfigNamespace):
-    """Configuration parameters for spextra."""
-    data_dir = ConfigItem(
-        None,
-        "Directory where spextra will store and read downloaded data "
-        "resources. If None, ASTROPY_CACHE_DIR/spextra is created and "
-        "used. Example: data_dir = /home/user/data/spextra",
-        cfgtype='string(default=None)')
-
-    remote_timeout = ConfigItem(
-        10.0, "Remote timeout in seconds.")
-
-
-# Create an instance of the class we just defined.
-# This needs to be done before the imports below because `conf` is used
-# in some parts of the library.
-
-conf = Conf()
-
 
 
 def get_rootdir():

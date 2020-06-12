@@ -2,25 +2,22 @@
 """
 Database for speXtra
 """
-
 import inspect
-
-from astropy.utils.data import download_file
-from astropy.table import Table
 from posixpath import join as urljoin
 import os
 import yaml
-from .utils import get_rootdir, database_url, download_file
 from urllib.error import URLError, HTTPError
 
 import tynt
+
+from .utils import get_rootdir, database_url, download_file
+
 # Configurations
 
 __all__ = ["SpecDatabase", "SpecLibrary", "SpectralTemplate",
            "ExtinctionCurve", "Filter"]
 
-
-
+# Do we need this?
 __pkg_dir__ = os.path.dirname(inspect.getfile(inspect.currentframe()))
 __data_dir__ = os.path.join(__pkg_dir__, "data")
 
@@ -29,9 +26,8 @@ with open(os.path.join(__data_dir__,  "default_filters.yml")) as filter_file:
     FILTER_DEFAULTS = yaml.safe_load(filter_file)
 
 # Tables are displayed with a jsviewer by default
-Table.show_in_browser.__defaults__ = (5000, True, 'default', {'use_local_files': True},
-                                              None, 'display compact', None, 'idx')
-
+# Table.show_in_browser.__defaults__ = (5000, True, 'default', {'use_local_files': True},
+#                                              None, 'display compact', None, 'idx')
 
 
 class SpecDatabase:
@@ -62,7 +58,8 @@ class SpecDatabase:
         Root URL of the remote server.
     """
 
-    def __init__(self, rootdir, remote_root):
+    def __init__(self, rootdir=get_rootdir(),
+                 remote_root=database_url()):
         if not remote_root.endswith('/'):
             remote_root = remote_root + '/'
 
@@ -76,51 +73,15 @@ class SpecDatabase:
         self.extinction_curves = [ext for ext in self.contents["extinction_curves"]]
         self.filter_systems = [filt for filt in self.contents["filter_systems"]]
 
-    def rootdir(self):
-        """Return the path to the local data directory, ensuring that it
-        exists"""
-
-        if self._checked_rootdir is None:
-
-            # If the supplied value is a string, use it. Otherwise
-            # assume it is a callable that returns a string)
-            rootdir = (self._rootdir
-                       if isinstance(self._rootdir, str)
-                       else self._rootdir())
-
-            # Check existance
-            if not os.path.isdir(rootdir):
-                raise Exception("data directory {!r} not an existing "
-                                "directory".format(rootdir))
-
-            # Cache value for future calls
-            self._checked_rootdir = rootdir
-
-        return self._checked_rootdir
-
-    def abspath(self, relpath, isdir=False):
+    def abspath(self, relpath):
         """Return absolute path to file or directory, ensuring that it exists.
-        If ``isdir``, look for ``{relpath}.tar.gz`` on the remote server and
-        unpackage it.
-        Otherwise, just look for ``{relpath}``. If redirect points to a gz, it
-        will be uncompressed."""
+            Otherwise, just look for ``{relpath}``.
+        """
 
-        abspath = os.path.join(self.rootdir(), relpath)
-
-        if not os.path.exists(abspath):
-            if isdir:
-                url = urljoin(self.remote_root, relpath)
-
-                # Download and unpack a directory.
-                download_dir(url, os.path.dirname(abspath))
-
-                # ensure that tarfile unpacked into the expected directory
-                if not os.path.exists(abspath):
-                    raise RuntimeError("Tarfile not unpacked into expected "
-                                       "subdirectory. Please file an issue.")
-            else:
-                url = urljoin(self.remote_root, relpath)
-                download_file(url, abspath)
+        abspath = os.path.join(self.rootdir, relpath)
+        if os.path.exists(abspath) is False:
+            url = urljoin(self.remote_root, relpath)
+            download_file(url, abspath)
 
         return abspath
 
@@ -143,7 +104,7 @@ class SpecDatabase:
         return data
 
     def __repr__(self):
-        rootdir = "local data directory: " + self.rootdir()
+        rootdir = " local data directory: " + self.rootdir
         database_url = "data base url: " + self.remote_root
         libs = "libraries:" + ' ' + str(self.library_names)
         exts = "extinction curves:" + ' ' + str(self.extinction_curves)
@@ -228,42 +189,66 @@ class SpectralTemplate:
 
         return database.abspath(relpath)
 
+    def __repr__(self):
+        s1 = "Spectral template: " + self.template
+        return s1
 
 
 class Filter:
 
     def __init__(self, filter_name):
 
+        self.filter_name = filter_name
         try:
-            self.filter_system, self.filter = filter_name.split("/")
+            self.filter_system, self.filter = self.filter_name.split("/")
 
-        except ValueError
+        except ValueError:
             if filter_name in FILTER_DEFAULTS:
-                filter_name = FILTER_DEFAULTS(filter_name)
-                self.filter_system, self.filter = filter_name.split("/")
+                self.filter_name = FILTER_DEFAULTS[filter_name]
+                self.filter_system, self.filter = self.filter_name.split("/")
 
         self.data = self.get_data()
-
-
 
     def get_data(self):
         relpath = urljoin("filters", self.filter_system, self.filter)
         try:
             database = SpecDatabase(get_rootdir(), database_url())
-            path  = database.abspath(relpath)
-        except URLError:
+            path = database.abspath(relpath)
+        except (URLError, HTTPError):
             path = download_file('http://svo2.cab.inta-csic.es/'
                                  'theory/fps3/fps.php?ID={}'.format(self.filter_name),
-                                 os.path.join(get_rootdir(), relpath)
-
+                                 os.path.join(get_rootdir(), relpath))
 
         return path
 
-
+    def __repr__(self):
+        s = "Filter: " + self.filter_name
+        return s
 
 
 class ExtinctionCurve:
-    pass
+
+    def __init__(self, curve_name):
+        self.curve_name = curve_name
+        self.family, self.ext_curve = self.curve_name.split("/")
+        self.data = self.getdata()
+
+    def get_data(self):
+        relpath = urljoin("extinction_curves", self.family, self.ext_curve)
+        database = SpecDatabase(get_rootdir(), database_url())
+        path = database.get_yaml_contents(relpath)
+
+        return path
+
+    def __repr__(self):
+        s = "Extinction curve: " + self.curve_name
+        return s
+
+
+
+
+
+
 
 
 # This is based on scopesim.effects.ter_curves_utils.py

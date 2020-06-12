@@ -22,7 +22,7 @@ from synphot import exceptions
 
 import tynt
 
-from .database import get_template, get_filter, get_extinction_curve
+from .database import SpecDatabase, SpecLibrary, Filter, ExtinctionCurve
 
 
 __all__ = ["Spextrum", "make_passband",  "get_vega_spectrum"]
