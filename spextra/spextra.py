@@ -57,7 +57,8 @@ def make_passband(filter_name=None, filter_file=None, wave_unit=u.Angstrom):
             print("File not found or malformed", e)
             raise
     else:
-        path, meta = get_filter(filter_name)
+        filt = Filter(filter_name=filter_name)
+        path, meta = filt.path, filt.meta
         if meta is None:  # it's a svo filter!
             trans_table = Table.read(path, format="votable")
             wave = trans_table['Wavelength'].data.data * u.Angstrom

@@ -1,6 +1,6 @@
 # Database contents
 
-library_names:
+libraries:
   kc96      : Kinney-Calzetti Atlas
   pickles   : Pickles Stellar Library
   sdss      : SDSS galaxy composite spectra

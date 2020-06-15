@@ -69,7 +69,7 @@ class SpecDatabase:
 
         self.url = remote_root + "index.yml"
         self.contents = self.get_yaml_contents("index.yml")
-        self.library_names = [lib for lib in self.contents["library_names"]]
+        self.libraries = [lib for lib in self.contents["libraries"]]
         self.extinction_curves = [ext for ext in self.contents["extinction_curves"]]
         self.filter_systems = [filt for filt in self.contents["filter_systems"]]
 
@@ -183,7 +183,7 @@ class SpectralTemplate:
         self.filename = self.template_name + self.file_extension
         self.path = self.get_data()
 
-    def get_data(self):
+    def get_path(self):
         relpath = urljoin("libraries", self.library_name, self.filename)
         database = SpecDatabase(get_rootdir(), database_url())
 
@@ -192,6 +192,57 @@ class SpectralTemplate:
     def __repr__(self):
         s1 = "Spectral template: " + self.template
         return s1
+
+
+class FilterSystem:
+
+    def __init__(self, filter_system):
+        self.filter_system = filter_system
+        self.instrument = None
+        self.title = None
+        self.author = None
+        self.source = None
+        self.spectral_coverage = None
+        self.wave_unit = None
+        self.data_type = None
+        self.file_extension = None
+        self.filters = None
+        self._update_atributes()
+
+    def get_data(self):
+        data = None
+        relpath = urljoin("filter_systems", self.filter_system, "index.yml")
+        database = SpecDatabase(get_rootdir(), database_url())
+        if self.filter_system in database.filter_systems:
+            data = database.get_yaml_contents(relpath)
+
+        return data
+
+    def _update_atributes(self):
+        data = self.get_data()
+        if data is not None:
+            self.filter_system = data["filter_system"]
+            self.instrument = data["instrument"]
+            self.title = data["title"]
+            self.author = data["author"]
+            self.source = data["source"]
+            self.spectral_coverage = data["spectral_coverage"]
+            self.wave_unit = data["wave_unit"]
+            self.file_extension = data["file_extension"]
+            self.filters = list(data["filters"].keys())
+            self.filters_comments = [data["filters"][k] for k in self.filters]
+
+    def __repr__(self):
+        name = self.filter_system
+        if self.filters is None:
+            name = self.filter_system + " at SVO"
+        s = "Filter System: " + name
+
+        return s
+
+#
+
+
 
 
 class Filter:
@@ -226,14 +277,27 @@ class Filter:
         return s
 
 
+class ExtCurvesLibraries:
+    def __init__(self, extcurvname):
+        self.extcurvname = extcurvname
+        pass
+
+    def get_data(self):
+        relpath = urljoin("extinction_curves", self.extcurvname)
+        database = SpecDatabase(get_rootdir(), database_url())
+        data = database.get_yaml_contents(relpath)
+        return data
+
+
 class ExtinctionCurve:
 
     def __init__(self, curve_name):
         self.curve_name = curve_name
         self.family, self.ext_curve = self.curve_name.split("/")
-        self.data = self.getdata()
+        self.path = self.getdata()
+        self.meta = None
 
-    def get_data(self):
+    def get_path(self):
         relpath = urljoin("extinction_curves", self.family, self.ext_curve)
         database = SpecDatabase(get_rootdir(), database_url())
         path = database.get_yaml_contents(relpath)
