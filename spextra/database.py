@@ -74,8 +74,11 @@ class SpecDatabase:
         self.filter_systems = [filt for filt in self.contents["filter_systems"]]
 
     def abspath(self, relpath):
-        """Return absolute path to file or directory, ensuring that it exists.
-            Otherwise, just look for ``{relpath}``.
+        """
+        Return absolute path to file or directory, ensuring that it exists.
+        If it doesn't exist it will download it from the remote host
+
+        Otherwise, just look for ``{relpath}``.
         """
 
         abspath = os.path.join(self.rootdir, relpath)
@@ -91,7 +94,7 @@ class SpecDatabase:
 
         Parameters
         ----------
-        path
+        relpath: The relative path to a file either local or in remote host
 
         Returns
         -------
@@ -143,8 +146,11 @@ class SpecLibrary:
         self.template_comments = [self.data["templates"][k] for k in self.templates]
 
     def get_data(self):
-        relpath = urljoin("libraries", self.name, "index.yml")
         database = SpecDatabase(get_rootdir(), database_url())
+        if self.name not in database.libraries:
+            raise ValueError(self.name, "library unknown, please check")
+
+        relpath = urljoin("libraries", self.name, "index.yml")
 
         return database.get_yaml_contents(relpath)
 
@@ -173,6 +179,8 @@ class SpectralTemplate:
     def __init__(self, template):
         self.library_name, self.template_name = template.split("/")
         library = SpecLibrary(self.library_name)
+        if self.template_name not in library.templates:
+            raise ValueError("Template not in library", self.library_name)
         self.resolution = library.resolution
         self.wave_unit = library.wave_unit
         self.flux_unit = library.flux_unit
@@ -184,9 +192,8 @@ class SpectralTemplate:
         self.path = self.get_data()
 
     def get_path(self):
-        relpath = urljoin("libraries", self.library_name, self.filename)
         database = SpecDatabase(get_rootdir(), database_url())
-
+        relpath = urljoin("libraries", self.library_name, self.filename)
         return database.abspath(relpath)
 
     def __repr__(self):
@@ -209,28 +216,28 @@ class FilterSystem:
         self.filters = None
         self._update_atributes()
 
-    def get_data(self):
-        data = None
+    def get_data_dict(self):
+        data_dict = None
         relpath = urljoin("filter_systems", self.filter_system, "index.yml")
         database = SpecDatabase(get_rootdir(), database_url())
         if self.filter_system in database.filter_systems:
-            data = database.get_yaml_contents(relpath)
+            data_dict = database.get_yaml_contents(relpath)
 
-        return data
+        return data_dict
 
     def _update_atributes(self):
-        data = self.get_data()
-        if data is not None:
-            self.filter_system = data["filter_system"]
-            self.instrument = data["instrument"]
-            self.title = data["title"]
-            self.author = data["author"]
-            self.source = data["source"]
-            self.spectral_coverage = data["spectral_coverage"]
-            self.wave_unit = data["wave_unit"]
-            self.file_extension = data["file_extension"]
-            self.filters = list(data["filters"].keys())
-            self.filters_comments = [data["filters"][k] for k in self.filters]
+        data_dict = self.get_data_dict()
+        if data_dict is not None:
+            self.filter_system = data_dict["filter_system"]
+            self.instrument = data_dict["instrument"]
+            self.title = data_dict["title"]
+            self.author = data_dict["author"]
+            self.source = data_dict["source"]
+            self.spectral_coverage = data_dict["spectral_coverage"]
+            self.wave_unit = data_dict["wave_unit"]
+            self.file_extension = data_dict["file_extension"]
+            self.filters = list(data_dict["filters"].keys())
+            self.filters_comments = [data_dict["filters"][k] for k in self.filters]
 
     def __repr__(self):
         name = self.filter_system
@@ -240,23 +247,18 @@ class FilterSystem:
 
         return s
 
-#
-
-
-
 
 class Filter:
 
     def __init__(self, filter_name):
 
         self.filter_name = filter_name
-        try:
-            self.filter_system, self.filter = self.filter_name.split("/")
+        if self.filter_name in FILTER_DEFAULTS:
+            self.filter_name = FILTER_DEFAULTS[filter_name]
 
-        except ValueError:
-            if filter_name in FILTER_DEFAULTS:
-                self.filter_name = FILTER_DEFAULTS[filter_name]
-                self.filter_system, self.filter = self.filter_name.split("/")
+        if "/" not in self.filter_name:
+            raise ValueError("not a valid filter", self.filter_name)
+        self.filter_system, self.filter = self.filter_name.split("/")
 
         self.data = self.get_data()
 
@@ -280,13 +282,39 @@ class Filter:
 class ExtCurvesLibraries:
     def __init__(self, extcurvname):
         self.extcurvname = extcurvname
-        pass
+        self.title = None
+        self.summary = None
+        self.source = None
+        self.wave_unit = None
+        self.data_type = None
+        self.file_extension = None
+        self.curves = None
 
     def get_data(self):
-        relpath = urljoin("extinction_curves", self.extcurvname)
         database = SpecDatabase(get_rootdir(), database_url())
+        if self.extcurvname not in database.extinction_curves:
+            raise ValueError("Extinction curves not known")
+        relpath = urljoin("extinction_curves", self.extcurvname)
         data = database.get_yaml_contents(relpath)
         return data
+
+    def _update_atributes(self):
+        data = self.get_data()
+        self.name = data["name"]
+        self.title = data["title"]
+        self.summary = data["summary"]
+        self.source = data["soruce"]
+        self.wave_unit = data["wave_unit"]
+        self.extinction_unit = data["extinction_unit"]
+        self.data_type = data["data_type"]
+        self.file_extension = data["file_extension"]
+        self.curves = list(data["curves"].keys())
+        self.curves_comments = [data["curves"][k] for k in self.curves]
+
+    def __repr__(self):
+        s1 = "Extincion curves: " + self.name
+        s2 = "Curves: " + str(self.curves)
+        return '%s \n %s' % (s1, s2)
 
 
 class ExtinctionCurve:
@@ -294,10 +322,11 @@ class ExtinctionCurve:
     def __init__(self, curve_name):
         self.curve_name = curve_name
         self.family, self.ext_curve = self.curve_name.split("/")
-        self.path = self.getdata()
+        self.path = self.get_path()
         self.meta = None
 
     def get_path(self):
+
         relpath = urljoin("extinction_curves", self.family, self.ext_curve)
         database = SpecDatabase(get_rootdir(), database_url())
         path = database.get_yaml_contents(relpath)
