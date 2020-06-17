@@ -6,6 +6,7 @@ from astropy.config import ConfigItem, ConfigNamespace
 
 __all__ = ["Conf"]
 
+
 class Conf(ConfigNamespace):
     """Configuration parameters for spextra."""
     data_dir = ConfigItem(None,

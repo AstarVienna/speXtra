@@ -5,9 +5,9 @@ Database for speXtra
 import inspect
 from posixpath import join as urljoin
 import os
-import yaml
 from urllib.error import URLError, HTTPError
 
+import yaml
 import tynt
 
 from .utils import get_rootdir, database_url, download_file
@@ -63,11 +63,9 @@ class SpecDatabase:
         if not remote_root.endswith('/'):
             remote_root = remote_root + '/'
 
-        self._checked_rootdir = None
         self.rootdir = rootdir
         self.remote_root = remote_root
 
-        self.url = remote_root + "index.yml"
         self.contents = self.get_yaml_contents("index.yml")
         self.libraries = [lib for lib in self.contents["libraries"]]
         self.extinction_curves = [ext for ext in self.contents["extinction_curves"]]
@@ -127,25 +125,25 @@ class SpecLibrary:
         self.name = name
         self.location = urljoin(database_url(), "libraries",
                                 self.name, "index.yml")
-        self.data = self.get_data()
-        self.library_name = self.data["library_name"]
-        self.title = self.data["title"]
-        self.type = self.data["type"]
-        self.summary = self.data["summary"]
-        self.reference = self.data["reference"]
-        self.link = self.data["link"]
-        self.spectral_coverage = self.data["spectral_coverage"]
-        self.resolution = self.data["resolution"]
-        self.wave_unit = self.data["wave_unit"]
-        self.flux_unit = self.data["flux_unit"]
-        self.wave_column_name = self.data["wave_column_name"]
-        self.flux_column_name = self.data["flux_column_name"]
-        self.data_type = self.data["data_type"]
-        self.file_extension = self.data["file_extension"]
-        self.templates = list(self.data["templates"].keys())
-        self.template_comments = [self.data["templates"][k] for k in self.templates]
+        self.meta = self.get_data_dict()
+        self.library_name = self.meta["library_name"]
+        self.title = self.meta["title"]
+        self.type = self.meta["type"]
+        self.summary = self.meta["summary"]
+        self.reference = self.meta["reference"]
+        self.link = self.meta["link"]
+        self.spectral_coverage = self.meta["spectral_coverage"]
+        self.resolution = self.meta["resolution"]
+        self.wave_unit = self.meta["wave_unit"]
+        self.flux_unit = self.meta["flux_unit"]
+        self.wave_column_name = self.meta["wave_column_name"]
+        self.flux_column_name = self.meta["flux_column_name"]
+        self.data_type = self.meta["data_type"]
+        self.file_extension = self.meta["file_extension"]
+        self.templates = list(self.meta["templates"].keys())
+        self.template_comments = [self.meta["templates"][k] for k in self.templates]
 
-    def get_data(self):
+    def get_data_dict(self):
         database = SpecDatabase(get_rootdir(), database_url())
         if self.name not in database.libraries:
             raise ValueError(self.name, "library unknown, please check")
@@ -180,7 +178,7 @@ class SpectralTemplate:
         self.library_name, self.template_name = template.split("/")
         library = SpecLibrary(self.library_name)
         if self.template_name not in library.templates:
-            raise ValueError("Template not in library", self.library_name)
+            raise ValueError("Template not in library", self.template_name)
         self.resolution = library.resolution
         self.wave_unit = library.wave_unit
         self.flux_unit = library.flux_unit
@@ -189,19 +187,38 @@ class SpectralTemplate:
         self.data_type = library.data_type
         self.file_extension = library.file_extension
         self.filename = self.template_name + self.file_extension
-        self.path = self.get_data()
+        self.path = self.get_path()
+
 
     def get_path(self):
         database = SpecDatabase(get_rootdir(), database_url())
         relpath = urljoin("libraries", self.library_name, self.filename)
         return database.abspath(relpath)
 
+    @property
+    def meta(self):
+        library = SpecLibrary(self.library_name)
+        del library.meta["templates"]
+        del library.meta["summary"]
+        return library.meta
+
+
+
     def __repr__(self):
-        s1 = "Spectral template: " + self.template
+        s1 = "Spectral template: " + self.template_name
         return s1
 
 
 class FilterSystem:
+    """
+    ``FilterSystem`` holds all the information of a particular filter system which is in
+    turn passed to ``Filter``
+
+    Because we are currently using filters served by the SVO the attributes
+    of these filter systems are not known and thus initialized with none.
+
+    This might change in the future
+    """
 
     def __init__(self, filter_system):
         self.filter_system = filter_system
@@ -217,11 +234,17 @@ class FilterSystem:
         self._update_atributes()
 
     def get_data_dict(self):
-        data_dict = None
+
         relpath = urljoin("filter_systems", self.filter_system, "index.yml")
         database = SpecDatabase(get_rootdir(), database_url())
         if self.filter_system in database.filter_systems:
             data_dict = database.get_yaml_contents(relpath)
+
+        elif self.filter_system in get_filter_systems():
+            data_dict = None  # Filter is in the SVO
+
+        else:
+            raise ValueError("Filter system %s is unknown" % self.filter_system)
 
         return data_dict
 
@@ -259,27 +282,59 @@ class Filter:
         if "/" not in self.filter_name:
             raise ValueError("not a valid filter", self.filter_name)
         self.filter_system, self.filter = self.filter_name.split("/")
+        self.data_type = None
+        self.wave_unit = None
+        self.meta = None
+        self.file_extension = None
+        self.filename = None
+        self.instrument = None
 
-        self.data = self.get_data()
+        self._update_atributes()
+        self.path = self.get_path()
 
-    def get_data(self):
-        relpath = urljoin("filters", self.filter_system, self.filter)
-        try:
-            database = SpecDatabase(get_rootdir(), database_url())
+    def get_path(self):
+        relpath = urljoin("filter_systems", self.filter_system, self.filename)
+        database = SpecDatabase(get_rootdir(), database_url())
+        if self.filter_system in database.filter_systems:
+            try:
+                path = database.abspath(relpath)
+            except (URLError, HTTPError):
+                raise ValueError("filter %s is unknown" % self.filter_name)
+        #elif self.filter_name in get_filter_names():
+        else:
+            download_file('http://svo2.cab.inta-csic.es/'
+                          'theory/fps3/fps.php?ID={}'.format(self.filter_name),
+                          os.path.join(get_rootdir(), relpath))
             path = database.abspath(relpath)
-        except (URLError, HTTPError):
-            path = download_file('http://svo2.cab.inta-csic.es/'
-                                 'theory/fps3/fps.php?ID={}'.format(self.filter_name),
-                                 os.path.join(get_rootdir(), relpath))
+       # else:
+       #     raise ValueError("filter %s is unknown" % self.filter_name)
 
         return path
+
+    def _update_atributes(self):
+        database = SpecDatabase(get_rootdir(), database_url())
+        if self.filter_system in database.filter_systems:
+            system = FilterSystem(self.filter_system)
+            self.wave_unit = system.wave_unit
+            self.data_type = system.data_type
+
+            self.file_extension = system.file_extension
+            self.wave_unit = system.wave_unit
+            self.instrument = system.instrument
+            self.filename = self.filter + self.file_extension
+            self.meta = system.get_data_dict()
+
+            del self.meta["filters"]
+
+        else:
+            self.filename = self.filter
 
     def __repr__(self):
         s = "Filter: " + self.filter_name
         return s
 
 
-class ExtCurvesLibraries:
+class ExtCurvesLibrary:
     def __init__(self, extcurvname):
         self.extcurvname = extcurvname
         self.title = None
@@ -289,27 +344,30 @@ class ExtCurvesLibraries:
         self.data_type = None
         self.file_extension = None
         self.curves = None
+        self.meta = None
+        self._update_attributes()
 
     def get_data(self):
         database = SpecDatabase(get_rootdir(), database_url())
         if self.extcurvname not in database.extinction_curves:
             raise ValueError("Extinction curves not known")
-        relpath = urljoin("extinction_curves", self.extcurvname)
+        relpath = urljoin("extinction_curves", self.extcurvname, "index.yml")
         data = database.get_yaml_contents(relpath)
         return data
 
-    def _update_atributes(self):
+    def _update_attributes(self):
         data = self.get_data()
         self.name = data["name"]
         self.title = data["title"]
         self.summary = data["summary"]
-        self.source = data["soruce"]
+        self.source = data["source"]
         self.wave_unit = data["wave_unit"]
         self.extinction_unit = data["extinction_unit"]
         self.data_type = data["data_type"]
         self.file_extension = data["file_extension"]
         self.curves = list(data["curves"].keys())
         self.curves_comments = [data["curves"][k] for k in self.curves]
+        self.meta = data
 
     def __repr__(self):
         s1 = "Extincion curves: " + self.name
@@ -322,21 +380,30 @@ class ExtinctionCurve:
     def __init__(self, curve_name):
         self.curve_name = curve_name
         self.family, self.ext_curve = self.curve_name.split("/")
+        self.meta = self.get_meta()
+        self.file_extension = self.meta["file_extension"]
+        self.filename = self.ext_curve + self.file_extension
         self.path = self.get_path()
-        self.meta = None
+
 
     def get_path(self):
 
-        relpath = urljoin("extinction_curves", self.family, self.ext_curve)
+        relpath = urljoin("extinction_curves", self.family, self.filename)
         database = SpecDatabase(get_rootdir(), database_url())
-        path = database.get_yaml_contents(relpath)
+        path = database.abspath(relpath)
 
         return path
+
+    def get_meta(self):
+        ext_family = ExtCurvesLibrary(self.family)
+        meta_dict = ext_family.meta
+        return meta_dict
 
     def __repr__(self):
         s = "Extinction curve: " + self.curve_name
         return s
 
+#
 
 
 
@@ -344,7 +411,9 @@ class ExtinctionCurve:
 
 
 
-# This is based on scopesim.effects.ter_curves_utils.py
+
+
+#    This is based on scopesim.effects.ter_curves_utils.py
 
 
 def get_filter_systems():

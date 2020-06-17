@@ -2,7 +2,6 @@
 """
 speXtra: A python tool to manage and manipulate astronomical spectra
 """
-
 import numbers
 import warnings
 
@@ -14,15 +13,13 @@ import astropy.units as u
 from astropy.constants import c as speed_of_light
 from astropy.modeling.models import Scale
 
-
 import synphot
 from synphot import (units, SourceSpectrum, SpectralElement, Observation, BaseUnitlessSpectrum)
 from synphot.models import (Empirical1D, GaussianFlux1D, Box1D, ConstFlux1D, BlackBody1D)
 from synphot import exceptions
 
-import tynt
-
-from .database import SpecDatabase, SpecLibrary, Filter, ExtinctionCurve
+from .database import SpecDatabase, SpecLibrary, FilterSystem, ExtCurvesLibrary
+from .database import SpectralTemplate, Filter, ExtinctionCurve
 
 
 __all__ = ["Spextrum", "make_passband",  "get_vega_spectrum"]
@@ -125,7 +122,8 @@ class Spextrum(SourceSpectrum):
         lam: wavelengths
         flux: flux
         """
-        location, meta = get_template(self.template_name)
+        template = SpectralTemplate(self.template_name)
+        location, meta = template.path, template.meta
         self.path = location
         self.data_type = meta["data_type"]
 
@@ -329,7 +327,8 @@ class Spextrum(SourceSpectrum):
         if Av is not None:
             Ebv = Av / Rv
 
-        curve, meta = get_extinction_curve(curve_name)
+        extcurve = ExtinctionCurve(curve_name)
+        curve, meta = extcurve.path, extcurve.meta
 
         if meta["data_type"] == "fits":
             header, wavelengths, rvs = synphot.specio.read_fits_spec(curve, flux_col='Av/E(B-V)')
@@ -360,7 +359,8 @@ class Spextrum(SourceSpectrum):
         if Av is not None:
             Ebv = Av / Rv
 
-        curve, meta = get_extinction_curve(curve_name)
+        ext_curve = ExtinctionCurve(curve_name)
+        curve, meta = ext_curve.path, ext_curve.meta
 
         if meta["data_type"] == "fits":
             header, wavelengths, rvs = synphot.specio.read_fits_spec(curve, flux_col='Av/E(B-V)')

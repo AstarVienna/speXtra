@@ -1,10 +1,11 @@
 import os
 import inspect
-from astropy.config import get_cache_dir
 from contextlib import closing
 from urllib.request import urlopen, Request
 from urllib.error import URLError, HTTPError
+
 from astropy.utils.console import ProgressBarOrSpinner
+from astropy.config import get_cache_dir
 
 from .conf import Conf
 
