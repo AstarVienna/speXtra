@@ -13,7 +13,6 @@ numpy~=1.15.4
 
 sphinx~=2.2.0
 pytest~=5.4.2
-spextra~=0.0.0
 scipy~=1.3.0
 yaml~=0.1.7
 setuptools~=40.7.0
