@@ -1,0 +1,80 @@
+# THE KINNEY-CALZETTI SPECTRAL ATLAS OF GALAXIES
+
+library_name : kc96
+
+type : galaxies
+
+title : The Kinney-Calzetti Spectral Atlas of Galaxies
+
+summary : |
+  The Kinney-Calsetti Atlas consists of an homogeneous set of 12 galaxy spectral
+  covering the ultraviolet, optical and near-infrared wavelength range up to about 1 micron.
+  The spectra include various morphological types and starburst galaxies.
+
+  This atlas contains a set of galaxy spectral covering the ultraviolet to near-infrared
+  spectral range (i.e. from 0.12  to 1 μm). The ultraviolet range of the spectral
+  templates was obtained with the large aperture (10" by 20") and low resolution spectrographs
+  on the IUE satellite. The optical spectra were obtained through a long slit with a 10" width,
+  where a window of 20" long was extracted to match the IUE aperture.
+
+  The spectral templates cover various galaxy morphological types
+  from elliptical to late type spiral. Starburst spectra for low
+  (E(B-V < 0.10) to high (0.61 < E(B-V) < 0.70) internal extinction are also available.
+  Several of the starburst galaxies used are classified as irregulars. Thus,
+  although irregular galaxies are not explicitly covered, the starburst templates
+  can be used for this morphological type. Details about how the spectra have been
+  constructed can be found in Kinney et al. (1996) for the different morphological types,
+  and in Calzetti et al. (1994) for the starbursts.
+
+  The flux of the spectra has been normalized to a visual magnitude of 12.5 (STMAG).
+  Details about each spectrum can be found in the header of the FITS file.
+
+reference : Kinney, A.L., Calzetti, D., Bohlin, R.C., McQuade, K., Storchi-Bergmann, T.  & Schmitt, H.R. 1996, ApJ, 467, 38
+
+link : "http://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/the-kinney-calzetti-spetral-atlas"
+
+spectral_coverage :
+  - uv
+  - vis
+
+resolution : 10
+
+wave_unit: Angstrom
+
+flux_unit : FLAM
+
+wave_column_name : WAVELENGTH
+
+flux_column_name : FLUX
+
+data_type: fits
+
+file_extension: .fits
+
+templates:    # comments
+  elliptical : null
+  bulge      : null
+  s0         : null
+  sa         : null
+  sb         : null
+  sc         : null
+  starb1     : starburst with E(B-V)<0.1
+  starb2     : starburst with 0.11<E(B-V)<0.21
+  starb3     : starburst with 0.25<E(B-V)<0.35
+  starb4     : starburst with 0.39<E(B-V)<0.50
+  starb5     : starburst with 0.51<E(B-V)<0.60
+  starb6     : starburst with 0.61<E(B-V)<0.70
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -10,6 +10,7 @@ libraries:
   brown     : Galaxy SEDs from the UV to the Mid-IR 
   kurucz    : Excerpt of Kurucz 1993 Models
   sne       : Supernova Legacy Survey
+  moehler   : flux/telluric standars with X-Shooter
 
 # here go the extinction curves
 extinction_curves:

@@ -1,0 +1,71 @@
+# Nebulae 
+
+library_name : nebulae
+
+type : nebulae
+
+title : THE GALACTIC EMISSION LINE OBJECT ATLAS 
+
+summary : |
+  This atlas contains the model spectra of the Orion nebula, and of the 
+  planetary nebula NGC 7009. The templates cover the wavelength range from
+  0.1 to 1.1 microns. 
+
+  The continuum of the Orion's template contains the nebular contribution
+  plus a combination of Kurucz model atmospheres to simulated the stellar
+  contribution. The fluxes of the UV, optical and near-IR emission lines
+  from different sources are also incorporated into the template (J.R. Walsh,
+  private comm).  
+
+  The continuum of the planetery nebula has a nebular component and a hot
+  stellar component simulated by an 80000K black body. The fluxes of the UV,
+  optical and near-IR emission lines, from different sources, are also
+  incorporated into the template (J.R. Walsh, private comm.).
+
+  Details about how each individual template has been constructed can be found
+  in the header of the STSDAS binary files. The header can be read using the 
+  tupar task of the IRAF ttools package. Files can also be dump into an ASCII 
+  formatted file using the tdump task of the IRAF ttools package.
+
+
+reference : TBD
+
+link : TBD
+
+spectral_coverage :
+  - uv
+  - vis
+  - nir
+
+resolution : 10
+
+wave_unit: Angstrom
+
+flux_unit : FLAM
+
+wave_column_name : WAVELENGTH
+
+flux_column_name : FLUX
+
+data_type: fits
+
+file_extension: .fits
+
+templates:    # comments
+  orion:     Orion
+  pn:        Planetary Nebula
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,306 @@
+# An Atlas of Galaxy Spectral Energy Distributions from the Ultraviolet to the Mid-infrared 
+
+library_name : brown
+
+type : Galaxies
+
+title : An Atlas of Galaxy Spectral Energy Distributions from the Ultraviolet to the Mid-infrared 
+
+summary : |
+  We present an atlas of 129 spectral energy distributions for nearby galaxies, 
+  with wavelength coverage spanning from the ultraviolet to the mid-infrared. Our atlas 
+  spans a broad range of galaxy types, including ellipticals, spirals, merging galaxies, 
+  blue compact dwarfs, and luminous infrared galaxies. We have combined ground-based optical 
+  drift-scan spectrophotometry with infrared spectroscopy from Spitzer and Akari with gaps in spectral 
+  coverage being filled using Multi-wavelength Analysis of Galaxy Physical Properties spectral energy distribution models. 
+  The spectroscopy and models were normalized, constrained, and verified with matched-aperture photometry measured from 
+  Swift, Galaxy Evolution Explorer, Sloan Digital Sky Survey, Two Micron All Sky Survey, Spitzer, and Wide-field 
+  Infrared Space Explorer images. The availability of 26 photometric bands allowed us to identify and mitigate systematic 
+  errors present in the data. Comparison of our spectral energy distributions with other template libraries and the observed 
+  colors of galaxies indicates that we have smaller systematic errors than existing atlases, while spanning a broader range of 
+  galaxy types. Relative to the prior literature, our atlas will provide improved K-corrections, photometric redshifts, 
+  and star-formation rate calibrations.
+
+reference :  Brown et al. 2014, ApJS 212, 18 
+
+link : "https://archive.stsci.edu/hlsp/galsedatlas"
+
+spectral_coverage :
+  - uv
+  - vis
+  - nir
+  - mir
+
+resolution : 2.5 # optical 
+
+wave_unit: Angstrom
+
+flux_unit : FLAM
+
+wave_column_name : WAVELENGTH
+
+flux_column_name : FLUX
+
+data_type: ascii
+
+file_extension: .dat
+
+templates:    # comments
+  Arp256N  :           SB(s)c SF             
+  Arp256S  :             SB(s)b SF             
+  NGC0337  :             SBd SF              
+  CGCG436-030  :       Pec SF             
+  NGC0474  :             (R)SA(s)0  Passive     
+  NGC0520  :             Pec  SF/AGN             
+  NGC0584  :             E4  Passive             
+  NGC0628  :             SAc  Passive             
+  NGC0660  :             SB(s)a  SF/AGN         
+  IIIZw035  :             Pec SF/AGN             
+  NGC0695  :             S0  SF             
+  NGC0750  :             Pec  Passive             
+  NGC0855  :             E SF                 
+  NGC1068  :             (R)SA(rs)b  AGN        
+  Arp118  :             Pec  SF/AGN             
+  NGC1144  :             Pec SF             
+  NGC1275  :             Pec Passive             
+  NGC1614  :             SB(s)c SF/AGN             
+  NGC2388  :             Irr  SF             
+  NGC2403  :             SABcd Passove             
+  NGC2537  :             SB(s)m SF             
+  NGC2623  :             Pec AGN             
+  IRAS08572+3915  :    Pec  SF/AGN             
+  UGC04881  :             Pec  SF             
+  NGC2798  :             SBa pec  SF/AGN        
+  UGCA166  :             Irr  SF             
+  UGC05101  :             Pec  AGN             
+  NGC3049  :             SBab  SF             
+  NGC3079  :             SB(s)c  SF/AGN         
+  UGCA208  :             Pec  AGN             
+  NGC3190  :             SAa pec  Passive       
+  NGC3198  :             SBc  SF             
+  NGC3265  :             E  SF                 
+  Mrk33  :             Im pec  SF             
+  NGC3310  :             SAB(r)bc  SF             
+  NGC3351  :             SBb  SF             
+  NGC3379  :             E0  Passove             
+  UGCA219  :             Sc  SF             
+  NGC3521  :             SABbc  SF             
+  NGC3627  :             SABb  SF/AGN             
+  IC0691  :             Irr  SF             
+  NGC3690  :             Pec  SF/AGN             
+  NGC3773  :             SA0  SF             
+  Mrk1450  :             Irr  SF             
+  UGC06665  :             Sb  SF             
+  NGC3870  :             S0  SF             
+  UM461  :             Irr  SF             
+  UGC06850  :             Irr  SF             
+  NGC3938  :             SAc  Passive             
+  NGC4088  :             SAB(rs)bc  SF             
+  NGC4125  :             E6 pec  Passive        
+  NGC4138  :             SA(r)0  SF/AGN         
+  NGC4168  :             E  Passive             
+  NGC4194  :             Pec  SF/AGN             
+  Haro06  :             Irr  SF             
+  NGC4254  :             SAc  SF             
+  NGC4321  :             SABbc  SF             
+  NGC4365  :             E  Passive             
+  NGC4387  :             E  Passive             
+  NGC4385  :             SB(rs)0  SF/AGN        
+  NGC4450  :             SAab  AGN             
+  NGC4458  :             E  Passive             
+  NGC4473  :             E  Passive             
+  NGC4486  :             E  Passive             
+  NGC4536  :             SABbc  SF             
+  NGC4550  :             E  Passive             
+  NGC4551  :             E  Passive             
+  NGC4552  :             E  Passive             
+  NGC4559  :             SABcd  SF             
+  NGC4569  :             SABab  AGN             
+  NGC4579  :             SABb  AGN             
+  NGC4594  :             SAa  Passive             
+  NGC4625  :             SABm pec  SF             
+  NGC4621  :             E Passive             
+  NGC4631  :             SBd AGN             
+  NGC4660  :             E Passive             
+  NGC4670  :             SB(s)0/a  SF             
+  NGC4676A  :             Pec  AGN             
+  NGC4725  :             SABab pec  Passive     
+  NGC4826  :             SAab  SF/AGN             
+  NGC4860  :             E  Passive             
+  NGC4889  :             E4  Passive             
+  IC4051  :             E  Passive             
+  NGC4926  :             E  Passive             
+  NGC5033  :             SAc  SF/AGN             
+  IC0860  :             Sa  AGN             
+  UGC08335NW  :        Pec  SF/AGN             
+  UGC08335SE  :        Pec  SF/AGN             
+  NGC5055  :             SAbc  Passive             
+  IC0883  :             Pec  SF/AGN             
+  NGC5104  :             Sa  SF/AGN             
+  NGC5194  :             SABbc pecSF/AGN        
+  NGC5195  :             SB0 pec  SF/AGN        
+  NGC5256  :             Pec  AGN             
+  NGC5257  :             SAB(s)b  SF             
+  NGC5258  :             SA(s)b  SF             
+  UGC08696  :             Pec  AGN             
+  Mrk1490  :             Sa  SF/AGN             
+  NGC5653  :             (R)SA(rs)b SF         
+  Mrk0475  :             Irr  SF             
+  NGC5713  :             SABbc pec  SF             
+  UGC09618S  :         Sc  SF/AGN             
+  UGC09618  :             Pec  SF/AGN             
+  UGC09618N  :         Sb  SF             
+  NGC5866  :             S0  Passive             
+  CGCG049-057  :       Irr  SF/AGN             
+  NGC5953  :             Sa  SF/AGN             
+  IC4553  :             Pec  AGN             
+  UGCA410  :             Irr  SF             
+  NGC5992  :             SBb  SF             
+  NGC6052  :             Pec  SF             
+  NGC6090  :             Pec  SF             
+  NGC6240  :             Pec  AGN             
+  IRAS17208-0014  :    Pec  SF             
+  IIZw096  :             Pec  SF             
+  NGC7331  :             SAb  SF/AGN             
+  UGC12150  :             SB0/a  SF/AGN             
+  CGCG453-062  :       Sab  SF             
+  IC5298  :             Pec  AGN             
+  NGC7585  :             (R)SA(s)0  Passive     
+  NGC7591  :             SBbc  SF             
+  NGC7592  :             Pec  SF/AGN             
+  NGC7673  :             (R)SAc  SF             
+  NGC7674  :             SA(r)bc  Passive       
+  NGC7679  :             SB0  SF/AGN             
+  Mrk0930  :             Pec  SF             
+  NGC7714  :             SB(s)b  SF/AGN         
+  NGC7771  :             SB(s)a  SF             
+  Mrk0331  :           Sa  SF/AGN             
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

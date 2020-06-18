@@ -1,0 +1,80 @@
+# THE AGN ATLAS  
+
+library_name : agn
+
+type : agn
+
+title : THE AGN ATLAS
+
+summary : |
+  This atlas contains a few spectral templates of AGNs covering the
+  ultraviolet to near-infrared spectral range (see Table 1 for spectral
+  coverage). The LINER and Seyfert 2 templates have been obtained with the
+  large aperture (10" by 20") and low resolution spectrographs of the IUE
+  satellite. The optical spectra were obtained through a long slit with a 10"
+  width, were a window of 20" long was extracted to mach the IUE aperture 
+  (Calzetti 1995, private comm.). The flux of the LINER and Seyfert2 templates
+  is normalized to a Johnson visual magnitude of 12.5 (STMAG).
+
+  The Seyfert1 template consists of an UV spectrum obtained with the IUE low 
+  resolution spectrographs and of a ground-based optical spectrum. The bright
+  QSO template is a composite spectrum from the Large Bright Quasar Survey
+  of Francie and collaborators (1991).  The Seyfert1 and QSO spectral
+  templates are normalized to a Johnson blue magnitude of 12.5 (STMAG).
+
+  The NGC 1068 template is a composite spectrum. The continuum contains the 
+  nebular, stellar, and power-law contributions. The observed fluxes and FWHM 
+  of the UV, optical and near-IR emission lines are also incorporated into the
+  template (J.R. Walsh, private comm; read also the header of the STSDAS binary
+  for further details).  
+
+  Details about how each template has been constructed can be found in the header
+  of the STSDAS binary file, or in the references given above. The header can be 
+  read using the tupar task of the IRAF ttools package. STSDAS files can also be
+  dumped into an ASCII formatted file using the tdump task of the IRAF ttools package.
+
+
+reference : Francis et al. 1991, ApJ 373, 465.
+
+link : TBD
+
+spectral_coverage :
+  - uv
+  - vis
+  - nir
+
+resolution : 10
+
+wave_unit: Angstrom
+
+flux_unit : FLAM
+
+wave_column_name : WAVELENGTH
+
+flux_column_name : FLUX
+
+data_type: fits
+
+file_extension: .fits
+
+templates:    # comments
+  liner:     spectrum of M81
+  ngc1068:   model,  lines + cont.
+  qso:        average of various spectra
+  seyfert1:   spectrum of NGC 5548
+  seyfert2:   spectrum of NGC 5548
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,246 @@
+# The IRTF Spectral Library
+
+library_name : irtf
+
+type : 
+  - stars
+  - brown dwarfs
+  - planets
+
+title : The IRTF Spectral Library
+
+summary : |
+  The IRTF Spectral Library is a collection of 0.8-5.0 μm mostly stellar spectra observed at a resolving power of R = λ/Δλ ~ 2000 with the 
+  medium-resolution spectrograph, SpeX, at the NASA Infrared Telescope Facility (IRTF) on Mauna Kea. The current release covers mainly 
+  solar-metallicity late-type stars with spectral types between F and M and luminosity classes between I and V, but also includes AGB stars, 
+  carbon and S stars, and L and T dwarfs. We also include spectra of the giant planets, Jupiter, Saturn, Uranus, and Neptune. Later updates will 
+  add Wolf-Rayet, O, B, and A stars.
+
+reference : Rayner, J.T., Cushing, M.C., & Vacca, W.D., 2009, ApJS, 185, 289
+
+link : "http://irtfweb.ifa.hawaii.edu/~spex/IRTF_Spectral_Library/index.html"
+
+spectral_coverage :
+  - nir
+  - mir
+
+resolution : 0.0015  # um
+
+wave_unit: um
+
+flux_unit : W m-2 um-1
+
+wave_column_name : WAVELENGTH
+
+flux_column_name : FLUX
+
+data_type: ascii
+
+file_extension: .dat
+
+templates:      # comments: star name, spec type
+  C7: HD31996   C7,6e(N4)
+  C-J4: HD70138  C-J4.5IIIaC26j6
+  C-J5: HD57160  C-J5-C25-j4
+  C-N4.5C: HD92055  C-N4.5C24.5
+  C-N4C23: HD44984  C-N4C23.5
+  C-N5C26: HD48664  C-N5C26-
+  C-R2: HD76846  C-R2+IIIaC22.5
+  F0Ia: HD7927_ext  F0Ia
+  F0Ib: HD135153_ext  F0Ib-II
+  F0II: HD6130_ext  F0II
+  F0IIIa: HD89025  F0IIIa
+  F0III-IVn: HD13174  F0III-IVn
+  F0IV: HD27397    F0IV
+  F0V: HD108519    F0V(n)
+  F1II: HD173638_ext   F1II
+  F1V: HD213135    F1V
+  F2-F5Ib: BD+38_2803   F2-F5Ib
+  F2Ib: HD182835_ext   F2Ib
+  F2III: HD40535    F2III-IV
+  F2V: HD113139    F2V
+  F3V: HD26015    F3V
+  F4III: HD21770    F4III
+  F4V: HD16232    F4V
+  F5.5III: HD75555    F5.5III-IV
+  F5Ib-G1Ib: HD213306_ext   F5Ib-G1Ib
+  F5III: HD17918    F5III
+  F5II-III: HD186155    F5II-III
+  F5V: HD218804    F5V
+  F6III-IV: HD160365    F6III-IV
+  F6IV: HD11443    F6IV
+  F6V: HD215648    F6V
+  F7II: HD201078    F7II-
+  F7III: HD124850    F7III
+  F7V: HD126660    F7V
+  F8.5IV-V: HD102870    F8.5IV-V
+  F8Ia: HD190323_ext   F8Ia
+  F8Ib: HD51956_ext   F8Ib
+  F8III: HD220657    F8III
+  F8IV: HD111844    F8IV
+  F8V: HD219623    F8V
+  F9.5V: HD114710    F9.5V
+  F9IIIa: HD6903_ext   F9IIIa
+  F9V: HD176051    F9V
+  wF9V: HD165908  metalweak wF9V
+  G0Ib-II: HD185018_ext   G0Ib-II
+  G0V: HD109358    G0V
+  G1.5V: HD20619    G1.5V
+  G1Ib: HD74395    G1Ib
+  G1III: HD21018_ext   G1IIICH-1
+  G1II: HD216219  G1II-IIIFe-1CH0
+  G1-V: HD95128    G1-VFe-0.5
+  G1V: HD10307    G1V
+  G2Ib: HD39949_ext   G2Ib
+  G2Ib: HD3421    G2Ib-II
+  G2II: HD219477    G2II-III
+  G2IV: HD126868    G2IV
+  G2V: HD76151    G2V
+  G3Ib-II: HD192713_ext   G3Ib-IIWkH&Kcomp
+  G3II: HD176123_ext   G3II
+  G3IIIb: HD88639    G3IIIbFe-1
+  G3Va: HD10697    G3Va
+  G4Ia: HD6474_ext   G4Ia
+  G4III: HD108477    G4III
+  G4O-Ia: HD179821_ext   G4O-Ia
+  G4V: HD214850    G4V
+  G5Ib: HD190113_ext   G5Ib
+  G5IIIa: HD193896    G5IIIa
+  G5IIICN: HD18474.   G5IIICN-3CH-2H
+  G5V: HD165185    G5V
+  G6.5V: HD115617    G6.5V
+  G6IbH: delta1_HD161664_ext G6IbH
+  G6Ib-IIa: HD202314_ext.fit  G6Ib-IIaCa1Ba0.5
+  G6IIb: HD58367  G6IIb
+  G6III: HD27277  G6III
+  G7.5IIIa: HD16139_ext  G7.5IIIa
+  G7Ia: HD333385_ext  G7Ia
+  G7II: HD25877_ext  G7II
+  G7IIIa: HD182694  G7IIIa
+  G7IV: HD114946  G7IV
+  G7IV: HD20618  G7IV
+  G8Ib: HD208606_ext  G8Ib
+  G8IIIBa1: HD104979   G8IIIBa1CN-1CH1
+  G8IIIFe-1: HD135722  G8IIIFe-1
+  G8IIIFe-5: HD122563   G8IIIFe-5
+  G8V: HD101501  G8V
+  G9IICN1H: delta1_HD170820_ext G9IICN1H
+  G9III: HD222093  G9III
+  K0.5IIb: HD164349_ext  K0.5IIb
+  K0.5IIICN1: HD9852_ext  K0.5IIICN1
+  K0Ia: HD165782_ext  K0Ia
+  K0Ib: HD44391_ext  K0Ib
+  K0II: HD179870_ext  K0II
+  K0III: HD100006  K0III
+  K0V: HD145675  K0V
+  K1.5IIIlines: HD124897_lines_ext.   K1.5IIIFe-0.5
+  K1.5IIIflux: HD124897_shape_ext.    K1.5IIIFe-0.5
+  K1Ia-Iab: HD63302_ext    K1Ia-Iab
+  K1-IIIb1: HD91810      K1-IIIbCN1.5Ca1
+  K1-IIIFe: HD36134      K1-IIIFe-0.5
+  K1III: HD25975      K1III
+  K1IVa: HD142091      K1IVa
+  K1IV: HD165438      K1IV
+  K1V: HD10476      K1V
+  K2.5II: HD23082_ext     K2.5II
+  K2IIIFe: HD2901      K2IIIFe-1
+  K2III: HD132935_ext     K2III
+  K2O-Ia: HD212466_ext     K2O-Ia
+  K2V: HD3765      K2V
+  K3.5IIIb: HD114960     K3.5IIIbCN0.5CH0.5
+  K3Iab-Ib: HD187238_ext     K3Iab-Ib
+  K3+IIIFe05: HD99998_ext     K3+IIIFe-0.5
+  K3IIIFe1: HD35620_ext     K3IIIFe1
+  K3III: HD178208_ext     K3III
+  K3II-III: HD16068_ext     K3II-III
+  K3V: HD219134      K3V
+  K4Ib: HD185622A_ext     K4Ib
+  K4Ib-II: HD201065_ext     K4Ib-II
+  K4-III: HD207991_ext     K4-III
+  K4V: HD45977_ext     K4V
+  K5.5III: HD120477      K5.5III
+  K5Ib: HD216946_ext     K5Ib
+  K5III: HD181596      K5III
+  K5V: HD36003      K5V
+  K6IIIa: HD3346      K6IIIa
+  K7IIa: HD181475_ext     K7IIa
+  K7III: HD194193      K7III
+  K7V: HD201092      K7V
+  kA9hF2mF2: HD164136      kA9hF2mF2(IV)
+  L0.5: 2MASSJ0746+2000AB    L0.5
+  L1: 2MASSJ0208+2542     L1
+  L2: Kelu-1AB      L2
+  L3: 2MASSJ1146+2230AB    L3
+  L3.5: 2MASSJ0036+1821     L3.5
+  L4.5: 2MASSJ2224-0158     L4.5
+  L5: 2MASSJ1507-1627     L5
+  L6: 2MASSJ1515+4847     L6(NIR)
+  L7.5: 2MASSJ0825+2115     L7.5
+  L8: DENISJ0255-4700     L8
+  M0.5Ib: HD236697_ext     M0.5Ib
+  M0.5V: HD209290      M0.5V
+  M0IIIb: HD213893      M0IIIb
+  M0V: HD19305      M0V
+  M10+III: IRAS14086-0703     M10+III
+  M1.5Iab-Ib: HD35601_ext     M1.5Iab-Ib
+  M1.5Ib: BD+60_265_ext     M1.5Ib
+  M1.5V: HD36395      M1.5V
+  M1-Iab-Ib: HD14404_ext     M1-Iab-Ib
+  M1Ia: HD339034_ext     M1Ia
+  M1+III: HD204724      M1+III
+  M1-M2Ia-Iab: HD39801_ext     M1-M2Ia-Iab
+  M1V: HD42581     M1V
+  M2.5IIIBa0.5: HD219734      M2.5IIIBa0.5
+  M2.5V: Gl381      M2.5V
+  M2-Ia: HD206936_ext     M2-Ia
+  M2Ib: HD10465_ext     M2Ib
+  M2II: HD23475_ext     M2II
+  M2III: HD120052      M2III
+  M2V: Gl806      M2V
+  M3.5I: HD14488_ext     M3.5IabFe-1var
+  M3.5III: HD28487_ext     M3.5IIICa-0.5
+  M3.5V: Gl273      M3.5V
+  M3Iab-Ia: CD-31_49_ext     M3Iab-Ia
+  M3IIb: HD40239      M3IIb
+  M3III: HD39045_ext     M3III
+  M3-M4Iab: HD14469_ext     M3-M4Iab
+  M3toM4: RW_Cyg_ ext    M3toM4Ia-Iab
+  M3V: Gl388      M3V
+  M4.5IIIa: HD204585      M4.5IIIa
+  M4.5V: Gl268AB      M4.5V
+  M4+IIIa: HD19058      M4+IIIa
+  M4+III: HD214665      M4+III
+  M4III: HD4408      M4III
+  M4V: Gl299_ext     M4V
+  M5.5III: HD94705      M5.5III
+  M5e-M9eIII: HD14386      M5e-M9eIII
+  M5Ib-II: HD156014      M5Ib-II
+  M5III: HD175865      M5III
+  M5V: Gl866ABC_ext     M5V
+  M6.5StoM7: HD142143      M6.5StoM7SIII
+  M6.5V: GJ1111      M6.5V
+  M6e-M9eIII: HD69243      M6e-M9eIII
+  M6-III: HD18191      M6-III
+  M6III: HD196610      M6III
+  M6V: Gl406      M6V
+  M7-8III: BRIB2339-0447     M7-8III
+  M7-III: HD108849      M7-III
+  M7-M7.5I: MY_Cep      M7-M7.5I
+  M7V: Gl644C      M7V
+  M8-9III: IRAS14303-1042     M8-9III
+  M8III: IRAS01037+1219     M8III
+  M8V: Gl752B      M8V
+  M9.5V: BRIB0021-0214     M9.5V
+  M9III: BRIB1219-1336     M9III
+  M9V: DENIS-PJ1048-3956    M9V
+  Jupiter: Jupiter      plnt
+  Neptune: Neptune      plnt
+  Saturn: Saturn      plnt
+  Uranus: Uranus      plnt
+  S2.5Zr2: BD+44_2267     S2.5Zr2
+  S4.5Zr2Ti4: HD64332      S4.5Zr2Ti4
+  S5-S6Zr3: HD62164      S5-S6Zr3to4Ti0
+  SC5.5Zr: HD44544      SC5.5Zr0.5
+  T2: SDSSJ1254-0122     T2
+  T4.5: 2MASSJ0559-1404    T4.5
+

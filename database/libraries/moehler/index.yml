@@ -18,22 +18,39 @@ spectral_coverage :
   - vis
   - nir
 
-resolution : 5
+resolution : 0.1
 
-wave_unit: Angstrom
+wave_unit: nm
 
-flux_unit : FLAM
+flux_unit : 10mW/m2/nm
 
-wave_column_name : WAVELENGTH
+wave_column_name : lambda
 
-flux_column_name : FLUX
+flux_column_name : flux
 
 data_type: fits
 
 file_extension: .fits
 
 templates:      # comments
-  
+  eg274      : EG274,    Te=25985,  logg=7.96, DA
+  feige110   : Feige110, Te=45250,  logg=5.80, sdO
+  gd153      : GD153,    Te=40320,  logg=7.93, DA
+  gd71       : GD71,     Te=33590,  logg=7.93, DA
+  l97-3      : L97-3,    Te=10917,  logg=8.15, DC
+  ltt3218    : LTT3218,  Te=9081,   logg=7.71, DA
+  ltt7987    : LTT7987,  Te=16147,  logg=7.98, DA
+
+
+
+
+
+
+
+
+
+
+
   
   
   
