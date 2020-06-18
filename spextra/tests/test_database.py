@@ -65,7 +65,7 @@ class TestSpecDatabase:
 
     def test_abspath(self):
         database = SpecDatabase(rootdir=MOCK_DIR)
-        assert os.path.exists("mocks/index.yml")
+        assert os.path.exists(os.path.join(MOCK_DIR, "index.yml"))
 
     def test_get_yaml_contents(self):
         database = SpecDatabase(rootdir=MOCK_DIR)

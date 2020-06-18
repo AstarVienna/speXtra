@@ -1,0 +1,25 @@
+# Database contents
+
+libraries:
+  kc96      : Kinney-Calzetti Atlas
+  pickles   : Pickles Stellar Library
+  sdss      : SDSS galaxy composite spectra
+  irtf      : IRTF spectral library
+  agn       : AGN templates
+  nebulae   : Emission line nebulae
+  brown     : Galaxy SEDs from the UV to the Mid-IR 
+  kurucz    : Excerpt of Kurucz 1993 Models
+  sne       : Supernova Legacy Survey
+
+# here go the extinction curves
+extinction_curves:
+  gordon    : LMC and SMC extinction laws
+  cardelli  : MW extinction laws
+  calzetti  : extragalactic attenuation curves
+
+# here go filters not found at SVO
+filter_systems:
+  micado : MICADO filters
+# metis  : METIS filters
+
+

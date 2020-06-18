@@ -1,0 +1,168 @@
+# 
+library_name : moehler
+
+type : stars
+
+title : Flux calibration of medium-resolution spectra from 300 nm to 2500 nm
+
+summary : |
+   We will provide standard star reference data that allow users to derive response curves from 300nm to 2500nm for spectroscopic data of medium to high resolution, including those taken with echelle spectrographs. In addition we describe a method to correct for moderate telluric absorption without the need of observing telluric standard stars. As reference data for the flux standard stars we use theoretical spectra derived from stellar model atmospheres. We verify that they provide an appropriate description of the observed standard star spectra by checking for residuals in line cores and line overlap regions in the ratios of observed (X-shooter) spectra to model spectra. The finally selected model spectra are then corrected for remaining mismatches and photometrically calibrated using independent observations. The correction of telluric absorption is performed with the help of telluric model spectra. We provide new, finely sampled reference spectra without telluric absorption for six southern flux standard stars that allow the users to flux calibrate their data from 300nm to 2500nm, and a method to correct for telluric absorption using atmospheric models.
+
+
+reference : Moehler et al. 2014, A&A 568, A9
+
+link : TB
+
+spectral_coverage :
+  - uv
+  - vis
+  - nir
+
+resolution : 5
+
+wave_unit: Angstrom
+
+flux_unit : FLAM
+
+wave_column_name : WAVELENGTH
+
+flux_column_name : FLUX
+
+data_type: fits
+
+file_extension: .fits
+
+templates:      # comments
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
