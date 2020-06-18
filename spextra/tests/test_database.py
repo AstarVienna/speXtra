@@ -71,4 +71,4 @@ class TestSpecDatabase:
         database = SpecDatabase(rootdir=MOCK_DIR)
         data = database.get_yaml_contents("index.yml")
         assert isinstance(data, dict)
-    
+
