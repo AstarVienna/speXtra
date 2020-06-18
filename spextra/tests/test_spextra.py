@@ -2,12 +2,14 @@
 Tests for class Spextrum
 """
 import pytest
-from spextra import Spextrum, make_passband
-from synphot import SpectralElement, SourceSpectrum, units
-import astropy.units as u
-import numpy as np
-import os
 import inspect
+import os
+
+import numpy as np
+import astropy.units as u
+from synphot import SpectralElement, SourceSpectrum, units
+
+from spextra import Spextrum, make_passband
 
 
 # utility function

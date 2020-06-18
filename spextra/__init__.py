@@ -3,6 +3,7 @@ import os
 import inspect
 from . import spextra
 from . import database
+from . import utils
 
 from .spextra import Spextrum, make_passband
 from .database import SpecDatabase
