@@ -16,9 +16,9 @@ from astropy.modeling.models import Scale
 import synphot
 from synphot import (units, SourceSpectrum, SpectralElement, Observation, BaseUnitlessSpectrum)
 from synphot.models import (Empirical1D, GaussianFlux1D, Box1D, ConstFlux1D, BlackBody1D)
+from synphot.specio import read_ascii_spec, read_fits_spec, read_spec
 from synphot import exceptions
 
-from .database import SpecDatabase, SpecLibrary, FilterSystem, ExtCurvesLibrary
 from .database import SpectralTemplate, Filter, ExtinctionCurve
 
 
@@ -47,10 +47,9 @@ def make_passband(filter_name=None, filter_file=None, wave_unit=u.Angstrom):
     """
     if filter_file is not None:
         try:
-            meta, wave, trans = synphot.specio.read_spec(filter_file,
-                                                         wave_unit=wave_unit,
-                                                         flux_unit='transmission')
-        except (FileNotFoundError, synphot.exceptions.SynphotError) as e:
+            meta, wave, trans = read_spec(filter_file, wave_unit=wave_unit,
+                                          flux_unit='transmission')
+        except (FileNotFoundError, exceptions.SynphotError) as e:
             print("File not found or malformed", e)
             raise
     else:
@@ -130,7 +129,7 @@ class Spextrum(SourceSpectrum):
         try:  # it should also try to read it from the file directly
             wave_unit = units.validate_unit(meta["wave_unit"])
             flux_unit = units.validate_unit(meta["flux_unit"])
-        except synphot.exceptions.SynphotError:
+        except exceptions.SynphotError:
             wave_unit = u.AA
             flux_unit = units.FLAM
 
@@ -141,14 +140,12 @@ class Spextrum(SourceSpectrum):
 
         # make try and except here to catch most problems
         if self.data_type == "fits":
-            meta, lam, flux = synphot.specio.read_fits_spec(location, ext=1,
-                                                            wave_unit=wave_unit,
-                                                            flux_unit=flux_unit,
-                                                            wave_col=wave_column_name,
-                                                            flux_col=flux_column_name)
+            meta, lam, flux = read_fits_spec(location, ext=1,
+                                             wave_unit=wave_unit, flux_unit=flux_unit,
+                                             wave_col=wave_column_name, flux_col=flux_column_name)
         else:
-            meta, lam, flux = synphot.specio.read_ascii_spec(location,
-                                                             wave_unit=wave_unit, flux_unit=flux_unit)
+            meta, lam, flux = read_ascii_spec(location, wave_unit=wave_unit,
+                                              flux_unit=flux_unit)
 
         return meta, lam, flux
 
@@ -204,7 +201,7 @@ class Spextrum(SourceSpectrum):
         """
         if vel != 0:
             if isinstance(vel, u.Quantity) is False:
-                vel = vel * u.m / u.s # assumed to be in m/s
+                vel = vel * u.m / u.s  # assumed to be in m/s
 
             z = (vel.to(u.m / u.s) / speed_of_light).value
         if z <= -1:
@@ -331,9 +328,9 @@ class Spextrum(SourceSpectrum):
         curve, meta = extcurve.path, extcurve.meta
 
         if meta["data_type"] == "fits":
-            header, wavelengths, rvs = synphot.specio.read_fits_spec(curve, flux_col='Av/E(B-V)')
+            header, wavelengths, rvs = read_fits_spec(curve, flux_col='Av/E(B-V)')
         else:
-            header, wavelengths, rvs = synphot.specio.read_ascii_spec(curve)
+            header, wavelengths, rvs = read_ascii_spec(curve)
 
         red_law = synphot.ReddeningLaw(Empirical1D, points=wavelengths, lookup_table=rvs, meta={'header': header})
         extinction = red_law.extinction_curve(Ebv)
@@ -363,9 +360,9 @@ class Spextrum(SourceSpectrum):
         curve, meta = ext_curve.path, ext_curve.meta
 
         if meta["data_type"] == "fits":
-            header, wavelengths, rvs = synphot.specio.read_fits_spec(curve, flux_col='Av/E(B-V)')
+            header, wavelengths, rvs = read_fits_spec(curve, flux_col='Av/E(B-V)')
         else:
-            header, wavelengths, rvs = synphot.specio.read_ascii_spec(curve)
+            header, wavelengths, rvs = read_ascii_spec(curve)
 
         red_law = synphot.ReddeningLaw(Empirical1D, points=wavelengths, lookup_table=rvs, meta={'header': header})
         extinction = red_law.extinction_curve(Ebv)

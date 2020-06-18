@@ -14,8 +14,9 @@ from .utils import get_rootdir, database_url, download_file
 
 # Configurations
 
-__all__ = ["SpecDatabase", "SpecLibrary", "SpectralTemplate",
-           "ExtinctionCurve", "Filter"]
+__all__ = ["SpecDatabase", "SpecLibrary", "SpectralTemplate", "ExtCurvesLibrary",
+           "ExtinctionCurve", "FilterSystem", "Filter",
+           "get_filter_names", "get_filter_systems"]
 
 # Do we need this?
 __pkg_dir__ = os.path.dirname(inspect.getfile(inspect.currentframe()))
@@ -107,7 +108,7 @@ class SpecDatabase:
     def __repr__(self):
         rootdir = " local data directory: " + self.rootdir
         database_url = "data base url: " + self.remote_root
-        libs = "libraries:" + ' ' + str(self.library_names)
+        libs = "libraries:" + ' ' + str(self.libraries)
         exts = "extinction curves:" + ' ' + str(self.extinction_curves)
         filts = "filter systems:" + ' ' + str(self.filter_systems)
 
@@ -289,6 +290,7 @@ class Filter:
         self.path = self.get_path()
 
     def get_path(self):
+        """ This just obtains the path to the filter  """
         relpath = urljoin("filter_systems", self.filter_system, self.filename)
         database = SpecDatabase()
         if self.filter_system in database.filter_systems:
@@ -318,7 +320,7 @@ class Filter:
             self.wave_unit = system.wave_unit
             self.instrument = system.instrument
             self.filename = self.filter + self.file_extension
-            self.meta = system.get_data_dict()
+            self.meta = system.meta
 
             del self.meta["filters"]
 
@@ -375,15 +377,12 @@ class ExtinctionCurve:
 
         return path
 
-
     def __repr__(self):
         s = "Extinction curve: " + self.curve_name
         return s
 
 
-
 #    This is based on scopesim.effects.ter_curves_utils.py
-
 
 def get_filter_systems():
     """
