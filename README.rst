@@ -14,6 +14,15 @@ It has developed to provide spectral sources to SpecSim but it may be helpful fo
 
 speXtra stands in the shoulder of giants: ``synphot`` and ``astropy``
 
+To install ``spextra`` please clone the repository
+
+.. code-block:: python
+
+    git clone https://github.com/miguelverdugo/speXtra
+    cd speXtra
+    pip install -e .
+
+Soon a PyPi version will be available
 
 Functionalities
 ===============
