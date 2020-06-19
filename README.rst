@@ -23,6 +23,7 @@ speXtra is able to:
 - Download spectra from known sources and return it in format compatible with ``synphot`` format
 
 .. code-block:: python
+
     from spextra import Spextrum
     sp = Spextrum("kc96/s0")
 
