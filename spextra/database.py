@@ -381,8 +381,32 @@ class ExtinctionCurve:
         s = "Extinction curve: " + self.curve_name
         return s
 
+#
+
+
+def database_as_table():
+    """
+    Show the contents of the database as table
+    Returns
+    -------
+
+    """
+
+    pass
+
+
+def database_as_tree():
+    """
+    Show the contents od the database as a tree
+    Returns
+    -------
+
+    """
+    pass
+
 
 #    This is based on scopesim.effects.ter_curves_utils.py
+
 
 def get_filter_systems():
     """

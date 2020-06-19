@@ -9,7 +9,7 @@ A python tool to manage and manipulate astronomical spectra
 Description
 ===========
 
-speXtra is a python tool to download, load, display and manipulate spectra of astronomical sources.
+``speXtra`` is a python tool to download, load, display and manipulate spectra of astronomical sources.
 It has developed to provide spectral sources to SpecSim but it may be helpful for other purposes too.
 
 speXtra stands in the shoulder of giants: ``synphot`` and ``astropy``
@@ -21,6 +21,12 @@ Functionalities
 speXtra is able to:
 
 - Download spectra from known sources and return it in format compatible with ``synphot`` format
+
+.. code-block:: python
+    from spextra import Spextrum
+    sp = Spextrum("kc96/s0")
+
+and it will load the S0 galaxy template of the Kinney-Calzetti spectral library
 
 
 - Load spectra from files in different formats and return it in ``synphot`` format
