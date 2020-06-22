@@ -10,13 +10,19 @@ Description
 ===========
 
 ``speXtra`` is a python tool to download, load, display and manipulate spectra of astronomical sources.
-It has developed to provide spectral sources to SpecSim but it may be helpful for other purposes too.
+It has developed to provide spectral sources to ScopeSim_ but it may be helpful for other purposes too.
 
-speXtra stands in the shoulder of giants: ``synphot`` and ``astropy``
+.. _ScopeSim: https://scopesim.readthedocs.io/en/latest/?badge=latest
+
+speXtra stands in the shoulder of giants: synphot_ and astropy_
+
+.. _synphot: https://synphot.readthedocs.io/en/latest/
+
+.. _astropy: https://www.astropy.org/
 
 To install ``spextra`` please clone the repository
 
-.. code-block:: python
+.. code-block:: bash
 
     git clone https://github.com/miguelverdugo/speXtra
     cd speXtra
@@ -27,40 +33,26 @@ Soon a PyPi version will be available
 Functionalities
 ===============
 
-speXtra is able to:
+``speXtra`` is able to:
 
-- Download spectra from known sources and return it in format compatible with ``synphot`` format
+- Download spectra from a database and return it in format compatible with ``synphot`` format
 
 .. code-block:: python
 
     from spextra import Spextrum
     sp = Spextrum("kc96/s0")
 
-and it will load the S0 galaxy template of the Kinney-Calzetti spectral library
+and it will load the S0 galaxy template of the Kinney-Calzetti spectral library. To quickly
+plot the resulting spectra, simply type
 
+.. code-block:: python
 
-- Load spectra from files in different formats and return it in ``synphot`` format
-   - Ascii and fits tables are natively supported by ``synphot``
-   - fits files and other type of spectra will be supported by converting
-     a ``specutils.Spectrum1D`` object to a ``synphot.SourceSpectrum``. Leave it to
-     ``specutils`` to try to do the file loading.
+    sp.plot()
 
-- Manipulate spectra:
-   - rebinning (interpolate), including log-rebin and constant velocity
-   - smooth with a kernel, including a wavelength changing kernel (think about it later)
-   - redshifting (blueshifting)
-   - (de-)reddening and (de-)attenuating
-   - scaling to a magnitude in filter
-   - obtaining magnitude in filter
-   - Add emission/absorption line (currently only gaussian profile is supported)
-
-- plot the spectra
+.. image:: docs/_static/images/kc96_S0.png
 
 
 
-TODO
-====
 
-- Create a logo ;-)
 
 
