@@ -49,8 +49,8 @@ plot the resulting spectra, simply type
 
     sp.plot()
 
-.. image:: docs/_static/images/kc96_S0.png
-
+.. image:: ./docs/_static/images/kc96_S0.png
+    :width: 40pt
 
 
 
