@@ -45,7 +45,7 @@ intersphinx_mapping = {
     'numpy': ('https://docs.scipy.org/doc/numpy/', None),
     'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
     'astropy': ('http://docs.astropy.org/en/stable/', None),
-    'emcee': ('https://emcee.readthedocs.io/en/stable/', None)
+    'synphot': ('https://synphot.readthedocs.io/en/latest/', None),
     }
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -57,8 +57,8 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.inheritance_diagram',
     'sphinx.ext.mathjax',
-    'sphinx.ext.linkcode',
-    'sphinx_gallery.gen_gallery',
+#    'sphinx.ext.linkcode',
+#    'sphinx_gallery.gen_gallery',
     'numpydoc',
     matplotlib.sphinxext.plot_directive.__name__
 ]
@@ -105,7 +105,7 @@ copyright = '2020-{:d}, {}'.format(current_year, author)
 
 import spextra
 # The short X.Y version.
-version = 0.1 #spextra.__version__.split('-', 1)[0]
+version = "0.1" #spextra.__version__.split('-', 1)[0]
 release = version
 # The full version, including alpha/beta/rc tags.
 
@@ -118,7 +118,7 @@ exclude_patterns = ['_build']
 default_role = 'obj'
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = 'default' #'sphinx'
 
 
 # -- Options for HTML output ---------------------------------------------------
@@ -129,7 +129,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = [sphinx_gallery.glr_path_static()]
+# html_static_path = [sphinx_gallery.glr_path_static()]
 
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,

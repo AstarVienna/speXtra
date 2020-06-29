@@ -1,4 +1,3 @@
-
 .. raw:: html
 
     <style media="screen" type="text/css">
@@ -6,14 +5,25 @@
       th { display:none; }
     </style>
 
+
+
 *******
 speXtra
 *******
 
 
+speXtra
+=======
+
 ``speXtra`` is a Python library for managing and manipulating astronomical spectra.
 
-It packages many workflows typically used in spectroscopy
+Under the hood it packages many ``synphot`` workflows to perform typical
+treatment of astronomical spectra.
+
+
+
+
+
 
 .. toctree::
    :maxdepth: 1
@@ -22,6 +32,9 @@ It packages many workflows typically used in spectroscopy
    install
    database
    spextra
+
+
+
 
 
 
