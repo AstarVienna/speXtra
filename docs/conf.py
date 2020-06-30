@@ -32,7 +32,7 @@ import datetime
 import sphinx_rtd_theme
 
 # import sphinx_gallery
-import matplotlib.sphinxext.plot_directive
+# import matplotlib.sphinxext.plot_directive probably not needed
 
 
 #sys.path.insert(0, os.path.abspath("_helpers"))
@@ -52,7 +52,7 @@ extensions = [
     'sphinx.ext.extlinks',
 #    'sphinx.ext.linkcode',
     'numpydoc',
-    matplotlib.sphinxext.plot_directive.__name__
+#    matplotlib.sphinxext.plot_directive.__name__
 ]
 
 
