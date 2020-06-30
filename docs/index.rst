@@ -15,7 +15,7 @@ speXtra
 speXtra
 =======
 
-``speXtra`` is a Python library for managing and manipulating astronomical spectra.
+``speXtra`` is a :python:`python <>` library for managing and manipulating astronomical spectra.
 
 Under the hood it packages many ``synphot`` workflows to perform typical
 treatment of astronomical spectra.
@@ -26,8 +26,8 @@ treatment of astronomical spectra.
 
 
 .. toctree::
-   :maxdepth: 1
-   :titlesonly:
+   :maxdepth: 2
+
 
    install
    database

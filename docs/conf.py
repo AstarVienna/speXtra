@@ -30,15 +30,31 @@ import os
 import datetime
 
 import sphinx_rtd_theme
-import sphinx_gallery
+
+# import sphinx_gallery
 import matplotlib.sphinxext.plot_directive
 
-sys.path.insert(0, os.path.abspath("_helpers"))
+
+#sys.path.insert(0, os.path.abspath("_helpers"))
 
 # -- General configuration ----------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
 needs_sphinx = '1.3'
+
+
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.inheritance_diagram',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.extlinks',
+#    'sphinx.ext.linkcode',
+    'numpydoc',
+    matplotlib.sphinxext.plot_directive.__name__
+]
+
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
@@ -48,39 +64,25 @@ intersphinx_mapping = {
     'synphot': ('https://synphot.readthedocs.io/en/latest/', None),
     }
 
+extlinks = {'python': ('https://docs.python.org/3/', None),
+            'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+            'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
+            'astropy': ('http://docs.astropy.org/en/stable/', None),
+            'synphot': ('https://synphot.readthedocs.io/en/latest/', None),
+            }
+
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.inheritance_diagram',
-    'sphinx.ext.mathjax',
-#    'sphinx.ext.linkcode',
-#    'sphinx_gallery.gen_gallery',
-    'numpydoc',
-    matplotlib.sphinxext.plot_directive.__name__
-]
+
 
 numpydoc_show_class_members = False
 autosummary_generate = True
 autoclass_content = "class"
 autodoc_default_flags = ["members", "inherited-members"]
 autodoc_docstring_signature = False
-#sphinx_gallery_conf = {
- #   'examples_dirs': '_examples',  # path to examples scripts
-  #  'gallery_dirs': 'examples',   # path to gallery generated examples
- #   'backreferences_dir': 'modules/generated',  # path to store the module
-                                             # using example template
- #   'doc_module': ('spextra',),  # documented module(s)
- #   'download_section_examples': False,
- #   'download_all_examples': False,  # don't package up examples.
- #   'default_thumb_file': os.path.join(os.path.dirname(__file__), '_logo',
- #                                      'spectral_white_bkg.png')
-#}
 
-    
+
 # The suffix of source filenames.
 source_suffix = '.rst'
 
