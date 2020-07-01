@@ -22,16 +22,17 @@ treatment of astronomical spectra.
 
 
 
-
-
-
 .. toctree::
    :maxdepth: 2
 
 
    install
-   database
    spextra
+   database
+   spectral_libraries
+   extinction_curves
+   filters
+
 
 
 
