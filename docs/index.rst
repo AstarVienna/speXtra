@@ -6,7 +6,6 @@
     </style>
 
 
-
 *******
 speXtra
 *******
@@ -17,29 +16,22 @@ speXtra
 
 ``speXtra`` is a :python:`python <>` library for managing and manipulating astronomical spectra.
 
-Under the hood it packages many ``synphot`` workflows to perform typical
-treatment of astronomical spectra.
+Under the hood it packages many :synphot:`synphot <>` workflows to perform typical
+treatment of astronomical spectra, including scaling, binning, smoothing, redshifting, etc.
+``speXtra`` does not make measurement on the spectra, except obtaining magnitudes.
 
-
-
-Getting Started
-===============
-
-
-
-
+``speXtra`` comes with a built-in :ref:`database <database>` to facilitate the access
+to commonly used spectral templates, extinction curves and filters.
 
 
 .. toctree::
    :maxdepth: 2
 
-
    install
-   spextra
+   starting
    database
-   spectral_libraries
-   extinction_curves
-   filters
+
+
 
 
 

@@ -32,6 +32,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.extlinks',
 #    'sphinx.ext.linkcode',
+    'sphinx.ext.doctest',
     'numpydoc',
 ]
 
@@ -44,7 +45,7 @@ intersphinx_mapping = {
     'synphot': ('https://synphot.readthedocs.io/en/latest/', None),
     }
 
-extlinks = {'python': ('https://docs.python.org/3/', None),
+extlinks = {'python': ('https://docs.python.org/3/%s', None),
             'numpy': ('https://docs.scipy.org/doc/numpy/', None),
             'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
             'astropy': ('http://docs.astropy.org/en/stable/', None),

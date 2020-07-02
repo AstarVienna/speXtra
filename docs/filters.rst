@@ -1,4 +1,4 @@
-.. _filters
+.. _filters:
 
 *******
 Filters
@@ -26,7 +26,7 @@ To list the filter systems available in the `SVO database <http://svo2.cab.inta-
 
 --------------------------------------------------------------------
 
-.. _micado
+.. _micado:
 
 MICADO
 ======

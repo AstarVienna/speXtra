@@ -1,4 +1,4 @@
-.. _extinction_curves
+.. _extinction_curves:
 
 *****************
 Extinction Curves
@@ -19,7 +19,7 @@ To list the names of the extinction curves included in the database
 
 --------------------------------------------------------------------
 
-.. _gordon
+.. _gordon:
 
 Gordon
 ======
@@ -27,7 +27,7 @@ Gordon
 .. literalinclude:: ../database/extinction_curves/gordon/index.yml
     :language: yaml
 
-.. _cardelli
+.. _cardelli:
 
 Cardelli
 ========
@@ -35,6 +35,8 @@ Cardelli
 .. literalinclude:: ../database/extinction_curves/cardelli/index.yml
     :language: yaml
 
+
+.. _calzetti:
 
 Calzetti
 ========

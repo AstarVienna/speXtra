@@ -1,6 +1,8 @@
+.. _install:
 
+************
 Installation
-============
+************
 
 ``speXtra`` is written in Python 3.7 and should work with newer versions
 
@@ -16,7 +18,7 @@ Soon a PyPi version will be available
 
 
 Dependencies
-============
+------------
 
 The following dependencies are necessary to run ``speXtra``
 

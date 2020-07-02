@@ -1,11 +1,13 @@
-.. _spextra-database:
+.. _database:
 
 
 ********
 Database
 ********
 
-The database is organized trough yaml files which describes its contents
+The database is organized trough yaml files which describes its contents.
+
+
 
 
 
@@ -24,3 +26,10 @@ Database contents
 
 
 
+.. toctree::
+   :maxdepth: 2
+
+
+   spectral_libraries
+   extinction_curves
+   filters

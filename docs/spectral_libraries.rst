@@ -1,4 +1,4 @@
-.. _spectral-libraries
+.. _spectral-libraries:
 
 ******************
 Spectral Libraries
@@ -31,7 +31,7 @@ Below you can find a detailed description of each library.
 
 --------------------------------------------------------------------
 
-.. _kc96
+.. _kc96:
 
 The Kinney-Calzetti Spectral Atlas of Galaxies
 ==============================================
@@ -39,7 +39,7 @@ The Kinney-Calzetti Spectral Atlas of Galaxies
 .. literalinclude:: ../database/libraries/kc96/index.yml
     :language: yaml
 
-.. _pickles
+.. _pickles:
 
 Pickles Stellar Library
 =======================
@@ -48,12 +48,15 @@ Pickles Stellar Library
     :language: yaml
 
 
+.. _sdss:
+
 SDSS galaxy composite spectra
 =============================
 
 .. literalinclude:: ../database/libraries/sdss/index.yml
     :language: yaml
 
+.. _irtf:
 
 IRTF spectral library
 =====================
@@ -61,6 +64,7 @@ IRTF spectral library
 .. literalinclude:: ../database/libraries/irtf/index.yml
     :language: yaml
 
+.. _agn:
 
 AGN templates
 =============
@@ -68,6 +72,7 @@ AGN templates
 .. literalinclude:: ../database/libraries/agn/index.yml
     :language: yaml
 
+.. _nebulae:
 
 Emission line nebulae
 =====================
@@ -76,12 +81,16 @@ Emission line nebulae
 .. literalinclude:: ../database/libraries/nebulae/index.yml
     :language: yaml
 
+.. _brown:
+
 Galaxy SEDs from the UV to the Mid-IR
 =====================================
 
 .. literalinclude:: ../database/libraries/brown/index.yml
     :language: yaml
 
+
+.. _kurucz:
 
 Subset of Kurucz 1993 Models
 ============================
@@ -90,12 +99,16 @@ Subset of Kurucz 1993 Models
     :language: yaml
 
 
+.. _sne:
+
 Supernova Legacy Survey
 =======================
 
 .. literalinclude:: ../database/libraries/sne/index.yml
     :language: yaml
 
+
+.. _moehler:
 
 Flux/Telluric standards with X-Shooter
 =======================================
