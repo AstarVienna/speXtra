@@ -34,7 +34,7 @@ Below you can find a detailed description of each library.
 .. _kc96:
 
 The Kinney-Calzetti Spectral Atlas of Galaxies
-==============================================
+----------------------------------------------
 
 .. literalinclude:: ../database/libraries/kc96/index.yml
     :language: yaml
@@ -42,7 +42,7 @@ The Kinney-Calzetti Spectral Atlas of Galaxies
 .. _pickles:
 
 Pickles Stellar Library
-=======================
+-----------------------
 
 .. literalinclude:: ../database/libraries/pickles/index.yml
     :language: yaml
@@ -51,7 +51,7 @@ Pickles Stellar Library
 .. _sdss:
 
 SDSS galaxy composite spectra
-=============================
+-----------------------------
 
 .. literalinclude:: ../database/libraries/sdss/index.yml
     :language: yaml
@@ -59,7 +59,7 @@ SDSS galaxy composite spectra
 .. _irtf:
 
 IRTF spectral library
-=====================
+---------------------
 
 .. literalinclude:: ../database/libraries/irtf/index.yml
     :language: yaml
@@ -67,7 +67,7 @@ IRTF spectral library
 .. _agn:
 
 AGN templates
-=============
+-------------
 
 .. literalinclude:: ../database/libraries/agn/index.yml
     :language: yaml
@@ -75,7 +75,7 @@ AGN templates
 .. _nebulae:
 
 Emission line nebulae
-=====================
+---------------------
 
 
 .. literalinclude:: ../database/libraries/nebulae/index.yml
@@ -84,7 +84,7 @@ Emission line nebulae
 .. _brown:
 
 Galaxy SEDs from the UV to the Mid-IR
-=====================================
+-------------------------------------
 
 .. literalinclude:: ../database/libraries/brown/index.yml
     :language: yaml
@@ -93,7 +93,7 @@ Galaxy SEDs from the UV to the Mid-IR
 .. _kurucz:
 
 Subset of Kurucz 1993 Models
-============================
+----------------------------
 
 .. literalinclude:: ../database/libraries/kurucz/index.yml
     :language: yaml
@@ -102,7 +102,7 @@ Subset of Kurucz 1993 Models
 .. _sne:
 
 Supernova Legacy Survey
-=======================
+-----------------------
 
 .. literalinclude:: ../database/libraries/sne/index.yml
     :language: yaml
@@ -111,7 +111,7 @@ Supernova Legacy Survey
 .. _moehler:
 
 Flux/Telluric standards with X-Shooter
-=======================================
+--------------------------------------
 
 .. literalinclude:: ../database/libraries/moehler/index.yml
     :language: yaml

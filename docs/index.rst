@@ -25,7 +25,8 @@ to commonly used spectral templates, extinction curves and filters.
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
+
 
    install
    starting
