@@ -23,18 +23,7 @@ a extinction curve or a filter, it will look for it at that particular place. Th
 - ``"extinction_curve_family/extinction_curve_name"`` for extinction curves
 - ``"filter_system/filter_name"`` for astronomical filters
 
-Below you can find the contents of the database
-
---------------------------------------------------------------------
-
-.. _database-contents:
-
-Database contents
-=================
-
-
-.. literalinclude:: ../database/index.yml
-    :language: yaml
+Below you can find the contents of the database :ref:`database-contents`
 
 
 Browsing the database
@@ -45,6 +34,7 @@ programately
 
 
 .. code-block:: python
+
     from spextra.database import SpecDatabase
     db = SpecDatabase()
     print(db.libraries)
@@ -52,6 +42,7 @@ programately
 it will list the spectral libraries available
 
 .. code-block:: python
+
     print(db.extinction_curves)
     print(db.filter_systems)
 
@@ -71,6 +62,21 @@ and it will list all templates available for that library.
 
 Similarly :class:`FilterSystem` holds the information for a particular filter system and :class:`ExtinctionCurveLibrary`
 for a particular extinction curve family.
+
+
+--------------------------------------------------------------------
+
+.. _database-contents:
+
+Database contents
+=================
+
+
+.. literalinclude:: ../database/index.yml
+    :language: yaml
+
+
+
 
 
 
