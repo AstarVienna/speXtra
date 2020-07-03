@@ -69,6 +69,8 @@ of each spectral library. To use it, simply call it like this
 and it will list all templates available for that library.
 
 
+Similarly :class:`FilterSystem` holds the information for a particular filter system and :class:`ExtinctionCurveLibrary`
+for a particular extinction curve family.
 
 
 
