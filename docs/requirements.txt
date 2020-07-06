@@ -6,7 +6,7 @@ astropy
 synphot
 PyYAML
 numpydoc
-jupyter-sphinx
+jupyter_sphinx==0.2.3
 spextra
 
 
