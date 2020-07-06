@@ -2,6 +2,15 @@
 SpeXtra
 =======
 
+.. image:: https://travis-ci.org/miguelverdugo/speXtra.svg?branch=master
+    :target: https://travis-ci.org/github/miguelverdugo/speXtra
+    :alt: Tests Status
+
+.. image:: https://readthedocs.org/projects/spextra/badge/?version=latest
+    :target: https://spextra.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+
+
 A python tool to manage and manipulate astronomical spectra
 
 
@@ -51,6 +60,7 @@ plot the resulting spectra, simply type
 
 .. image:: ./docs/_static/images/kc96_S0.png
     :width: 40pt
+
 
 
 
