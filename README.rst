@@ -29,13 +29,12 @@ speXtra stands in the shoulder of giants: synphot_ and astropy_
 
 .. _astropy: https://www.astropy.org/
 
-To install ``spextra`` please clone the repository
+To install ``spextra`` just type:
 
 .. code-block:: bash
 
-    git clone https://github.com/miguelverdugo/speXtra
-    cd speXtra
-    pip install -e .
+    pip install spextra
+
 
 Soon a PyPi version will be available
 

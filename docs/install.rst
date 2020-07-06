@@ -6,7 +6,15 @@ Installation
 
 ``speXtra`` is written in Python 3.7 and should work with newer versions
 
-To install ``spextra`` please clone the repository
+The preferred method to install  ``spextra`` is using ``pip``
+
+.. code-block:: bash
+
+    pip install spextra
+
+
+To install the development version, just clone the repository
+
 
 .. code-block:: bash
 
@@ -14,7 +22,7 @@ To install ``spextra`` please clone the repository
     cd speXtra
     pip install -e .
 
-Soon a PyPi version will be available
+
 
 
 Dependencies
