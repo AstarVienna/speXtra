@@ -11,6 +11,14 @@ speXtra
 *******
 
 
+.. image:: https://travis-ci.org/miguelverdugo/speXtra.svg?branch=master
+    :target: https://travis-ci.org/github/miguelverdugo/speXtra
+    :alt: Tests Status
+
+.. image:: https://readthedocs.org/projects/spextra/badge/?version=latest
+    :target: https://spextra.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+
 speXtra
 =======
 

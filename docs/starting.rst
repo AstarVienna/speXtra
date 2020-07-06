@@ -15,7 +15,16 @@ For example to load a `S0` galaxy templates from the  :ref:`kc96` (`kc96`) just 
     sp = Spextrum("kc96/s0")
 
 
-and `speXtra` will download the template and create a `Spextrum` object.
+and `speXtra` will download the template and create a `Spextrum` object. The spectrum can be plotted using
+
+.. code-block:: python
+
+    sp.plot()
+
+.. image:: _static/images/kc96_S0.png
+    :width: 400px
+
+
 
 All operations available in   :class:`synphot.SourceSpectrum` are possible:
 
@@ -26,7 +35,12 @@ All operations available in   :class:`synphot.SourceSpectrum` are possible:
     sp = sp1 + 0.3*sp2
 
 
+
+
+
+
 Adding emission lines
+----------------------
 
 It is possible to add emission lines, either individually or as a list. Parameters are center, flux and fwhm
 `astropy.Units` are allowed. If units are not specified it defaults to Angstroms for wavelengths (center and fwhm)
@@ -39,6 +53,7 @@ and ergs/s/AA/cm^2 (FLAM) for flux.
 
 
 Scaling to a magnitude
+----------------------
 
 .. code-block:: python
 
@@ -47,14 +62,18 @@ Scaling to a magnitude
 
 
 
-Obtaining magnitudes from spectra¶
+Obtaining magnitudes from spectra
+---------------------------------
 
 .. code-block:: python
 
     sp1.get_magnitude(filter_name="g"
 
 
-Redshifting the spectra according to z or velocity (negative velocities are allowed)
+Redshifting the spectra
+------------------------
+
+It is possible to specify a redshift `z` ir a velocity `vel` (negative velocities are allowed)
 
 .. code-block:: python
 
@@ -68,7 +87,10 @@ Redshifting the spectra according to z or velocity (negative velocities are allo
 
 
 
-Smooth the spectral with a velocity kernel¶
+Smooth the spectral
+-------------------
+
+Spectra can be smoothed with a kernel with a size in velocities (default km/s)
 
 .. code-block:: python
 
@@ -76,32 +98,6 @@ Smooth the spectral with a velocity kernel¶
 
     sigma = 500*(u.km / u.s)
     sp2 = sp1.smooth(sigma=sigma)
-
-
-
-.. testcode::
-
-   1+1         # this will give no output!
-   print(2+2)  # this will give output
-
-.. testoutput::
-
-   3
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
