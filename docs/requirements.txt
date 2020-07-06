@@ -6,4 +6,8 @@ astropy
 synphot
 PyYAML
 numpydoc
+jupyter-sphinx
+spextra
+
+
 

@@ -9,9 +9,17 @@ with added functionalities.
 
 For example to load a `S0` galaxy templates from the  :ref:`kc96` (`kc96`) just type
 
+.. jupyter-execute::
+    :raises:
+
+    from spextra import Spextrum
+    sp = Spextrum("kc96/s0")
+    sp.plot()
+
+
 .. code-block:: python
 
-    from speXtra import Spextrum
+    from spextra import Spextrum
     sp = Spextrum("kc96/s0")
 
 
