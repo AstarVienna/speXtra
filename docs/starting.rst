@@ -10,27 +10,13 @@ with added functionalities.
 For example to load a `S0` galaxy templates from the  :ref:`kc96` (`kc96`) just type
 
 .. jupyter-execute::
-    :raises:
 
     from spextra import Spextrum
     sp = Spextrum("kc96/s0")
     sp.plot()
 
 
-.. code-block:: python
-
-    from spextra import Spextrum
-    sp = Spextrum("kc96/s0")
-
-
-and `speXtra` will download the template and create a `Spextrum` object. The spectrum can be plotted using
-
-.. code-block:: python
-
-    sp.plot()
-
-.. image:: _static/images/kc96_S0.png
-    :width: 400px
+The last statement will create a plot of the spectrum for a quick visualization
 
 
 

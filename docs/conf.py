@@ -32,7 +32,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.extlinks',
 #    'sphinx.ext.linkcode',
-    'jupyter_sphinx.execute',
+    'jupyter_sphinx',
     'sphinx.ext.doctest',
     'numpydoc',
 ]
