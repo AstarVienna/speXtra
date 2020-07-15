@@ -11,6 +11,7 @@ libraries:
   kurucz    : Subset of Kurucz 1993 Models
   sne       : Supernova Legacy Survey
   moehler   : flux/telluric standards with X-Shooter
+  madden    : High-Resolution Spectra of Habitable Zone Planets
 
 # here go the extinction curves
 extinction_curves:
