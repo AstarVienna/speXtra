@@ -38,7 +38,24 @@ database
 └───filters
 ```
 
+# Libraries to add
+
+* [High-resolution Spectra for a Wide Range of Habitable Zone Planets around Sun-like Stars](https://arxiv.org/abs/2007.02420)
+
+
+
+# TODO
+
 Questions marks indicate that no decision has been made yet. 
+
+* Add more filters to database
+
+* Spectra of bright objects?
+
+* Sky spectra at different resolutions?
+
+* Moon illumination?
+
 
 * At the root directory, there should be a file describing the contents of 
 the database. Every time that data is added this file should be updated.

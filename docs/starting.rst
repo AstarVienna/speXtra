@@ -30,9 +30,6 @@ All operations available in   :class:`synphot.SourceSpectrum` are possible:
 
 
 
-
-
-
 Adding emission lines
 ----------------------
 
