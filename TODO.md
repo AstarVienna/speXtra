@@ -8,7 +8,10 @@ List of things I'd to add
 - Add metadata registering the operations in a consistent manner
 - Better interactive browsing of the database
 - clear versioning
-- make function ``make_passband`` a class so metadata is better conserved?
+- make function ``make_passband`` a class so metadata is better conserved? Maybe merge with 
+  database classes data holders. 
+- replace method ``from1Dspec`` for something that can read the most basic fits 1d spectrum 
+  using ``astropy.io.fits`` and add another method that can read a ``Spectrum`D`` objects 
 
 ## Libraries
 

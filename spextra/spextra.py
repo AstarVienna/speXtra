@@ -150,6 +150,12 @@ class Spextrum(SourceSpectrum):
         return meta, lam, flux
 
     def spectral_edges(self):
+        """
+
+        Returns
+        -------
+        a tuple with the edges of the spectrum
+        """
         self.wmin = np.min(self.waveset)
         self.wmax = np.max(self.waveset)
 
