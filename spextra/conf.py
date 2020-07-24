@@ -20,4 +20,4 @@ class Conf(ConfigNamespace):
                               "URL address of the database",
                               cfgtype='string(default=None)')
 
-    remote_timeout = ConfigItem(10.0, "Remote timeout in seconds.")
+    remote_timeout = ConfigItem(30.0, "Remote timeout in seconds.")

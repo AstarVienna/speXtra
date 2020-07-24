@@ -3,6 +3,7 @@ import inspect
 from contextlib import closing
 from urllib.request import urlopen, Request
 from urllib.error import URLError, HTTPError
+import socket
 
 from astropy.utils.console import ProgressBarOrSpinner
 from astropy.config import get_cache_dir

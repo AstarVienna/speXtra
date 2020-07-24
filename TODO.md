@@ -1,6 +1,6 @@
 # TO-DO
 
-List of things I'd to add
+List of things I'd like to add
 
 ## Coding
 
@@ -11,7 +11,8 @@ List of things I'd to add
 - make function ``make_passband`` a class so metadata is better conserved? Maybe merge with 
   database classes data holders. 
 - replace method ``from1Dspec`` for something that can read the most basic fits 1d spectrum 
-  using ``astropy.io.fits`` and add another method that can read a ``Spectrum`D`` objects 
+  using ``astropy.io.fits`` and add another method that can read a ``Spectrum1D`` objects
+- Clean cache in database, specifying for example a library, etc.  
 
 ## Libraries
 

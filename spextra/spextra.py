@@ -25,6 +25,22 @@ from .database import SpectralTemplate, Filter, ExtinctionCurve
 __all__ = ["Spextrum", "make_passband",  "get_vega_spectrum"]
 
 
+class Passband(SpectralElement):
+    """
+    This should be the holder of all information and operations related to the filters
+    including path, etc.
+    """
+    pass
+
+
+class XCurve(synphot.ReddeningLaw):
+    """
+    This should be the holder of all information and operations related to extinction curves
+    Name should be ExtinctionCurve
+    """
+    pass
+
+
 def make_passband(filter_name=None, filter_file=None, wave_unit=u.Angstrom):
     """
     Make a SpectralElement (aka a synphot passband) from an

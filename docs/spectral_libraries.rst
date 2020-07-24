@@ -92,8 +92,8 @@ Galaxy SEDs from the UV to the Mid-IR
 
 .. _kurucz:
 
-Subset of Kurucz 1993 Models
-----------------------------
+Subset of Kurucz 1993 Models (subset)
+-------------------------------------
 
 .. literalinclude:: ../database/libraries/kurucz/index.yml
     :language: yaml
@@ -114,4 +114,13 @@ Flux/Telluric standards with X-Shooter
 --------------------------------------
 
 .. literalinclude:: ../database/libraries/moehler/index.yml
+    :language: yaml
+
+
+.. _madden:
+
+High-Resolution Spectra of Habitable Zone Planets (example)
+-----------------------------------------------------------
+
+.. literalinclude:: ../database/libraries/madden/index.yml
     :language: yaml

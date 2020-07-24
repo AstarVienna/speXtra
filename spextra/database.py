@@ -435,6 +435,6 @@ def get_filter_names(system=None):
     flat_list = [item for sublist in ord_list for item in sublist]
 
     if system is not None:
-        flat_list = [f for f in filter_list if s in f]
+        flat_list = [f for f in filter_list if system in f]
 
     return flat_list
