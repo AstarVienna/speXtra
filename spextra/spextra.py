@@ -30,7 +30,12 @@ class Passband(SpectralElement):
     This should be the holder of all information and operations related to the filters
     including path, etc.
     """
-    pass
+    def __init__(self):
+        pass
+
+    @classmethod
+    def from_file(cls, filename, wave_unit=u.Angstrom):
+        pass
 
 
 class XCurve(synphot.ReddeningLaw):
@@ -38,7 +43,24 @@ class XCurve(synphot.ReddeningLaw):
     This should be the holder of all information and operations related to extinction curves
     Name should be ExtinctionCurve
     """
-    pass
+    def __init__(self):
+        pass
+
+    @classmethod
+    def from_file(cls, filename, wave_unit=u.Angstrom):
+        """
+        TODO: many extinction curves come in 1/wavelength, check this works too
+        Parameters
+        ----------
+        filename
+        wave_unit
+
+        Returns
+        -------
+
+        """
+
+        pass
 
 
 def make_passband(filter_name=None, filter_file=None, wave_unit=u.Angstrom):
