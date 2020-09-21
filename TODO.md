@@ -13,11 +13,13 @@ List of things I'd like to add
 - replace method ``from1Dspec`` for something that can read the most basic fits 1d spectrum 
   using ``astropy.io.fits`` and add another method that can read a ``Spectrum1D`` objects
 - Clean cache in database, specifying for example a library, etc.  
+- Add ``.wave`` and ``.flux`` (or similar) properties for a quicker access to these quantities
+- Power law spectra F(lambda) ~ lambda^alpha specified by the spectral index alpha
 
-## Libraries
+## Spectral Libraries
 
-- Night sky spectrum at different resolutions
-- Moon spectrum at different phases/distances
+- Night sky spectrum at different resolutions?
+- Moon spectrum at different phases/distances?
 - MIR spectra of different objects, preferentially at high resolutions
 
 ## Filters

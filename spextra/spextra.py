@@ -577,6 +577,25 @@ class Spextrum(SourceSpectrum):
                                      filter_name=filter_name,
                                      filter_file=filter_file)
 
+    @classmethod
+    def powerlaw(cls, alpha=1, amplitude=0, filter_name=None, filter_file=None):
+        """
+        Return a power law spectrum F(lambda) ~ lambda^alpha scaled to a magnitude
+        (amplitude) in an particular band
+
+        Parameters
+        ----------
+        alpha
+        amplitude
+        filter_name
+        filter_file
+
+        Returns
+        -------
+
+        """
+        pass
+
     def scale_to_magnitude(self, amplitude, filter_name=None, filter_file=None):
         """
             Scales a Spectrum to a value in a filter
