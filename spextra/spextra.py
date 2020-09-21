@@ -590,11 +590,16 @@ class Spextrum(SourceSpectrum):
         filter_name
         filter_file
 
+        TODO: definition of x0 as filter pivot wavelength
         Returns
         -------
 
         """
-        pass
+
+        sp = cls(modelclass=synphot.models.PowerLawFlux1D, amplitude=amplitude, x_0, alpha=alpha)
+
+        return  sp.scale_to_magnitude(amplitude=amplitude, filter_name=filter_name, filter_file=filter_file)
+
 
     def scale_to_magnitude(self, amplitude, filter_name=None, filter_file=None):
         """
