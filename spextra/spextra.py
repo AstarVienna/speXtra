@@ -19,23 +19,74 @@ from synphot.models import (Empirical1D, GaussianFlux1D, Box1D, ConstFlux1D, Bla
 from synphot.specio import read_ascii_spec, read_fits_spec, read_spec
 from synphot import exceptions
 
-from .database import SpectralTemplate, Filter, ExtinctionCurve
+from .database import SpectrumContainer, FilterContainer, ExtCurveContainer
 
 
 __all__ = ["Spextrum", "make_passband",  "get_vega_spectrum"]
 
 
-class Passband(SpectralElement):
+class Passband(SpectralElement, FilterContainer):
     """
     This should be the holder of all information and operations related to the filters
     including path, etc.
     """
-    def __init__(self):
-        pass
 
-    @classmethod
-    def from_file(cls, filename, wave_unit=u.Angstrom):
-        pass
+    def __init__(self, filter_name=None, modelclass=None, **kwargs):
+
+        self.filter_name = filter_name
+        self.path = None
+        self.data_type = None
+
+        if self.template_name is not None:
+            meta, wave, trans = self._loader
+            modelclass = SpectralElement(Empirical1D, points=wave, lookup_table=trans, meta=meta)
+        if modelclass is not None:
+            modelclass = modelclass
+        else:
+            raise ValueError("please define a spectra")
+
+        super().__init__(modelclass, **kwargs)
+
+    @property
+    def _loader(self):
+        """
+        Load a filter from the database
+
+        Returns
+        -------
+        meta: metadata of the spectra (header)
+        lam: wavelengths
+        flux: flux
+        """
+
+        self.path = self.get_path()
+
+        try:  # it should also try to read it from the file directly
+            wave_unit = units.validate_unit(self.wave_unit)
+        except exceptions.SynphotError:
+            wave_unit = u.AA
+
+
+        wave_column_name = self.meta["wave_column_name"]  # same here
+        flux_column_name = meta["flux_column_name"]
+        file_extension = meta["file_extension"]
+
+        # make try and except here to catch most problems
+        if self.data_type == "fits":
+            meta, lam, flux = read_fits_spec(location, ext=1,
+                                             wave_unit=wave_unit, flux_unit=flux_unit,
+                                             wave_col=wave_column_name, flux_col=flux_column_name)
+        else:
+            meta, lam, flux = read_ascii_spec(location, wave_unit=wave_unit,
+                                              flux_unit=flux_unit)
+
+        return meta, lam, flux
+
+
+
+
+
+
 
 
 class XCurve(synphot.ReddeningLaw):
@@ -596,10 +647,9 @@ class Spextrum(SourceSpectrum):
 
         """
 
-        sp = cls(modelclass=synphot.models.PowerLawFlux1D, amplitude=amplitude, x_0, alpha=alpha)
+        sp = cls(modelclass=synphot.models.PowerLawFlux1D, amplitude=amplitude, x_0=2000, alpha=alpha)
 
-        return  sp.scale_to_magnitude(amplitude=amplitude, filter_name=filter_name, filter_file=filter_file)
-
+        return sp.scale_to_magnitude(amplitude=amplitude, filter_name=filter_name, filter_file=filter_file)
 
     def scale_to_magnitude(self, amplitude, filter_name=None, filter_file=None):
         """

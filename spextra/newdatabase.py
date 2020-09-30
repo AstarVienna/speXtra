@@ -35,51 +35,26 @@ class DataContainer:
     """
     Just a general container for the data
     """
-
-    def __init__(self, path, name):
-        self.name = name
-        self.relpath = urljoin(path, self.name, "index.yml")
-        self.meta = self.get_yaml_contents(self.relpath)
-        self.location = urljoin(database.remote_root, self.relpath)
+    def __init__(self, filename):
+        self.filename = filename
+        with open(filename) as f:
+            self.meta = yaml.safe_load(f)
         for key in self.meta:
             setattr(self, key, self.meta[key])
 
-    def abspath(self, relpath):
+    def dump(self):
         """
-        Return absolute path to file or directory, ensuring that it exists.
-        If it doesn't exist it will download it from the remote host
-
-        Otherwise, just look for ``{relpath}``.
-        """
-
-        abspath = os.path.join(self.rootdir, relpath)
-        if os.path.exists(abspath) is False:
-            url = urljoin(self.remote_root, relpath)
-            download_file(url, abspath)
-
-        return abspath
-
-    def get_yaml_contents(self, relpath):
-        """
-        read a yaml file from a relative url
-
-        Parameters
-        ----------
-        relpath: The relative path to a file either local or in remote host
+        Nicely dump the contents of the library
 
         Returns
         -------
-        dict with the contents of the yaml file
+
         """
-        filename = self.abspath(relpath)
-        with open(filename) as f:
-            data = yaml.safe_load(f)
-
-        return data
+        print(yaml.dump(self.meta,
+                        indent=4, sort_keys=False, default_flow_style=False))
 
 
-
-class Database:
+class Database(DataContainer):
     """
     This class contains the database.
 
@@ -108,16 +83,15 @@ class Database:
     """
 
     def __init__(self, rootdir=get_rootdir(), remote_root=database_url()):
+
         if not remote_root.endswith('/'):
             remote_root = remote_root + '/'
 
         self.rootdir = rootdir
         self.remote_root = remote_root
+        self.filename = self.abspath("index.yml")
 
-        self.contents = self.get_yaml_contents("index.yml")
-        self.libraries = [lib for lib in self.contents["libraries"]]
-        self.extinction_curves = [ext for ext in self.contents["extinction_curves"]]
-        self.filter_systems = [filt for filt in self.contents["filter_systems"]]
+        super().__init__(filename=self.filename)
 
     def abspath(self, relpath):
         """
@@ -134,37 +108,6 @@ class Database:
 
         return abspath
 
-    def get_yaml_contents(self, relpath):
-        """
-        read a yaml file from a relative url
-
-        Parameters
-        ----------
-        relpath: The relative path to a file either local or in remote host
-
-        Returns
-        -------
-        dict with the contents of the yaml file
-        """
-        filename = self.abspath(relpath)
-        with open(filename) as f:
-            data = yaml.safe_load(f)
-
-        return data
-
-    def __repr__(self):
-        rootdir = " local data directory: " + self.rootdir
-        database_url = "data base url: " + self.remote_root
-        libs = "libraries:" + ' ' + str(self.libraries)
-        exts = "extinction curves:" + ' ' + str(self.extinction_curves)
-        filts = "filter systems:" + ' ' + str(self.filter_systems)
-
-        return '%s \n %s \n %s \n %s \n %s \n %s' % (rootdir, database_url,
-                                                     'Database contents:', libs, exts, filts)
-
-
-
-
 
 class SpecLibrary(DataContainer):
     """
@@ -172,54 +115,38 @@ class SpecLibrary(DataContainer):
 
     """
 
-    def __init__(self, name):
+    def __init__(self, library_name):
 
-        super().__init__("libraries", name)
-        self.name = name
         database = Database()
-        if self.name not in database.libraries:
-            raise ValueError("library %s unknown, please check" % self.name)
-
-        relpath = urljoin("libraries", self.name, "index.yml")
-
-        self.meta = database.get_yaml_contents(relpath)
-
-        self.location = urljoin(database.remote_root, relpath)
-        self.library_name = self.meta["library_name"]
-        self.title = self.meta["title"]
-        self.type = self.meta["type"]
-        self.summary = self.meta["summary"]
-        self.reference = self.meta["reference"]
-        self.link = self.meta["link"]
-        self.spectral_coverage = self.meta["spectral_coverage"]
-        self.resolution = self.meta["resolution"]
-        self.wave_unit = self.meta["wave_unit"]
-        self.flux_unit = self.meta["flux_unit"]
-        self.wave_column_name = self.meta["wave_column_name"]
-        self.flux_column_name = self.meta["flux_column_name"]
-        self.data_type = self.meta["data_type"]
-        self.file_extension = self.meta["file_extension"]
-        self.templates = list(self.meta["templates"].keys())
-        self.template_comments = [self.meta["templates"][k] for k in self.templates]
-
-    def dump(self):
-        """
-        Nicely dump the contents of the library
-
-        Returns
-        -------
-
-        """
-        print(yaml.dump(self.meta,
-                        indent=4, sort_keys=False, default_flow_style=False))
+        if library_name not in database.libraries:
+            raise ValueError("library '%s' is not in the database" % library_name)
+        self.library_name = library_name
+        self.relpath = os.path.join("libraries", library_name, "index.yml")
+        self.path = database.abspath(self.relpath)
+        super().__init__(filename=self.path)
 
     def __repr__(self):
-        description = "Spectral Library: " + self.name + " " + self.title
+        description = "Spectral Library: " + self.library_name + " " + self.title
         spec_cov = "spectral coverage: " + str(self.spectral_coverage)
         units = "wave_unit: " + self.wave_unit + "  flux_unit: " + self.flux_unit
         templates = "Templates: " + str(self.templates)
 
         return ' %s \n %s \n %s \n %s' % (description, spec_cov, units, templates)
+
+
+class FilterSystem(DataContainer):
+
+    def __init__(self, filter_system):
+
+        database = Database()
+        if filter_system not in database.filters:
+            raise ValueError("filter system '%s' is not in the database" % filter_system)
+
+        self.relpath = os.path.join("filter_systems", filter_system, "index.yml")
+        self.path = database.abspath(self.relpath)
+        super().__init__(filename=self.path)
+
+
 
 
 class SpectrumContainer:
@@ -259,64 +186,7 @@ class SpectrumContainer:
         return s1
 
 
-class FilterSystem:
-    """
-    ``FilterSystem`` holds all the information of a particular filter system which is in
-    turn passed to ``Filter``
 
-    Because we are currently using filters served by the SVO the attributes
-    of these filter systems are not known and thus initialized with none.
-
-    This might change in the future
-    """
-
-    def __init__(self, filter_system):
-        self.filter_system = filter_system
-        self.instrument = None
-        self.title = None
-        self.author = None
-        self.source = None
-        self.spectral_coverage = None
-        self.wave_unit = None
-        self.data_type = None
-        self.file_extension = None
-        self.filters = None
-        self.meta = None
-
-        relpath = urljoin("filter_systems", self.filter_system, "index.yml")
-        database = Database()
-        if self.filter_system in database.filter_systems:
-            self.meta = database.get_yaml_contents(relpath)
-
-#        elif self.filter_system not in get_filter_systems():  # get_filter_systems does not report
-#            data_dict = None  # Filter is in the SVO          # all filters at SVO only those created with tynt
-#                                                              # if filter is not at SVO no error is raised
-#        else:
-#            raise ValueError("Filter system %s is unknown" % self.filter_system)
-
-        self._update_atributes()
-
-    def _update_atributes(self):
-
-        if self.meta is not None:
-            self.filter_system = self.meta["filter_system"]
-            self.instrument = self.meta["instrument"]
-            self.title = self.meta["title"]
-            self.author = self.meta["author"]
-            self.source = self.meta["source"]
-            self.spectral_coverage = self.meta["spectral_coverage"]
-            self.wave_unit = self.meta["wave_unit"]
-            self.file_extension = self.meta["file_extension"]
-            self.filters = list(self.meta["filters"].keys())
-            self.filters_comments = [self.meta["filters"][k] for k in self.filters]
-
-    def __repr__(self):
-        name = self.filter_system
-        if self.filters is None:
-            name = self.filter_system + " at SVO"
-        s = "Filter System: " + name
-
-        return s
 
 
 class FilterContainer:

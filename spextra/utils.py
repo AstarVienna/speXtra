@@ -77,10 +77,6 @@ def clean_cache():
     pass
 
 
-
-
-
-
 def get_rootdir():
     # use the environment variable if set
     data_dir = os.environ.get('SPEXTRA_DATA_DIR')
