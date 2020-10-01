@@ -11,12 +11,41 @@ from astropy.config import get_cache_dir
 from .conf import Conf
 
 
-__all__ = ["is_url", "download_file", "get_rootdir", "database_url"]
+__all__ = ["is_url", "download_file", "get_rootdir", "database_url", "dict_generator"]
 
 __pkg_dir__ = os.path.dirname(inspect.getfile(inspect.currentframe()))
 __data_dir__ = os.path.join(__pkg_dir__, "data")
 
 conf = Conf()
+
+
+def dict_generator(indict, pre=None):
+    """
+    Make a generator out of a dictionary
+    Parameters
+    ----------
+    indict
+    pre
+
+    Returns
+    -------
+
+    """
+
+    pre = pre[:] if pre else []
+    if isinstance(indict, dict):
+        for key, value in indict.items():
+            if isinstance(value, dict):
+                for d in dict_generator(value, pre + [key]):
+                    yield d
+            elif isinstance(value, list) or isinstance(value, tuple):
+                for v in value:
+                    for d in dict_generator(v, pre + [key]):
+                        yield d
+            else:
+                yield pre + [key]
+    else:
+        yield pre + [indict]
 
 
 def is_url(url):  #
