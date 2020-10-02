@@ -129,7 +129,17 @@ class SpecLibrary(DataContainer):
         self.library_name = library_name
         self.relpath = os.path.join("libraries", library_name, "index.yml")
         self.path = database.abspath(self.relpath)
+
         super().__init__(filename=self.path)
+
+    @property
+    def template_names(self):
+        return list(self.templates.keys())
+
+    @property
+    def template_comments(self):
+        return list(self.templates.values())
+
 
     def __repr__(self):
         description = "Spectral Library: " + self.library_name + " " + self.title
@@ -138,6 +148,7 @@ class SpecLibrary(DataContainer):
         templates = "Templates: " + str(self.templates)
 
         return ' %s \n %s \n %s \n %s' % (description, spec_cov, units, templates)
+
 
 
 class FilterSystem(DataContainer):
@@ -152,6 +163,14 @@ class FilterSystem(DataContainer):
         self.path = database.abspath(self.relpath)
         super().__init__(filename=self.path)
 
+    @property
+    def filter_names(self):
+        return list(self.filters.keys())
+
+    @property
+    def filter_comments(self):
+        return list(self.filters.values())
+
 
 class ExtCurvesLibrary(DataContainer):
 
@@ -164,6 +183,16 @@ class ExtCurvesLibrary(DataContainer):
         self.path = database.abspath(self.relpath)
         super().__init__(filename=self.path)
 
+    @property
+    def curve_names(self):
+        return list(self.curves.keys())
+
+    @property
+    def curve_comments(self):
+        return list(self.curves.values())
+
+
+
 
 class SpectrumContainer(SpecLibrary):
     """
@@ -173,7 +202,7 @@ class SpectrumContainer(SpecLibrary):
     def __init__(self, template):
         library = template.split("/")[:-1]
         self.template_name = template.split("/").pop()
-        if self.template_name not in library.templates.keys():
+        if self.template_name not in library.templates_names:
             raise ValueError("Template not in library", self.template_name)
 
         super.__init__(filename=library)
