@@ -22,6 +22,7 @@ __pycache__/*
 /database/**/*.ascii
 /database/**/*.sed
 /database/**/*.txt
+/database/**/*.vo
 
 # Project files
 .ropeproject

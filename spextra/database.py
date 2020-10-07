@@ -30,13 +30,18 @@ with open(os.path.join(__data_dir__,  "default_filters.yml")) as filter_file:
 # Table.show_in_browser.__defaults__ = (5000, True, 'default', {'use_local_files': True},
 #                                              None, 'display compact', None, 'idx')
 
+
 class DataContainer:
     """
     Just a general container for the data
+
+    It reads a YAML file and creates attributes with the kyes of the dictionary.
+
+    Additionally it contains methods for nicely displaying the contents on the screen.
     """
     def __init__(self, filename):
         self.filename = filename
-        with open(filename) as f:
+        with open(self.filename) as f:
             self.meta = yaml.safe_load(f)
         for key in self.meta:
             setattr(self, key, self.meta[key])
@@ -88,9 +93,10 @@ class Database(DataContainer):
 
         self.rootdir = rootdir
         self.remote_root = remote_root
-        self.filename = self.abspath("index.yml")
+        self.filename = "index.yml"
+        self.path = self.abspath(self.filename)
 
-        super().__init__(filename=self.filename)
+        super().__init__(filename=self.path)
 
     def abspath(self, relpath):
         """
@@ -126,72 +132,73 @@ class SpecLibrary(DataContainer):
         database = Database()
         if library_name not in database.libraries:
             raise ValueError("library '%s' is not in the database" % library_name)
-        self.library_name = library_name
-        self.relpath = os.path.join("libraries", library_name, "index.yml")
+
+        self.directory = os.path.join("libraries", library_name)
+        self.filename = "index.yml"
+        self.relpath = os.path.join(self.directory, self.filename)
         self.path = database.abspath(self.relpath)
 
         super().__init__(filename=self.path)
 
-    @property
-    def template_names(self):
-        return list(self.templates.keys())
-
-    @property
-    def template_comments(self):
-        return list(self.templates.values())
-
+        self.template_names = list(self.templates.keys())
+        self.template_comments = list(self.templates.values())
 
     def __repr__(self):
         description = "Spectral Library: " + self.library_name + " " + self.title
         spec_cov = "spectral coverage: " + str(self.spectral_coverage)
         units = "wave_unit: " + self.wave_unit + "  flux_unit: " + self.flux_unit
-        templates = "Templates: " + str(self.templates)
+        templates = "Templates: " + str(self.template_names)
 
         return ' %s \n %s \n %s \n %s' % (description, spec_cov, units, templates)
 
 
-
 class FilterSystem(DataContainer):
+    """
+    This class contains the information of a filter system
 
+    TODO: Quit tynt dependency
+    """
     def __init__(self, filter_system):
-        filter_system_path = os.path.join("filter_systems", filter_system)
         database = Database()
-        if filter_system_path not in database.pathlist :
+        if filter_system not in database.filter_systems:
             raise ValueError("filter system '%s' is not in the database" % filter_system)
 
-        self.relpath = os.path.join(filter_system_path, "index.yml")
+        self.directory = os.path.join("filter_systems", filter_system)
+        self.filename = "index.yml"
+        self.relpath = os.path.join(self.directory, self.filename)
         self.path = database.abspath(self.relpath)
+
         super().__init__(filename=self.path)
 
-    @property
-    def filter_names(self):
-        return list(self.filters.keys())
+        self.filter_names = list(self.filters.keys())
+        self.filter_comments = list(self.filters.values())
 
-    @property
-    def filter_comments(self):
-        return list(self.filters.values())
+    def __repr__(self):
+        pass
 
 
 class ExtCurvesLibrary(DataContainer):
+    """
+    Class that contains the information of the a Extinction Curve Library
 
+    """
     def __init__(self, extinction_curve):
         database = Database()
         if extinction_curve not in database.extinction_curves:
             raise ValueError("extinction curve '%s' is not in the database" % extinction_curve)
 
-        self.relpath = os.path.join("filter_systems", extinction_curve, "index.yml")
+        self.directory = os.path.join("extinction_curves", extinction_curve)
+        self.filename = "index.yml"
+        self.relpath = os.path.join(self.directory, self.filename)
         self.path = database.abspath(self.relpath)
+
         super().__init__(filename=self.path)
 
-    @property
-    def curve_names(self):
-        return list(self.curves.keys())
+        self.curve_names = list(self.curves.keys())
+        self.curve_comments = list(self.curves.values())
 
-    @property
-    def curve_comments(self):
-        return list(self.curves.values())
-
-
+    def __repr__(self):
+        pass
 
 
 class SpectrumContainer(SpecLibrary):
@@ -200,118 +207,130 @@ class SpectrumContainer(SpecLibrary):
     """
 
     def __init__(self, template):
-        library = template.split("/")[:-1]
-        self.template_name = template.split("/").pop()
-        if self.template_name not in library.templates_names:
-            raise ValueError("Template not in library", self.template_name)
+        self.template = template
+        self.template_name = self.template.split("/").pop()
 
-        super.__init__(filename=library)
+        library_name = self.template.rstrip("/" + self.template_name)
+        super().__init__(library_name=library_name)
 
+        if self.template_name not in self.template_names:
+            raise ValueError("Template '%s' not in library" % self.template_name)
+
+        self.template_comment = self.templates[self.template_name]
         self.filename = self.template_name + self.file_extension
+        self.relpath = os.path.join(self.directory, self.filename)
         self.path = self.get_path()
+
+        self._update_attrs()
 
     def get_path(self):
         database = Database()
-        relpath = urljoin(self.relpath, self.filename)
-        return database.abspath(relpath)
+        return database.abspath(self.relpath)
 
-    @property
-    def meta(self):
-        library = SpecLibrary(self.library_name)
-        del library.meta["templates"]
-        del library.meta["summary"]
-        return library.meta
+    def _update_attrs(self):
+        """
+        Here to just delete unnecessary stuff
+        Returns
+        -------
+        """
+        self.meta.pop("templates", None)
+        self.meta.pop("summary", None)
+        self.__delattr__("templates")
+        self.__delattr__("summary")
+        self.__delattr__("template_names")
+        self.__delattr__("template_comments")
 
     def __repr__(self):
         s1 = "Spectral template: " + self.template_name
         return s1
 
 
-class FilterContainer:
+class FilterContainer(FilterSystem):
 
-    def __init__(self, filter_name):
+    def __init__(self, filter):
 
-        self.filter_name = filter_name
-        if self.filter_name in FILTER_DEFAULTS:
-            self.filter_name = FILTER_DEFAULTS[filter_name]
+        self.filter = filter
+        if self.filter in FILTER_DEFAULTS:
+            self.filter = FILTER_DEFAULTS[filter]
 
         if "/" not in self.filter_name:
             raise ValueError("not a valid filter %s" % self.filter_name)
 
-        self.filter_system, self.filter = self.filter_name.split("/")
-        self.data_type = None
-        self.wave_unit = None
-        self.meta = None
-        self.file_extension = None
-        self.filename = None
-        self.instrument = None
+        self.filter_name = self.filter.split("/").pop()
+        filter_system = self.filter.rstrip("/" + self.filter_name)
 
-        self._update_atributes()
+        super().__init__(filter_system=filter_system)
+
+        if self.filter_name not in self.filters:
+            raise ValueError("Filter '%s' not in library", self.filter_name)
+
+        self.filter_comment = self.filters[self.filter_name]
+        self.filename = self.filter_name + self.file_extension
+        self.relpath = os.path.join(self.directory, self.filename)
         self.path = self.get_path()
 
+        self._update_attrs()
+
     def get_path(self):
-        """ This just obtains the path to the filter  """
-        relpath = urljoin("filter_systems", self.filter_system, self.filename)
         database = Database()
-        if self.filter_system in database.filter_systems:
-            try:
-                path = database.abspath(relpath)
-            except (URLError, HTTPError):
-                raise ValueError("filter %s is unknown" % self.filter_name)
-        #elif self.filter_name in get_filter_names():
-        else:
-            download_file('http://svo2.cab.inta-csic.es/'
-                          'theory/fps3/fps.php?ID={}'.format(self.filter_name),
-                          os.path.join(database.rootdir, relpath))
-            path = database.abspath(relpath)
-       # else:
-       #     raise ValueError("filter %s is unknown" % self.filter_name)
+        return database.abspath(self.relpath)
 
-        return path
+    def _update_attrs(self):
+        """
+        Here to just delete unnecessary stuff
+        """
+        self.meta.pop("filterrs", None)
+        self.meta.pop("summary", None)
+        self.__delattr__("filters")
+        self.__delattr__("summary")
+        self.__delattr__("filters_names")
+        self.__delattr__("filters_comments")
 
-    def _update_atributes(self):
-        database = Database()
-        if self.filter_system in database.filter_systems:
-            system = FilterSystem(self.filter_system)
-            self.wave_unit = system.wave_unit
-            self.data_type = system.data_type
-
-            self.file_extension = system.file_extension
-            self.wave_unit = system.wave_unit
-            self.instrument = system.instrument
-            self.filename = self.filter + self.file_extension
-            self.meta = system.meta
-
-            del self.meta["filters"]
-
-        else:
-            self.filename = self.filter
+    #        download_file('http://svo2.cab.inta-csic.es/'
+    #                      'theory/fps3/fps.php?ID={}'.format(self.filter_name),
+    #                      os.path.join(database.rootdir, relpath))
+    #        path = database.abspath(relpath)
 
     def __repr__(self):
         s = "Filter: " + self.filter_name
         return s
 
 
+class ExtCurveContainer(ExtCurvesLibrary):
 
+    def __init__(self, curve):
+        self.curve = curve
+        self.curve_name = self.curve.split("/").pop()
 
-class ExtCurveContainer:
+        name = self.template.rstrip("/" + self.curve_name)
+        super().__init__(extinction_curve=name)
 
-    def __init__(self, curve_name):
-        self.curve_name = curve_name
-        self.family, self.ext_curve = self.curve_name.split("/")
-        ext_family = ExtCurvesLibrary(self.family)
-        self.meta = ext_family.meta
-        self.file_extension = self.meta["file_extension"]
-        self.filename = self.ext_curve + self.file_extension
+        if self.curve_name not in self.curve_names:
+            raise ValueError("Extinction Curve '%s' not in library" % self.curve_name)
+
+        self.curve_comment = self.curve_names[self.curve_name]
+        self.filename = self.curve_name + self.file_extension
+        self.relpath = os.path.join(self.directory, self.filename)
         self.path = self.get_path()
 
+        self._update_attrs()
+
     def get_path(self):
-
-        relpath = urljoin("extinction_curves", self.family, self.filename)
         database = Database()
-        path = database.abspath(relpath)
+        return database.abspath(self.relpath)
 
-        return path
+    def _update_attrs(self):
+        """
+        Here to just delete unnecessary stuff
+        Returns
+        -------
+        """
+        self.meta.pop("curves", None)
+        self.meta.pop("summary", None)
+        self.__delattr__("curves")
+        self.__delattr__("summary")
+        self.__delattr__("curve_names")
+        self.__delattr__("curve_comments")
 
     def __repr__(self):
         s = "Extinction curve: " + self.curve_name
