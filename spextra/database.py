@@ -191,6 +191,7 @@ class ExtCurvesLibrary(DataContainer):
         self.filename = "index.yml"
         self.relpath = os.path.join(self.directory, self.filename)
         self.path = database.abspath(self.relpath)
+        self.filename = self.path
 
         super().__init__(filename=self.path)
 
@@ -219,13 +220,10 @@ class SpectrumContainer(SpecLibrary):
         self.template_comment = self.templates[self.template_name]
         self.filename = self.template_name + self.file_extension
         self.relpath = os.path.join(self.directory, self.filename)
-        self.path = self.get_path()
+        self.path = Database().abspath(self.relpath)
+        self.filename = self.path
 
         self._update_attrs()
-
-    def get_path(self):
-        database = Database()
-        return database.abspath(self.relpath)
 
     def _update_attrs(self):
         """
@@ -235,10 +233,11 @@ class SpectrumContainer(SpecLibrary):
         """
         self.meta.pop("templates", None)
         self.meta.pop("summary", None)
-        self.__delattr__("templates")
-        self.__delattr__("summary")
-        self.__delattr__("template_names")
-        self.__delattr__("template_comments")
+        self.__dict__.pop("templates", None)
+        self.__dict__.pop("summary", None)
+        self.__dict__.pop("template_names", None)
+        self.__dict__.pop("template_comments", None)
+
 
     def __repr__(self):
         s1 = "Spectral template: " + self.template_name
@@ -247,33 +246,30 @@ class SpectrumContainer(SpecLibrary):
 
 class FilterContainer(FilterSystem):
 
-    def __init__(self, filter):
+    def __init__(self, filter_name):
 
-        self.filter = filter
-        if self.filter in FILTER_DEFAULTS:
-            self.filter = FILTER_DEFAULTS[filter]
+        self.filter_name = filter_name
+        if self.filter_name in FILTER_DEFAULTS:
+            self.filter_name = FILTER_DEFAULTS[filter_name]
 
         if "/" not in self.filter_name:
             raise ValueError("not a valid filter %s" % self.filter_name)
 
-        self.filter_name = self.filter.split("/").pop()
-        filter_system = self.filter.rstrip("/" + self.filter_name)
+        self.name = self.filter_name.split("/").pop()
+        filter_system = self.filter_name.rstrip("/" + self.name)
 
         super().__init__(filter_system=filter_system)
 
-        if self.filter_name not in self.filters:
+        if self.name not in self.filters:
             raise ValueError("Filter '%s' not in library", self.filter_name)
 
-        self.filter_comment = self.filters[self.filter_name]
-        self.filename = self.filter_name + self.file_extension
+        self.filter_comment = self.filters[self.name]
+        self.filename = self.name + self.file_extension
         self.relpath = os.path.join(self.directory, self.filename)
-        self.path = self.get_path()
+        self.path = Database().abspath(self.relpath)
+        self.filename = self.path
 
         self._update_attrs()
-
-    def get_path(self):
-        database = Database()
-        return database.abspath(self.relpath)
 
     def _update_attrs(self):
         """
@@ -281,10 +277,10 @@ class FilterContainer(FilterSystem):
         """
         self.meta.pop("filterrs", None)
         self.meta.pop("summary", None)
-        self.__delattr__("filters")
-        self.__delattr__("summary")
-        self.__delattr__("filters_names")
-        self.__delattr__("filters_comments")
+        self.__dict__.pop("filters", None)
+        self.__dict__.pop("summary", None)
+        self.__dict__.pop("filter_names", None)
+        self.__dict__.pop("filter_comments", None)
 
     #        download_file('http://svo2.cab.inta-csic.es/'
     #                      'theory/fps3/fps.php?ID={}'.format(self.filter_name),
@@ -311,26 +307,21 @@ class ExtCurveContainer(ExtCurvesLibrary):
         self.curve_comment = self.curve_names[self.curve_name]
         self.filename = self.curve_name + self.file_extension
         self.relpath = os.path.join(self.directory, self.filename)
-        self.path = self.get_path()
+        self.path = Database().abspath(self.relpath)
+        self.filename = self.path
 
         self._update_attrs()
-
-    def get_path(self):
-        database = Database()
-        return database.abspath(self.relpath)
 
     def _update_attrs(self):
         """
         Here to just delete unnecessary stuff
-        Returns
-        -------
         """
         self.meta.pop("curves", None)
         self.meta.pop("summary", None)
-        self.__delattr__("curves")
-        self.__delattr__("summary")
-        self.__delattr__("curve_names")
-        self.__delattr__("curve_comments")
+        self.__dict__.pop("curves", None)
+        self.__dict__.pop("summary", None)
+        self.__dict__.pop("curve_names", None)
+        self.__dict__.pop("curve_comments", None)
 
     def __repr__(self):
         s = "Extinction curve: " + self.curve_name

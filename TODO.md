@@ -21,6 +21,7 @@ List of things I'd like to add
 - Night sky spectrum at different resolutions?
 - Moon spectrum at different phases/distances?
 - MIR spectra of different objects, preferentially at high resolutions
+- UV spectra of galaxies at higher resolution (for LyA studies for example)
 
 ## Filters
 
