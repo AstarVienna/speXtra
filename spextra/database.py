@@ -98,6 +98,8 @@ class Database(DataContainer):
 
         super().__init__(filename=self.path)
 
+        self._makelists()
+
     def abspath(self, relpath):
         """
         Return absolute path to file or directory, ensuring that it exists.
@@ -113,35 +115,44 @@ class Database(DataContainer):
 
         return abspath
 
-    @property
-    def pathlist(self):
+    def _makelists(self):
         a = list(dict_generator(self.meta))
         separator = '/'
+        libs = [e[1:] for e in a]
+        self.liblist = [separator.join(e) for e in libs]
+        self.pathlist = [separator.join(e) for e in a]
 
-        return [separator.join(e) for e in a]
 
-
-class SpecLibrary(DataContainer):
+class Library(DataContainer):
     """
-    This class contains the information of a library
-
+    Class that contains the information of a Library, either spectral
+    of a filter system, extinction curves, etc
     """
-
     def __init__(self, library_name):
 
         database = Database()
-        if library_name not in database.libraries:
-            raise ValueError("library '%s' is not in the database" % library_name)
 
-        self.directory = os.path.join("libraries", library_name)
+        if library_name not in database.liblist:
+            raise ValueError("Library '%s' not in the database" % library_name)
+        else:
+            index = database.liblist.index(library_name)
+            self.relpath = database.pathlist[index]
+
         self.filename = "index.yml"
-        self.relpath = os.path.join(self.directory, self.filename)
-        self.path = database.abspath(self.relpath)
+        self.path = database.abspath(os.path.join(self.relpath, self.filename))
 
         super().__init__(filename=self.path)
 
+
+class SpecLibrary(Library):
+
+    def __init__(self, library_name):
+
+        super().__init__(library_name)
+
         self.template_names = list(self.templates.keys())
         self.template_comments = list(self.templates.values())
+        self.files = [t + self.file_extension for t in self.template_names]
 
     def __repr__(self):
         description = "Spectral Library: " + self.library_name + " " + self.title
@@ -152,54 +163,36 @@ class SpecLibrary(DataContainer):
         return ' %s \n %s \n %s \n %s' % (description, spec_cov, units, templates)
 
 
-class FilterSystem(DataContainer):
-    """
-    This class contains the information of a filter system
 
-    TODO: Quit tynt dependency
+class FilterSystem(Library):
     """
+        This class contains the information of a filter system
+
+        TODO: Quit tynt dependency
+        """
+
     def __init__(self, filter_system):
-        database = Database()
-        if filter_system not in database.filter_systems:
-            raise ValueError("filter system '%s' is not in the database" % filter_system)
 
-        self.directory = os.path.join("filter_systems", filter_system)
-        self.filename = "index.yml"
-        self.relpath = os.path.join(self.directory, self.filename)
-        self.path = database.abspath(self.relpath)
-
-        super().__init__(filename=self.path)
+        super().__init__(filter_system)
 
         self.filter_names = list(self.filters.keys())
         self.filter_comments = list(self.filters.values())
-
-    def __repr__(self):
-        pass
+        self.files = [f + self.file_extension for f in self.filter_names]
 
 
-class ExtCurvesLibrary(DataContainer):
+class ExtCurvesLibrary(Library):
     """
     Class that contains the information of the a Extinction Curve Library
 
     """
     def __init__(self, extinction_curve):
-        database = Database()
-        if extinction_curve not in database.extinction_curves:
-            raise ValueError("extinction curve '%s' is not in the database" % extinction_curve)
 
-        self.directory = os.path.join("extinction_curves", extinction_curve)
-        self.filename = "index.yml"
-        self.relpath = os.path.join(self.directory, self.filename)
-        self.path = database.abspath(self.relpath)
-        self.filename = self.path
-
-        super().__init__(filename=self.path)
+        super().__init__(self, extinction_curve)
 
         self.curve_names = list(self.curves.keys())
         self.curve_comments = list(self.curves.values())
 
-    def __repr__(self):
-        pass
+        self.files = [e + self.file_extension for e in self.curve_names]
 
 
 class SpectrumContainer(SpecLibrary):
