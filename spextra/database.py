@@ -15,8 +15,7 @@ from .utils import get_rootdir, database_url, download_file, dict_generator
 # Configurations
 
 __all__ = ["Database", "SpecLibrary", "SpectrumContainer", "ExtCurvesLibrary",
-           "ExtCurveContainer", "FilterSystem", "FilterContainer",
-           "get_filter_names", "get_filter_systems"]
+           "ExtCurveContainer", "FilterSystem", "FilterContainer"]
 
 # Do we need this?
 __pkg_dir__ = os.path.dirname(inspect.getfile(inspect.currentframe()))
@@ -93,8 +92,8 @@ class Database(DataContainer):
 
         self.rootdir = rootdir
         self.remote_root = remote_root
-        self.filename = "index.yml"
-        self.path = self.abspath(self.filename)
+        self.ymlfile = "index.yml"
+        self.path = self.abspath(self.ymlfile)
 
         super().__init__(filename=self.path)
 
@@ -120,7 +119,7 @@ class Database(DataContainer):
         separator = '/'
         libs = [e[1:] for e in a]
         self.liblist = [separator.join(e) for e in libs]
-        self.pathlist = [separator.join(e) for e in a]
+        self.relpathlist = [separator.join(e) for e in a]
 
 
 class Library(DataContainer):
@@ -136,11 +135,12 @@ class Library(DataContainer):
             raise ValueError("Library '%s' not in the database" % library_name)
         else:
             index = database.liblist.index(library_name)
-            self.relpath = database.pathlist[index]
+            self.relpath = database.relpathlist[index]
 
-        self.filename = "index.yml"
-        self.path = database.abspath(os.path.join(self.relpath, self.filename))
-
+        self.ymlfile = "index.yml"
+        self.path = database.abspath(os.path.join(self.relpath, self.ymlfile))
+        self.dir = database.abspath(self.relpath)
+        self.url = urljoin(database.remote_root, self.relpath, self.ymlfile)
         super().__init__(filename=self.path)
 
 
@@ -161,7 +161,6 @@ class SpecLibrary(Library):
         templates = "Templates: " + str(self.template_names)
 
         return ' %s \n %s \n %s \n %s' % (description, spec_cov, units, templates)
-
 
 
 class FilterSystem(Library):
@@ -202,20 +201,22 @@ class SpectrumContainer(SpecLibrary):
 
     def __init__(self, template):
         self.template = template
-        self.template_name = self.template.split("/").pop()
+        self.template_name = os.path.basename(self.template)
 
-        library_name = self.template.rstrip("/" + self.template_name)
+        library_name = os.path.split(self.template)[0]
         super().__init__(library_name=library_name)
 
         if self.template_name not in self.template_names:
             raise ValueError("Template '%s' not in library" % self.template_name)
 
-        self.template_comment = self.templates[self.template_name]
-        self.filename = self.template_name + self.file_extension
-        self.relpath = os.path.join(self.directory, self.filename)
-        self.path = Database().abspath(self.relpath)
-        self.filename = self.path
+        self.datafile = self.template_name + self.file_extension
 
+        database = Database()
+
+        self.path = database.abspath(os.path.join(self.relpath, self.datafile))
+        self.url = urljoin(database.remote_root, self.relpath, self.datafile)
+        self.template_comment = self.templates[self.template_name]
+        self.filename = self.path
         self._update_attrs()
 
     def _update_attrs(self):
@@ -230,7 +231,7 @@ class SpectrumContainer(SpecLibrary):
         self.__dict__.pop("summary", None)
         self.__dict__.pop("template_names", None)
         self.__dict__.pop("template_comments", None)
-
+        self.__dict__.pop("ymlfile", None)
 
     def __repr__(self):
         s1 = "Spectral template: " + self.template_name
@@ -245,21 +246,20 @@ class FilterContainer(FilterSystem):
         if self.filter_name in FILTER_DEFAULTS:
             self.filter_name = FILTER_DEFAULTS[filter_name]
 
-        if "/" not in self.filter_name:
-            raise ValueError("not a valid filter %s" % self.filter_name)
-
-        self.name = self.filter_name.split("/").pop()
-        filter_system = self.filter_name.rstrip("/" + self.name)
+        self.name = os.path.basename(self.filter_name)
+        filter_system = os.path.split(self.filter_name)[0]
 
         super().__init__(filter_system=filter_system)
 
         if self.name not in self.filters:
             raise ValueError("Filter '%s' not in library", self.filter_name)
 
+        database = Database()
+
+        self.datafile = self.name + self.file_extension
+        self.path = database.abspath(os.path.join(self.relpath, self.datafile))
+        self.url = urljoin(database.remote_root, self.relpath, self.datafile)
         self.filter_comment = self.filters[self.name]
-        self.filename = self.name + self.file_extension
-        self.relpath = os.path.join(self.directory, self.filename)
-        self.path = Database().abspath(self.relpath)
         self.filename = self.path
 
         self._update_attrs()
@@ -274,6 +274,7 @@ class FilterContainer(FilterSystem):
         self.__dict__.pop("summary", None)
         self.__dict__.pop("filter_names", None)
         self.__dict__.pop("filter_comments", None)
+        self.__dict__.pop("ymlfile", None)
 
     #        download_file('http://svo2.cab.inta-csic.es/'
     #                      'theory/fps3/fps.php?ID={}'.format(self.filter_name),
@@ -287,12 +288,13 @@ class FilterContainer(FilterSystem):
 
 class ExtCurveContainer(ExtCurvesLibrary):
 
-    def __init__(self, curve):
-        self.curve = curve
-        self.curve_name = self.curve.split("/").pop()
+    def __init__(self, curve_name):
 
-        name = self.template.rstrip("/" + self.curve_name)
-        super().__init__(extinction_curve=name)
+        self.curve_name = curve_name
+        self.name = os.path.basename(self.curve_name)
+        curve_library = os.path.split(self.curve_name)[0]
+
+        super().__init__(extinction_curve=curve_library)
 
         if self.curve_name not in self.curve_names:
             raise ValueError("Extinction Curve '%s' not in library" % self.curve_name)
@@ -301,6 +303,14 @@ class ExtCurveContainer(ExtCurvesLibrary):
         self.filename = self.curve_name + self.file_extension
         self.relpath = os.path.join(self.directory, self.filename)
         self.path = Database().abspath(self.relpath)
+        self.filename = self.path
+
+        database = Database()
+
+        self.datafile = self.name + self.file_extension
+        self.path = database.abspath(os.path.join(self.relpath, self.datafile))
+        self.url = urljoin(database.remote_root, self.relpath, self.datafile)
+        self.curve_comment = self.curves[self.name]
         self.filename = self.path
 
         self._update_attrs()
@@ -315,6 +325,7 @@ class ExtCurveContainer(ExtCurvesLibrary):
         self.__dict__.pop("summary", None)
         self.__dict__.pop("curve_names", None)
         self.__dict__.pop("curve_comments", None)
+        self.__dict__.pop("ymlfile", None)
 
     def __repr__(self):
         s = "Extinction curve: " + self.curve_name

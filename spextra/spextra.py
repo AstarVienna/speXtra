@@ -165,7 +165,7 @@ def make_passband(filter_name=None, filter_file=None, wave_unit=u.Angstrom):
     return passband
 
 
-class Spextrum(SourceSpectrum):
+class Spextrum(SpectrumContainer, SourceSpectrum):
     """
     Class to handle spectra. This class download, load, stores and manipulates the spectra.
 
@@ -182,14 +182,9 @@ class Spextrum(SourceSpectrum):
 
     def __init__(self, template_name=None, modelclass=None, **kwargs):
 
-        self.template_name = template_name
-        self.resolution = None
-        self.wmin = None
-        self.wmax = None
-        self.path = None
-        self.data_type = None
+        SpectrumContainer.__init__(self, template_name)
 
-        if self.template_name is not None:
+        if template_name is not None:
             meta, lam, flux = self._loader
             modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=flux, meta=meta)
         if modelclass is not None:
@@ -197,7 +192,7 @@ class Spextrum(SourceSpectrum):
         else:
             raise ValueError("please define a spectra")
 
-        super().__init__(modelclass, **kwargs)
+        SourceSpectrum.__init__(self, modelclass, **kwargs)
 
     @property
     def _loader(self):
@@ -210,31 +205,27 @@ class Spextrum(SourceSpectrum):
         lam: wavelengths
         flux: flux
         """
-        template = SpectralTemplate(self.template_name)
-        location, meta = template.path, template.meta
-        self.path = location
-        self.data_type = meta["data_type"]
-
         try:  # it should also try to read it from the file directly
-            wave_unit = units.validate_unit(meta["wave_unit"])
-            flux_unit = units.validate_unit(meta["flux_unit"])
-        except exceptions.SynphotError:
-            wave_unit = u.AA
-            flux_unit = units.FLAM
+            self.wave_unit = units.validate_unit(self.wave_unit)
+            self.flux_unit = units.validate_unit(self.flux_unit)
+        except exceptions.SynphotError:   # Assumes angtroms and FLAM
+            self.wave_unit = u.AA
+            self.flux_unit = units.FLAM
 
-        self.resolution = meta["resolution"] * wave_unit
-        wave_column_name = meta["wave_column_name"]  # same here
-        flux_column_name = meta["flux_column_name"]
-        file_extension = meta["file_extension"]
+     #   self.resolution = self.resolution * self.wave_unit
 
+        print(self.path,
+              self.flux_unit,
+              self.flux_column_name,
+              self.data_type)
         # make try and except here to catch most problems
         if self.data_type == "fits":
-            meta, lam, flux = read_fits_spec(location, ext=1,
-                                             wave_unit=wave_unit, flux_unit=flux_unit,
-                                             wave_col=wave_column_name, flux_col=flux_column_name)
+            meta, lam, flux = read_fits_spec(self.path, ext=1,
+                                             wave_unit=self.wave_unit, flux_unit=self.flux_unit,
+                                             wave_col=self.wave_column_name, flux_col=self.flux_column_name)
         else:
-            meta, lam, flux = read_ascii_spec(location, wave_unit=wave_unit,
-                                              flux_unit=flux_unit)
+            meta, lam, flux = read_ascii_spec(self.path, wave_unit=self.wave_unit,
+                                              flux_unit=self.flux_unit)
 
         return meta, lam, flux
 
