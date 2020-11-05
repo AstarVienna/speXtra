@@ -13,11 +13,15 @@ source : Ric Davies
 spectral_coverage :
   - nir
 
-wave_unit : um
-
 data_type : ascii
 
 file_extension : .dat
+
+wave_unit : um
+
+wave_column_name : wavelength
+
+flux_column_name : transmission
 
 filters: # filtername
   Br-gamma :            Br-gamma

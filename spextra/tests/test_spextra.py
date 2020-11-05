@@ -65,6 +65,7 @@ class TestSpextrumInstances:
         assert issubclass(Spextrum, SourceSpectrum)
 
     def test_redshift(self, sp=sp):
+
         sp2 = sp.redshift(z=1)
         assert isinstance(sp2, Spextrum)
 

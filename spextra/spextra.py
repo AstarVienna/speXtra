@@ -33,21 +33,17 @@ class Passband(SpectralElement, FilterContainer):
 
     def __init__(self, filter_name=None, modelclass=None, **kwargs):
 
-        self.filter_name = filter_name
-        self.path = None
-        self.data_type = None
+        if filter_name is not None:
 
-        if self.template_name is not None:
-            meta, wave, trans = self._loader
-            modelclass = SpectralElement(Empirical1D, points=wave, lookup_table=trans, meta=meta)
-        if modelclass is not None:
-            modelclass = modelclass
+            FilterContainer.__init__(self, filter_name)
+            meta, wave, trans = self._loader()
+            SpectralElement.__init__(self, Empirical1D, points=wave, lookup_table=trans, meta=meta)
+
+        elif modelclass is not None:
+            SpectralElement.__init__(self, modelclass)
         else:
-            raise ValueError("please define a spectra")
+            raise ValueError("please define a filter")
 
-        super().__init__(modelclass, **kwargs)
-
-    @property
     def _loader(self):
         """
         Load a filter from the database
@@ -59,31 +55,23 @@ class Passband(SpectralElement, FilterContainer):
         flux: flux
         """
 
-        self.path = self.get_path()
-
         try:  # it should also try to read it from the file directly
-            wave_unit = units.validate_unit(self.wave_unit)
+            self.wave_unit = units.validate_unit(self.wave_unit)
         except exceptions.SynphotError:
-            wave_unit = u.AA
-
-
-        wave_column_name = self.meta["wave_column_name"]  # same here
-        flux_column_name = meta["flux_column_name"]
-        file_extension = meta["file_extension"]
+            self.wave_unit = u.AA
 
         # make try and except here to catch most problems
         if self.data_type == "fits":
-            meta, lam, flux = read_fits_spec(location, ext=1,
-                                             wave_unit=wave_unit, flux_unit=flux_unit,
-                                             wave_col=wave_column_name, flux_col=flux_column_name)
-        else:
-            meta, lam, flux = read_ascii_spec(location, wave_unit=wave_unit,
-                                              flux_unit=flux_unit)
+            meta, lam, flux = read_fits_spec(self.filename, ext=1,
+                                             wave_unit=self.wave_unit,
+                                             wave_col=self.wave_column_name,
+                                             flux_col=self.flux_column_name)
+        elif self.data_type == "ascii":
+            meta, lam, flux = read_ascii_spec(self.filename,
+                                              wave_unit=self.wave_unit,
+                                              flux_unit=self._internal_flux_unit)
 
         return meta, lam, flux
-
-
-
 
 
 
@@ -182,19 +170,19 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
     def __init__(self, template_name=None, modelclass=None, **kwargs):
 
-        SpectrumContainer.__init__(self, template_name)
-
         if template_name is not None:
-            meta, lam, flux = self._loader
-            modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=flux, meta=meta)
-        if modelclass is not None:
-            modelclass = modelclass
+            SpectrumContainer.__init__(self, template_name)
+            meta, lam, flux = self._loader()
+            SourceSpectrum.__init__(self, Empirical1D, points=lam, lookup_table=flux, meta=meta,   **kwargs)
+          #  modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=flux, meta=meta)
+        elif modelclass is not None:
+           # modelclass = SourceSpectrum(modelclass=modelclass)
+            SourceSpectrum.__init__(self, modelclass, **kwargs)
         else:
             raise ValueError("please define a spectra")
 
-        SourceSpectrum.__init__(self, modelclass, **kwargs)
+#        SourceSpectrum.__init__(self, modelclass, **kwargs)
 
-    @property
     def _loader(self):
         """
         Load a template from the database
@@ -214,10 +202,6 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
      #   self.resolution = self.resolution * self.wave_unit
 
-        print(self.path,
-              self.flux_unit,
-              self.flux_column_name,
-              self.data_type)
         # make try and except here to catch most problems
         if self.data_type == "fits":
             meta, lam, flux = read_fits_spec(self.path, ext=1,
@@ -295,10 +279,11 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         lam = self.waveset * (1 + z)
         flux = self(self.waveset)
-        meta = self.meta.update({"redshift": z})
-        modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=flux, meta=meta)
+        self.meta.update({"redshift": z})
+        modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=flux, meta=self.meta)
+        sp = self._restore_attr(Spextrum(modelclass=modelclass))
 
-        return Spextrum(modelclass=modelclass)
+        return sp
 
     def add_emi_lines(self, center, flux, fwhm):
         """
@@ -807,6 +792,16 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         """
         pass
+
+    def _restore_attr(self, spextrum):
+        """
+        just a hack to down stream important attributes in particular methods.
+        there must be a better way
+        """
+        temp_dict = {k: self.__dict__[k] for k in self.__dict__ if k.startswith("_") is False}
+        spextrum.__dict__.update(temp_dict)
+        return spextrum
+
 
     # ------ Copied from synphot.SourceSpectrum so operations can also happen here --------
 
