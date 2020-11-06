@@ -14,7 +14,12 @@ from astropy.constants import c as speed_of_light
 from astropy.modeling.models import Scale
 
 import synphot
-from synphot import (units, SourceSpectrum, SpectralElement, Observation, BaseUnitlessSpectrum)
+from synphot import (units,
+                     SourceSpectrum,
+                     SpectralElement,
+                     Observation,
+                     BaseUnitlessSpectrum,
+                     ReddeningLaw)
 from synphot.models import (Empirical1D, GaussianFlux1D, Box1D, ConstFlux1D, BlackBody1D)
 from synphot.specio import read_ascii_spec, read_fits_spec, read_spec
 from synphot import exceptions
@@ -74,32 +79,55 @@ class Passband(SpectralElement, FilterContainer):
         return meta, lam, flux
 
 
-
-
-
-class XCurve(synphot.ReddeningLaw):
+cclass ExtCurve(ReddeningLaw, ExtCurveContainer):
     """
     This should be the holder of all information and operations related to extinction curves
     Name should be ExtinctionCurve
     """
-    def __init__(self):
-        pass
+    def __init__(self, curve_name=None, modelclass=None, **kwargs):
 
-    @classmethod
-    def from_file(cls, filename, wave_unit=u.Angstrom):
+
+        if curve_name is not None:
+
+            ExtCurveContainer.__init__(self, curve_name)
+            meta, wave, trans = self._loader()
+            ReddeningLaw.__init__(self, Empirical1D, points=wave, lookup_table=trans, meta=meta)
+
+        elif modelclass is not None:
+            SpectralElement.__init__(self, modelclass)
+        else:
+            raise ValueError("please define a filter")
+
+    def _loader(self):
         """
-        TODO: many extinction curves come in 1/wavelength, check this works too
-        Parameters
-        ----------
-        filename
-        wave_unit
+        Load a filter from the database
 
         Returns
         -------
-
+        meta: metadata of the spectra (header)
+        lam: wavelengths
+        flux: flux
         """
 
-        pass
+        try:  # it should also try to read it from the file directly
+            self.wave_unit = units.validate_unit(self.wave_unit)
+        except exceptions.SynphotError:
+            self.wave_unit = u.AA
+
+
+        # make try and except here to catch most problems
+        if self.data_type == "fits":
+            meta, lam, flux = read_fits_spec(self.filename, ext=1,
+                                             wave_unit=self.wave_unit,
+                                             wave_col=self.wave_column_name,
+                                             flux_col=self.flux_column_name)
+        elif self.data_type == "ascii":
+            meta, lam, flux = read_ascii_spec(self.filename,
+                                              wave_unit=self.wave_unit,
+                                              flux_unit=self._internal_flux_unit)
+
+
+        return meta, lam, flux
 
 
 def make_passband(filter_name=None, filter_file=None, wave_unit=u.Angstrom):

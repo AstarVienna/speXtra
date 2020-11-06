@@ -182,15 +182,13 @@ class FilterSystem(Library):
 class ExtCurvesLibrary(Library):
     """
     Class that contains the information of the a Extinction Curve Library
-
     """
-    def __init__(self, extinction_curve):
+    def __init__(self, curve_library):
 
-        super().__init__(self, extinction_curve)
+        super().__init__(curve_library)
 
         self.curve_names = list(self.curves.keys())
         self.curve_comments = list(self.curves.values())
-
         self.files = [e + self.file_extension for e in self.curve_names]
 
 
@@ -291,26 +289,22 @@ class ExtCurveContainer(ExtCurvesLibrary):
     def __init__(self, curve_name):
 
         self.curve_name = curve_name
-        self.name = os.path.basename(self.curve_name)
+        self.cname = os.path.basename(self.curve_name)
         curve_library = os.path.split(self.curve_name)[0]
+        print(self.curve_name, self.cname, curve_library)
+        super().__init__(curve_library=curve_library)
 
-        super().__init__(extinction_curve=curve_library)
-
-        if self.curve_name not in self.curve_names:
+        if self.cname not in self.curve_names:
             raise ValueError("Extinction Curve '%s' not in library" % self.curve_name)
 
-        self.curve_comment = self.curve_names[self.curve_name]
-        self.filename = self.curve_name + self.file_extension
-        self.relpath = os.path.join(self.directory, self.filename)
-        self.path = Database().abspath(self.relpath)
-        self.filename = self.path
+
 
         database = Database()
 
-        self.datafile = self.name + self.file_extension
+        self.datafile = self.cname + self.file_extension
         self.path = database.abspath(os.path.join(self.relpath, self.datafile))
         self.url = urljoin(database.remote_root, self.relpath, self.datafile)
-        self.curve_comment = self.curves[self.name]
+        self.curve_comment = self.curves[self.cname]
         self.filename = self.path
 
         self._update_attrs()
