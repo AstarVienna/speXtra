@@ -21,7 +21,7 @@ wave_unit : um
 
 wave_column_name : wavelength
 
-flux_column_name : transmission
+trans_column_name : transmission
 
 filters: # filtername
   Br-gamma :            Br-gamma

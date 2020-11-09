@@ -21,6 +21,7 @@ from synphot.specio import read_ascii_spec, read_fits_spec, read_spec
 from synphot import exceptions
 
 from .database import SpectrumContainer, FilterContainer, ExtCurveContainer
+from .utils import download_svo_filter
 
 
 __all__ = ["Spextrum", "Passband", "ExtCurve",  "get_vega_spectrum"]
@@ -36,9 +37,19 @@ class Passband(SpectralElement, FilterContainer):
 
         if filter_name is not None:
 
-            FilterContainer.__init__(self, filter_name)
-            meta, wave, trans = self._loader()
-            SpectralElement.__init__(self, Empirical1D, points=wave, lookup_table=trans, meta=meta)
+            try:
+                FilterContainer.__init__(self, filter_name)
+                meta, wave, trans = self._loader()
+                SpectralElement.__init__(self, Empirical1D, points=wave, lookup_table=trans, meta=meta)
+            except ValueError as e1:
+                print(e1)
+                try:
+                    wave, trans = download_svo_filter(filter_name)
+                    meta = {"filter_name": filter_name}
+                    SpectralElement.__init__(self, Empirical1D, points=wave, lookup_table=trans,
+                                         meta=meta)
+                except ValueError as e2:
+                    print("filter doesn't exist")
 
         elif modelclass is not None:
             SpectralElement.__init__(self, modelclass)
@@ -65,11 +76,12 @@ class Passband(SpectralElement, FilterContainer):
         if self.data_type == "fits":
             meta, lam, trans = read_fits_spec(self.filename, ext=1,
                                               wave_unit=self.wave_unit,
-                                              wave_col=self.wave_column_name, flux_col=self.flux_column_name)
+                                              wave_col=self.wave_column_name, flux_col=self.trans_column_name)
         elif self.data_type == "ascii":
             meta, lam, trans = read_ascii_spec(self.filename,
                                                wave_unit=self.wave_unit, flux_unit=self._internal_flux_unit,
-                                               wave_col=self.wave_column_name, flux_col=self.flux_column_name)
+                                             #  wave_col=self.wave_column_name, flux_col=self.trans_column_name,
+                                               )
 
         return meta, lam, trans
 

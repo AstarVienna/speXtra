@@ -214,3 +214,77 @@ def download_file(remote_url, local_name):
         if os.path.exists(local_name):
             os.remove(local_name)
             raise
+
+
+def download_svo_filter(filter_name):
+    """
+    Query the SVO service for the true transmittance for a given filter
+    Parameters
+    ----------
+    filter_name : str
+        Name of the filter as available on the spanish VO filter service
+        e.g: ``Paranal/HAWKI.Ks``
+
+    Returns
+    -------
+    filt_curve : tuple with wave and trans values
+    """
+    from astropy.table import Table
+
+    origin = 'http://svo2.cab.inta-csic.es/'\
+             'theory/fps3/fps.php?ID={}'.format(filter_name)
+
+    local_path = os.path.join(get_rootdir(), "svo_filters", filter_name)
+
+    if os.path.exists(local_path) is False:
+        download_file(origin, local_path)
+
+    tbl = Table.read(local_path, format='votable')  # raises ValueError if table is malformed
+                                                    # this can be used to catch problmes
+    wave = tbl['Wavelength']
+    trans = tbl['Transmission']
+
+    return wave, trans
+
+
+#    This is based on scopesim.effects.ter_curves_utils.py
+
+
+def get_filter_systems():
+    """
+    Return a set of the different filter system available
+
+    Returns
+    -------
+
+    """
+    try:
+        import tynt
+    except ImportError as e:
+        print(e, "this function requires tynt. ")
+    filters = tynt.FilterGenerator().available_filters()
+    systems = {f.split("/")[0] for f in filters}
+    return systems
+
+
+def get_filter_names(system=None):
+    """
+    This function just returns the filters available from tynt
+    if system= None returns all
+
+    Returns
+    -------
+
+    """
+    try:
+        import tynt
+    except ImportError as e:
+        print(e, "this function requires tynt. ")
+    filter_list = tynt.FilterGenerator().available_filters()
+    ord_list = [[f for f in filter_list if s in f] for s in get_filter_systems()]
+    flat_list = [item for sublist in ord_list for item in sublist]
+
+    if system is not None:
+        flat_list = [f for f in filter_list if system in f]
+
+    return flat_list

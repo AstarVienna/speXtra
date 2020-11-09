@@ -21,12 +21,13 @@ __pkg_dir__ = os.path.dirname(inspect.getfile(inspect.currentframe()))
 __data_dir__ = os.path.join(__pkg_dir__, "data")
 
 # Default filters
-with open(os.path.join(__data_dir__,  "default_filters.yml")) as filter_file:
-    FILTER_DEFAULTS = yaml.safe_load(filter_file)
 
 # Tables are displayed with a jsviewer by default
 # Table.show_in_browser.__defaults__ = (5000, True, 'default', {'use_local_files': True},
 #                                              None, 'display compact', None, 'idx')
+
+with open(os.path.join(__data_dir__,  "default_filters.yml")) as filter_file:
+    FILTER_DEFAULTS = yaml.safe_load(filter_file)
 
 
 class DataContainer:
@@ -347,44 +348,4 @@ def database_as_tree():
     pass
 
 
-#    This is based on scopesim.effects.ter_curves_utils.py
 
-
-def get_filter_systems():
-    """
-    Return a set of the different filter system available
-
-    Returns
-    -------
-
-    """
-    try:
-        import tynt
-    except ImportError as e:
-        print(e, "this function requires tynt. ")
-    filters = tynt.FilterGenerator().available_filters()
-    systems = {f.split("/")[0] for f in filters}
-    return systems
-
-
-def get_filter_names(system=None):
-    """
-    This function just returns the filters available from tynt
-    if system= None returns all
-
-    Returns
-    -------
-
-    """
-    try:
-        import tynt
-    except ImportError as e:
-        print(e, "this function requires tynt. ")
-    filter_list = tynt.FilterGenerator().available_filters()
-    ord_list = [[f for f in filter_list if s in f] for s in get_filter_systems()]
-    flat_list = [item for sublist in ord_list for item in sublist]
-
-    if system is not None:
-        flat_list = [f for f in filter_list if system in f]
-
-    return flat_list
