@@ -8,7 +8,6 @@ import os
 from urllib.error import URLError, HTTPError
 
 import yaml
-import tynt
 
 from .utils import get_rootdir, database_url, download_file, dict_generator
 
@@ -167,7 +166,6 @@ class FilterSystem(Library):
     """
         This class contains the information of a filter system
 
-        TODO: Quit tynt dependency
         """
 
     def __init__(self, filter_system):
@@ -360,6 +358,10 @@ def get_filter_systems():
     -------
 
     """
+    try:
+        import tynt
+    except ImportError as e:
+        print(e, "this function requires tynt. ")
     filters = tynt.FilterGenerator().available_filters()
     systems = {f.split("/")[0] for f in filters}
     return systems
@@ -374,6 +376,10 @@ def get_filter_names(system=None):
     -------
 
     """
+    try:
+        import tynt
+    except ImportError as e:
+        print(e, "this function requires tynt. ")
     filter_list = tynt.FilterGenerator().available_filters()
     ord_list = [[f for f in filter_list if s in f] for s in get_filter_systems()]
     flat_list = [item for sublist in ord_list for item in sublist]

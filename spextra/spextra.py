@@ -13,13 +13,9 @@ import astropy.units as u
 from astropy.constants import c as speed_of_light
 from astropy.modeling.models import Scale
 
-import synphot
-from synphot import (units,
-                     SourceSpectrum,
-                     SpectralElement,
-                     Observation,
-                     BaseUnitlessSpectrum,
-                     ReddeningLaw)
+
+from synphot import (units, SourceSpectrum, SpectralElement, Observation,
+                     BaseUnitlessSpectrum, ReddeningLaw)
 from synphot.models import (Empirical1D, GaussianFlux1D, Box1D, ConstFlux1D, BlackBody1D)
 from synphot.specio import read_ascii_spec, read_fits_spec, read_spec
 from synphot import exceptions
@@ -27,7 +23,7 @@ from synphot import exceptions
 from .database import SpectrumContainer, FilterContainer, ExtCurveContainer
 
 
-__all__ = ["Spextrum", "make_passband",  "get_vega_spectrum"]
+__all__ = ["Spextrum", "Passband", "ExtCurve",  "get_vega_spectrum"]
 
 
 class Passband(SpectralElement, FilterContainer):
@@ -67,34 +63,32 @@ class Passband(SpectralElement, FilterContainer):
 
         # make try and except here to catch most problems
         if self.data_type == "fits":
-            meta, lam, flux = read_fits_spec(self.filename, ext=1,
-                                             wave_unit=self.wave_unit,
-                                             wave_col=self.wave_column_name,
-                                             flux_col=self.flux_column_name)
-        elif self.data_type == "ascii":
-            meta, lam, flux = read_ascii_spec(self.filename,
+            meta, lam, trans = read_fits_spec(self.filename, ext=1,
                                               wave_unit=self.wave_unit,
-                                              flux_unit=self._internal_flux_unit)
+                                              wave_col=self.wave_column_name, flux_col=self.flux_column_name)
+        elif self.data_type == "ascii":
+            meta, lam, trans = read_ascii_spec(self.filename,
+                                               wave_unit=self.wave_unit, flux_unit=self._internal_flux_unit,
+                                               wave_col=self.wave_column_name, flux_col=self.flux_column_name)
 
-        return meta, lam, flux
+        return meta, lam, trans
 
 
-cclass ExtCurve(ReddeningLaw, ExtCurveContainer):
+class ExtCurve(ReddeningLaw, ExtCurveContainer):
     """
     This should be the holder of all information and operations related to extinction curves
     Name should be ExtinctionCurve
     """
     def __init__(self, curve_name=None, modelclass=None, **kwargs):
 
-
         if curve_name is not None:
 
             ExtCurveContainer.__init__(self, curve_name)
-            meta, wave, trans = self._loader()
-            ReddeningLaw.__init__(self, Empirical1D, points=wave, lookup_table=trans, meta=meta)
+            meta, wave, rvs = self._loader()
+            ReddeningLaw.__init__(self, Empirical1D, points=wave, lookup_table=rvs, meta=meta)
 
         elif modelclass is not None:
-            SpectralElement.__init__(self, modelclass)
+            ReddeningLaw.__init__(self, modelclass)
         else:
             raise ValueError("please define a filter")
 
@@ -114,71 +108,18 @@ cclass ExtCurve(ReddeningLaw, ExtCurveContainer):
         except exceptions.SynphotError:
             self.wave_unit = u.AA
 
-
-        # make try and except here to catch most problems
         if self.data_type == "fits":
-            meta, lam, flux = read_fits_spec(self.filename, ext=1,
-                                             wave_unit=self.wave_unit,
-                                             wave_col=self.wave_column_name,
-                                             flux_col=self.flux_column_name)
+            meta, lam, rvs = read_fits_spec(self.filename, ext=1,
+                                            wave_unit=self.wave_unit, flux_unit=self.extinction_unit,
+                                            # self._internal_flux_unit,
+                                            wave_col=self.wave_column, flux_col=self.extinctiom_column)
         elif self.data_type == "ascii":
-            meta, lam, flux = read_ascii_spec(self.filename,
-                                              wave_unit=self.wave_unit,
-                                              flux_unit=self._internal_flux_unit)
+            meta, lam, rvs = read_ascii_spec(self.filename,
+                                             wave_unit=self.wave_unit, flux_unit=self.extinction_unit,
+                                             # self._internal_flux_unit,
+                                             wave_col=self.wave_column, flux_col=self.extinctiom_column)
 
-
-        return meta, lam, flux
-
-
-def make_passband(filter_name=None, filter_file=None, wave_unit=u.Angstrom):
-    """
-    Make a SpectralElement (aka a synphot passband) from an
-    user specified filter in the database.
-    Optionally, specify a file in disk and the wavelength units.
-
-    Parameters
-    ----------
-    filter_name : str
-                  a filter name expressed as ``instrument/filter_name``
-    filter_file : str,
-                  Optionally, make a pasband from a local file
-    wave_unit : u.Quantity, optional
-                if not specified in the file
-                default: u.Angstrom
-
-    Returns
-    -------
-    passband : a ``synphot.SpectralElement``
-    """
-    if filter_file is not None:
-        try:
-            meta, wave, trans = read_spec(filter_file, wave_unit=wave_unit,
-                                          flux_unit='transmission')
-        except (FileNotFoundError, exceptions.SynphotError) as e:
-            print("File not found or malformed", e)
-            raise
-    else:
-        filt = Filter(filter_name=filter_name)
-        path, meta = filt.path, filt.meta
-        if meta is None:  # it's a svo filter!
-            trans_table = Table.read(path, format="votable")
-            wave = trans_table['Wavelength'].data.data * u.Angstrom
-            trans = trans_table['Transmission'].data.data
-        else:   # filter in spextra database
-            wave_unit = units.validate_unit(meta["wave_unit"])
-            data_type = meta["data_type"]
-            if data_type == "fits":
-                trans_table = Table.read(path, format="fits")
-                wave = trans_table[0][:].data * wave_unit
-                trans = trans_table[1][:].data
-            elif data_type == "ascii":
-                trans_table = Table.read(path, format="ascii")
-                wave = trans_table[0][:].data * wave_unit
-                trans = trans_table[1][:].data
-
-    passband = SpectralElement(Empirical1D, points=wave, lookup_table=trans, meta=meta)
-
-    return passband
+        return meta, lam, rvs
 
 
 class Spextrum(SpectrumContainer, SourceSpectrum):

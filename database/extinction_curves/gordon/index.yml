@@ -13,6 +13,10 @@ wave_unit : 1/um
 
 extinction_unit : Av/E(B-V)
 
+wave_column : WAVELENGTH
+
+extinction_colum : Av/E(B-V)
+
 data_type : fits
 
 file_extension : .fits

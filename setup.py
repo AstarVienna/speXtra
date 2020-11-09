@@ -53,8 +53,6 @@ def setup_sp():
         install_requires=["numpy",
                           "astropy>=3.1",
                           "synphot>=0.2.0",
-                          "matplotlib>1.5.0",
-                          "tynt",
                           "pyyaml", ],
         classifiers=["Programming Language :: Python :: 3",
                      "License :: OSI Approved :: MIT License",

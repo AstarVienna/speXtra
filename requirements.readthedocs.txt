@@ -1,7 +1,6 @@
 numpy>=1.13
 matplotlib
 scipy
-tynt
 astropy
 synphot
 PyYAML
