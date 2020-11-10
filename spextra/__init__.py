@@ -5,7 +5,7 @@ from . import spextra
 from . import database
 from . import utils
 
-from .spextra import Spextrum, Passband, ExtCurve
+from .spextra import Spextrum, Passband, ExtinctionCurve
 from .database import Database, SpecLibrary, FilterSystem, ExtCurvesLibrary
 
 __pkg_dir__ = os.path.dirname(inspect.getfile(inspect.currentframe()))

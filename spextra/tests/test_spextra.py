@@ -9,7 +9,7 @@ import numpy as np
 import astropy.units as u
 from synphot import SpectralElement, SourceSpectrum, units
 
-from spextra import Spextrum, make_passband
+from spextra import Spextrum, Passband
 
 
 # utility function
@@ -24,7 +24,7 @@ MOCK_DIR = mock_dir()
 
 def test_make_passband_no_file():
     with pytest.raises(FileNotFoundError) as e_info:
-        pb = make_passband(filter_file="blablabla")
+        pb = Passband.from_file(filename="blablabla")
         print(e_info)
 
 
@@ -32,20 +32,21 @@ def test_make_passband_no_file():
 class TestPassbandInstances:
 
     def test_alias(self):
-        passband = make_passband("W1")
+        passband = Passband("W1")
         assert isinstance(passband, SpectralElement)
 
     def test_svo(self):
-        passband = make_passband("Paranal/HAWKI.Ks")
+        passband = Passband("Paranal/HAWKI.Ks")
         assert isinstance(passband, SpectralElement)
 
     def test_database(self):
-        passband = make_passband("micado/Y")
+        passband = Passband("micado/Y")
         assert isinstance(passband, SpectralElement)
 
     def test_filename(self):
         filter_file = os.path.join(MOCK_DIR, 'Y.dat')
-        passband = make_passband(filter_file=filter_file, wave_unit=u.um)
+
+        passband = Passband.from_file(filename=filter_file)
         assert isinstance(passband, SpectralElement)
 
 

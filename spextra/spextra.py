@@ -15,22 +15,25 @@ from astropy.modeling.models import Scale
 
 
 from synphot import (units, SourceSpectrum, SpectralElement, Observation,
-                     BaseUnitlessSpectrum, ReddeningLaw)
-from synphot.models import (Empirical1D, GaussianFlux1D, Box1D, ConstFlux1D, BlackBody1D)
+                     BaseUnitlessSpectrum, ReddeningLaw, utils)
+from synphot.models import (Empirical1D, GaussianFlux1D, Box1D, ConstFlux1D, BlackBody1D, PowerLawFlux1D)
 from synphot.specio import read_ascii_spec, read_fits_spec, read_spec
 from synphot import exceptions
 
-from .database import SpectrumContainer, FilterContainer, ExtCurveContainer
+from .database import SpectrumContainer, FilterContainer, ExtCurveContainer, FILTER_DEFAULTS
 from .utils import download_svo_filter
 
 
-__all__ = ["Spextrum", "Passband", "ExtCurve",  "get_vega_spectrum"]
+__all__ = ["Spextrum", "Passband", "ExtinctionCurve",  "get_vega_spectrum"]
 
 
 class Passband(SpectralElement, FilterContainer):
     """
     This should be the holder of all information and operations related to the filters
     including path, etc.
+
+    TODO: Implement proper __add__, __sub__, __mul__, etc
+
     """
 
     def __init__(self, filter_name=None, modelclass=None, **kwargs):
@@ -43,11 +46,10 @@ class Passband(SpectralElement, FilterContainer):
                 SpectralElement.__init__(self, Empirical1D, points=wave, lookup_table=trans, meta=meta)
             except ValueError as e1:
                 print(e1)
-                try:
-                    wave, trans = download_svo_filter(filter_name)
-                    meta = {"filter_name": filter_name}
+                try:  # try to download it from SVO
+                    meta, wave, trans = self._from_svo(filter_name)
                     SpectralElement.__init__(self, Empirical1D, points=wave, lookup_table=trans,
-                                         meta=meta)
+                                             meta=meta)
                 except ValueError as e2:
                     print("filter doesn't exist")
 
@@ -85,11 +87,22 @@ class Passband(SpectralElement, FilterContainer):
 
         return meta, lam, trans
 
+    def _from_svo(self, filter_name):
+        if filter_name in FILTER_DEFAULTS.keys():
+            filter_name = FILTER_DEFAULTS[filter_name]
+        wave, trans = download_svo_filter(filter_name)
+        meta = {"filter_name": filter_name, "source": "SVO"}
+        self.filter_name = filter_name
 
-class ExtCurve(ReddeningLaw, ExtCurveContainer):
+        return meta, wave, trans
+
+
+class ExtinctionCurve(ReddeningLaw, ExtCurveContainer):
     """
-    This should be the holder of all information and operations related to extinction curves
-    Name should be ExtinctionCurve
+    Extinction curves
+
+    TODO: Implement proper __add__, __sub__, __mul__, etc
+
     """
     def __init__(self, curve_name=None, modelclass=None, **kwargs):
 
@@ -132,6 +145,8 @@ class ExtCurve(ReddeningLaw, ExtCurveContainer):
                                              wave_col=self.wave_column, flux_col=self.extinctiom_column)
 
         return meta, lam, rvs
+
+
 
 
 class Spextrum(SpectrumContainer, SourceSpectrum):
@@ -196,7 +211,6 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
     def spectral_edges(self):
         """
-
         Returns
         -------
         a tuple with the edges of the spectrum
@@ -207,32 +221,25 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         return self.wmin, self.wmax
 
     @classmethod
-    def from1dspec(cls, filename, format="wcs1d-fits", **kwargs):
+    def from_specutils(cls, spectrum_object):
         """
-        This function _tries_ to create a Spectrum from 1d fits files.
-        It relies in specutils for its job
+        This function _tries_ to create a Spectrum from a ``specutils.Spectrum1D`` instance.
+
+        ``specutils.Spectrum1D``  can read multiple file formats with the ``.read`` method.
+        please read ``specutils`` documentations.
+
         Parameters
         ----------
-        filename: str a filename with the spectra
-        format: format of the spectra accepted by `specutils` (see `specutils` documentation)
+        spectrum_object: specutils.Spectrum1D object
 
         Returns
         -------
         a Spextrum instance
-
         """
-        try:
-            from specutils import Spectrum1D
-        except ImportError as ie:
-            print(ie, "specutils not installed, cannot import spectra")
-            raise
-
-        spec1d = Spectrum1D.read(filename, format=format, **kwargs)
-        meta = spec1d.meta
-        lam = spec1d.spectral_axis
-        flux = spec1d.flux
-        modelclass = SourceSpectrum(Empirical1D,
-                                    points=lam, lookup_table=flux, meta=meta)
+        meta = spectrum_object.meta
+        lam = spectrum_object.spectral_axis
+        flux = spectrum_object.flux
+        modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=flux, meta=meta)
 
         return cls(modelclass=modelclass)
 
@@ -242,7 +249,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         Parameters
         ----------
-        z: redshift
+        z: redshift or
         vel: radial velocity,  if no unit are present it is assumed to be in m/s
 
         Returns
@@ -377,16 +384,11 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
             Ebv = Av / Rv
 
         extcurve = ExtinctionCurve(curve_name)
-        curve, meta = extcurve.path, extcurve.meta
 
-        if meta["data_type"] == "fits":
-            header, wavelengths, rvs = read_fits_spec(curve, flux_col='Av/E(B-V)')
-        else:
-            header, wavelengths, rvs = read_ascii_spec(curve)
-
-        red_law = synphot.ReddeningLaw(Empirical1D, points=wavelengths, lookup_table=rvs, meta={'header': header})
-        extinction = red_law.extinction_curve(Ebv)
+        extinction = extcurve.extinction_curve(Ebv)
         sp = Spextrum(modelclass=self.model * extinction.model)
+        sp = self._restore_attr(sp)
+        sp.meta.update({"Reddening with": curve_name, "Reddening with E(B-V)": Ebv})
 
         return sp
 
@@ -409,16 +411,11 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
             Ebv = Av / Rv
 
         ext_curve = ExtinctionCurve(curve_name)
-        curve, meta = ext_curve.path, ext_curve.meta
 
-        if meta["data_type"] == "fits":
-            header, wavelengths, rvs = read_fits_spec(curve, flux_col='Av/E(B-V)')
-        else:
-            header, wavelengths, rvs = read_ascii_spec(curve)
-
-        red_law = synphot.ReddeningLaw(Empirical1D, points=wavelengths, lookup_table=rvs, meta={'header': header})
-        extinction = red_law.extinction_curve(Ebv)
+        extinction = ext_curve.extinction_curve(Ebv)
         sp = Spextrum(modelclass=self.model / extinction.model)
+        sp = self._restore_attr(sp)
+        sp.meta.update({"Dereddening with": curve_name, "Dereddening with E(B-V)": Ebv})
 
         return sp
 
@@ -446,8 +443,11 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         obs = Observation(self, filt, binset=new_waves, force='taper')
         newflux = obs.binflux
         rebin_spec = Empirical1D(points=new_waves, lookup_table=newflux, meta=self.meta)
+        sp = Spextrum(modelclass=rebin_spec)
+        sp = self._restore_attr(sp)
+        sp.meta.update({"rebinned_spectra": True})
 
-        return Spextrum(modelclass=rebin_spec)
+        return sp
 
     def logrebin(self):
         """
@@ -501,15 +501,12 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         conv_sigma = sigma / step_size
         smoothed_flux = gaussian_filter1d(flux, conv_sigma.value)
 
-        flux_unit = flux.unit
-        meta = self.meta
+        self.meta.update({"KERNEL_SIZE": sigma.value})
+        modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=smoothed_flux, meta=self.meta)
+        sp = Spextrum(modelclass=modelclass)
+        sp = sp._restore_attr(sp)
 
-        meta.update({"KERNEL_SIZE": sigma.value})
-        modelclass = SourceSpectrum(Empirical1D,
-                                    points=lam, lookup_table=smoothed_flux,
-                                    meta=meta)
-
-        return Spextrum(modelclass=modelclass)
+        return sp
 
     @classmethod
     def flat_spectrum(cls, mag=0, system_name="AB", wavelengths=None):
@@ -529,8 +526,8 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         a Spextrum instance
         """
         if wavelengths is None:  # set a default waveset with R~805
-            wavelengths, info = synphot.utils.generate_wavelengths(minwave=100, maxwave=50000, num=5000,
-                                                                   log=True, wave_unit=u.AA)
+            wavelengths, info = utils.generate_wavelengths(minwave=100, maxwave=50000, num=5000,
+                                                           log=True, wave_unit=u.AA)
         if system_name.lower() in ["vega"]:
             spec = get_vega_spectrum()
             spec = spec * 10**(-0.4*mag)
@@ -604,7 +601,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         """
 
-        sp = cls(modelclass=synphot.models.PowerLawFlux1D, amplitude=amplitude, x_0=2000, alpha=alpha)
+        sp = cls(modelclass=PowerLawFlux1D, amplitude=amplitude, x_0=2000, alpha=alpha)
 
         return sp.scale_to_magnitude(amplitude=amplitude, filter_name=filter_name, filter_file=filter_file)
 
@@ -640,9 +637,9 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         """
 
         if filter_file is not None:
-            filter_curve = make_passband(filter_file=filter_file)
+            filter_curve = Passband.from_file(filename=filter_file)
         else:
-            filter_curve = make_passband(filter_name=filter_name)
+            filter_curve = Passband(filter_name=filter_name)
 
         if isinstance(amplitude, u.Quantity):
             if amplitude.unit.physical_type == "spectral flux density":
@@ -698,9 +695,9 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         """
 
         if filter_file is not None:
-            filter_curve = make_passband(filter_file=filter_file)
+            filter_curve = Passband.from_file(filename=filter_file)
         else:
-            filter_curve = make_passband(filter_name=filter_name)
+            filter_curve = Passband(filter_name=filter_name)
 
         if system_name.lower() in ["vega"]:
             unit = u.mag
@@ -756,9 +753,9 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
                 raise
 
         elif filter_file is not None:
-            filter_curve = make_passband(filter_file=filter_file)
+            filter_curve = Passband.from_file(filename=filter_file)
         else:
-            filter_curve = make_passband(filter_name=filter_name)
+            filter_curve = Passband(filter_name=filter_name)
 
         obs = Observation(self, filter_curve)
         counts = obs.countrate(area=area * u.cm ** 2)
@@ -861,6 +858,7 @@ def get_vega_spectrum():
         wave, flux = vega_sp._get_arrays(wavelengths=None)
 
     """
+    import synphot
     location = "http://ssb.stsci.edu/cdbs/calspec/alpha_lyr_stis_009.fits"
     remote = synphot.specio.read_remote_spec(location, cache=True)
     header = remote[0]
