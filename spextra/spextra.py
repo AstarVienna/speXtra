@@ -87,6 +87,13 @@ class Passband(SpectralElement, FilterContainer):
 
         return meta, lam, trans
 
+    @classmethod
+    def from_file(cls, filename, **kwargs):
+
+        modelclass = SpectralElement.from_file(filename, **kwargs)
+
+        return cls(modelclass=modelclass)
+
     def _from_svo(self, filter_name):
         if filter_name in FILTER_DEFAULTS.keys():
             filter_name = FILTER_DEFAULTS[filter_name]
@@ -117,6 +124,13 @@ class ExtinctionCurve(ReddeningLaw, ExtCurveContainer):
         else:
             raise ValueError("please define a filter")
 
+    @classmethod
+    def from_file(cls, filename, **kwargs):
+
+        modelclass = ReddeningLaw.from_file(filename, **kwargs)
+
+        return cls(modelclass=modelclass)
+
     def _loader(self):
         """
         Load a filter from the database
@@ -137,12 +151,12 @@ class ExtinctionCurve(ReddeningLaw, ExtCurveContainer):
             meta, lam, rvs = read_fits_spec(self.filename, ext=1,
                                             wave_unit=self.wave_unit, flux_unit=self.extinction_unit,
                                             # self._internal_flux_unit,
-                                            wave_col=self.wave_column, flux_col=self.extinctiom_column)
+                                            wave_col=self.wave_column, flux_col=self.extinction_column)
         elif self.data_type == "ascii":
             meta, lam, rvs = read_ascii_spec(self.filename,
                                              wave_unit=self.wave_unit, flux_unit=self.extinction_unit,
                                              # self._internal_flux_unit,
-                                             wave_col=self.wave_column, flux_col=self.extinctiom_column)
+                                             wave_col=self.wave_column, flux_col=self.extinction_column)
 
         return meta, lam, rvs
 
@@ -189,7 +203,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         lam: wavelengths
         flux: flux
         """
-        try:  # it should also try to read it from the file directly
+        try:
             self.wave_unit = units.validate_unit(self.wave_unit)
             self.flux_unit = units.validate_unit(self.flux_unit)
         except exceptions.SynphotError:   # Assumes angtroms and FLAM
@@ -198,27 +212,34 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
      #   self.resolution = self.resolution * self.wave_unit
 
-        # make try and except here to catch most problems
-        if self.data_type == "fits":
+        if self.data_type == "fits":  # make try and except here to catch most problems
             meta, lam, flux = read_fits_spec(self.path, ext=1,
                                              wave_unit=self.wave_unit, flux_unit=self.flux_unit,
                                              wave_col=self.wave_column_name, flux_col=self.flux_column_name)
         else:
-            meta, lam, flux = read_ascii_spec(self.path, wave_unit=self.wave_unit,
-                                              flux_unit=self.flux_unit)
+            meta, lam, flux = read_ascii_spec(self.path,
+                                              wave_unit=self.wave_unit, flux_unit=self.flux_unit)
 
         return meta, lam, flux
 
-    def spectral_edges(self):
+    @classmethod
+    def from_file(cls, filename, **kwargs):
         """
+        This is just an adaptation of the ``synphot.SourceSpectrum.from_file()`` method
+
+        Parameters
+        ----------
+        filename
+        kwargs
+
         Returns
         -------
-        a tuple with the edges of the spectrum
-        """
-        self.wmin = np.min(self.waveset)
-        self.wmax = np.max(self.waveset)
+        Spextrum instance
 
-        return self.wmin, self.wmax
+        """
+        modelclass = SourceSpectrum.from_file(filename, **kwargs)
+
+        return cls(modelclass=modelclass)
 
     @classmethod
     def from_specutils(cls, spectrum_object):
@@ -226,7 +247,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         This function _tries_ to create a Spectrum from a ``specutils.Spectrum1D`` instance.
 
         ``specutils.Spectrum1D``  can read multiple file formats with the ``.read`` method.
-        please read ``specutils`` documentations.
+        please read ``specutils`` documentation.
 
         Parameters
         ----------
@@ -336,12 +357,11 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         if isinstance(fwhm, u.Quantity) is True:
             fwhm = fwhm.to(u.AA).value
 
-
         center = np.array([center]).flatten()
         ew = np.array([ew]).flatten()
         fwhm = np.array([fwhm]).flatten()
 
-        sp = self  #.__class__(modelclass=self.model)
+        sp = self  #  .__class__(modelclass=self.model)
         for c, e, f in zip(center, ew, fwhm):
             sign = -1 * np.sign(e)  # to keep the convention that EL are negative and ABS are positive
             left, right = c - np.abs(e / 2), c + np.abs(e / 2)
@@ -372,8 +392,9 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         Parameters
         ----------
-        curve: the extinction curve
-        EBV: E(B-V)
+        curve_name: str, name of the extinction curve
+        Av: float, Av parameter
+        Ebv: float, E(B-V) color excess
 
         Returns
         -------
@@ -398,9 +419,9 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         Parameters
         ----------
-        spectrum: a synphot spectrum
-        curve: the extinction curve
-        EBV: E(B-V)
+        curve_name: str, name of the extinction curve
+        Av: float, Av parameter
+        Ebv: float, E(B-V) color excess
 
         Returns
         -------
@@ -454,7 +475,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         TODO: Estimate optimal rebinning factors here.
         Returns
         -------
-        a Spectrum with a log rebinned in wavelength
+        a Spextrum with a log rebinned in wavelength
         """
 
         waves = self.waveset.value

@@ -5,7 +5,7 @@ Database for speXtra
 import inspect
 from posixpath import join as urljoin
 import os
-from urllib.error import URLError, HTTPError
+import shutil
 
 import yaml
 
@@ -97,7 +97,7 @@ class Database(DataContainer):
 
         super().__init__(filename=self.path)
 
-        self._makelists()
+        self.liblist,  self.relpathlist = self._makelists()
 
     def abspath(self, relpath):
         """
@@ -114,12 +114,29 @@ class Database(DataContainer):
 
         return abspath
 
+    def remove_database(self):
+        """
+        Remove database and all files
+        """
+        try:
+            shutil.rmtree(self.rootdir)
+            print("database at %s removed" % self.rootdir)
+        except FileNotFoundError:
+            print("database at %s doesn't exist" % self.rootdir)
+            raise
+
     def _makelists(self):
+        """
+        just make lists of the libraries and paths in the database"
+        """
+
         a = list(dict_generator(self.meta))
         separator = '/'
         libs = [e[1:] for e in a]
-        self.liblist = [separator.join(e) for e in libs]
-        self.relpathlist = [separator.join(e) for e in a]
+        liblist = [separator.join(e) for e in libs]
+        relpathlist = [separator.join(e) for e in a]
+
+        return liblist, relpathlist
 
 
 class Library(DataContainer):
@@ -128,7 +145,7 @@ class Library(DataContainer):
     of a filter system, extinction curves, etc
     """
     def __init__(self, library_name):
-
+        self.name = library_name
         database = Database()
 
         if library_name not in database.liblist:
@@ -142,6 +159,21 @@ class Library(DataContainer):
         self.dir = database.abspath(self.relpath)
         self.url = urljoin(database.remote_root, self.relpath, self.ymlfile)
         super().__init__(filename=self.path)
+
+    def remove(self):
+        """
+        Remove library and all files.
+
+        Returns
+        -------
+
+        """
+        try:
+            shutil.rmtree(self.dir)
+            print("library %s removed" % self.name)
+        except FileNotFoundError:
+            print("library %s doesn't exist" % self.name)
+            raise
 
 
 class SpecLibrary(Library):
