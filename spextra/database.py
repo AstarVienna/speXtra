@@ -186,6 +186,15 @@ class SpecLibrary(Library):
         self.template_comments = list(self.templates.values())
         self.files = [t + self.file_extension for t in self.template_names]
 
+    def download_all(self):
+        """
+        Download the whole library
+        """
+
+        database = Database()
+        for template in self.template_names:
+            database.abspath(os.path.join(self.library_name, template))
+
     def __repr__(self):
         description = "Spectral Library: " + self.library_name + " " + self.title
         spec_cov = "spectral coverage: " + str(self.spectral_coverage)
@@ -209,6 +218,15 @@ class FilterSystem(Library):
         self.filter_comments = list(self.filters.values())
         self.files = [f + self.file_extension for f in self.filter_names]
 
+    def download_all(self):
+        """
+        Download the whole library
+        """
+
+        database = Database()
+        for filt in self.filter_names:
+            database.abspath(os.path.join(self.filter_system, filt))
+
 
 class ExtCurvesLibrary(Library):
     """
@@ -221,6 +239,15 @@ class ExtCurvesLibrary(Library):
         self.curve_names = list(self.curves.keys())
         self.curve_comments = list(self.curves.values())
         self.files = [e + self.file_extension for e in self.curve_names]
+
+    def download_all(self):
+        """
+        Download the whole library
+        """
+
+        database = Database()
+        for curve in self.curve_names:
+            database.abspath(os.path.join(self.curve_name, curve))
 
 
 class SpectrumContainer(SpecLibrary):
@@ -247,6 +274,17 @@ class SpectrumContainer(SpecLibrary):
         self.template_comment = self.templates[self.template_name]
         self.filename = self.path
         self._update_attrs()
+
+    def remove(self):
+        """
+        remove the file
+        """
+        try:
+            shutil.rmtree(self.path)
+            print("library %s removed" % self.path)
+        except FileNotFoundError:
+            print("file %s doesn't exist" % self.path)
+            raise
 
     def _update_attrs(self):
         """
@@ -290,6 +328,17 @@ class FilterContainer(FilterSystem):
 
         self._update_attrs()
 
+    def remove(self):
+        """
+        remove the file
+        """
+        try:
+            shutil.rmtree(self.path)
+            print("file %s removed" % self.path)
+        except FileNotFoundError:
+            print("file %s doesn't exist" % self.path)
+            raise
+
     def _update_attrs(self):
         """
         Here to just delete unnecessary stuff
@@ -302,11 +351,6 @@ class FilterContainer(FilterSystem):
         self.__dict__.pop("filter_comments", None)
         self.__dict__.pop("ymlfile", None)
 
-    #        download_file('http://svo2.cab.inta-csic.es/'
-    #                      'theory/fps3/fps.php?ID={}'.format(self.filter_name),
-    #                      os.path.join(database.rootdir, relpath))
-    #        path = database.abspath(relpath)
-
     def __repr__(self):
         s = "Filter: " + self.filter_name
         return s
@@ -317,25 +361,34 @@ class ExtCurveContainer(ExtCurvesLibrary):
     def __init__(self, curve_name):
 
         self.curve_name = curve_name
-        self.cname = os.path.basename(self.curve_name)
+        self.basename = os.path.basename(self.curve_name)
         curve_library = os.path.split(self.curve_name)[0]
-        print(self.curve_name, self.cname, curve_library)
+
         super().__init__(curve_library=curve_library)
 
-        if self.cname not in self.curve_names:
+        if self.basename not in self.curve_names:
             raise ValueError("Extinction Curve '%s' not in library" % self.curve_name)
-
-
 
         database = Database()
 
-        self.datafile = self.cname + self.file_extension
+        self.datafile = self.basename + self.file_extension
         self.path = database.abspath(os.path.join(self.relpath, self.datafile))
         self.url = urljoin(database.remote_root, self.relpath, self.datafile)
-        self.curve_comment = self.curves[self.cname]
+        self.curve_comment = self.curves[self.basename]
         self.filename = self.path
 
         self._update_attrs()
+
+    def remove(self):
+        """
+        remove the file
+        """
+        try:
+            shutil.rmtree(self.path)
+            print("file %s removed" % self.path)
+        except FileNotFoundError:
+            print("file %s doesn't exist" % self.path)
+            raise
 
     def _update_attrs(self):
         """
