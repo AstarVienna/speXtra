@@ -236,7 +236,7 @@ class SpectrumContainer(SpecLibrary):
         super().__init__(library_name=library_name)
 
         if self.template_name not in self.template_names:
-            raise ValueError("Template '%s' not in library" % self.template_name)
+            raise ValueError("Template %s not in library" % self.template_name)
 
         self.datafile = self.template_name + self.file_extension
 
@@ -272,23 +272,20 @@ class FilterContainer(FilterSystem):
     def __init__(self, filter_name):
 
         self.filter_name = filter_name
-        if self.filter_name in FILTER_DEFAULTS:
-            self.filter_name = FILTER_DEFAULTS[filter_name]
 
-        self.name = os.path.basename(self.filter_name)
+        self.basename = os.path.basename(self.filter_name)
         filter_system = os.path.split(self.filter_name)[0]
 
         super().__init__(filter_system=filter_system)
-
-        if self.name not in self.filters:
-            raise ValueError("Filter '%s' not in library", self.filter_name)
+        if self.basename not in self.filters:
+            raise ValueError("Filter %s not in library" % self.filter_name)
 
         database = Database()
 
-        self.datafile = self.name + self.file_extension
+        self.datafile = self.basename + self.file_extension
         self.path = database.abspath(os.path.join(self.relpath, self.datafile))
         self.url = urljoin(database.remote_root, self.relpath, self.datafile)
-        self.filter_comment = self.filters[self.name]
+        self.filter_comment = self.filters[self.basename]
         self.filename = self.path
 
         self._update_attrs()

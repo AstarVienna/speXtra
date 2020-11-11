@@ -45,13 +45,12 @@ class Passband(SpectralElement, FilterContainer):
                 meta, wave, trans = self._loader()
                 SpectralElement.__init__(self, Empirical1D, points=wave, lookup_table=trans, meta=meta)
             except ValueError as e1:
-                print(e1)
                 try:  # try to download it from SVO
                     meta, wave, trans = self._from_svo(filter_name)
                     SpectralElement.__init__(self, Empirical1D, points=wave, lookup_table=trans,
                                              meta=meta)
                 except ValueError as e2:
-                    print("filter doesn't exist")
+                    print("filter %s doesn't exist" % filter_name)
 
         elif modelclass is not None:
             SpectralElement.__init__(self, modelclass)
@@ -159,8 +158,6 @@ class ExtinctionCurve(ReddeningLaw, ExtCurveContainer):
                                              wave_col=self.wave_column, flux_col=self.extinction_column)
 
         return meta, lam, rvs
-
-
 
 
 class Spextrum(SpectrumContainer, SourceSpectrum):

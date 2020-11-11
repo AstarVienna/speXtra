@@ -104,8 +104,9 @@ class TestSpextrumInstances:
         sp2 = sp.rebin_spectra(new_waves=new_waves)
         assert isinstance(sp2, Spextrum)
 
-    def test_get_magnitude(self, sp=sp):
-        mag = sp.get_magnitude("g", system_name="AB")
+    def test_get_magnitude(self):
+        sp = Spextrum("pickles/a0v")
+        mag = sp.get_magnitude("micado/Y", system_name="AB")
         assert isinstance(mag, u.Quantity)
 
     def test_black_body_spectrum(self):
