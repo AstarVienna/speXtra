@@ -22,6 +22,6 @@ extinction_curves:
 # here go filters not found at SVO
 filter_systems:
   micado : MICADO filters
-# metis  : METIS filters
+  metis  : METIS filters
 
 

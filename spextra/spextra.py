@@ -87,6 +87,29 @@ class Passband(SpectralElement, FilterContainer):
         return meta, lam, trans
 
     @classmethod
+    def from_vectors(cls, waves, trans, meta=None, wave_unit=u.AA):
+        """
+        Create a ``Passband`` directly from from vectos (lists, numpy.arrays, etc)
+        Parameters
+        ----------
+        waves: list-like
+        transmission: list-like
+        meta: dictionary containing the metadata
+        wave_unit= u.Quantity, defaulted to angstroms
+
+        Returns
+        -------
+        Passband
+        """
+        if isinstance(waves, u.Quantity) is False:
+            waves = waves*wave_unit
+
+        modelclass = SpectralElement(Empirical1D, points=waves, lookup_table=trans,
+                                     meta=meta)
+
+        return cls(modelclass=modelclass)
+
+    @classmethod
     def from_file(cls, filename, **kwargs):
 
         modelclass = SpectralElement.from_file(filename, **kwargs)
