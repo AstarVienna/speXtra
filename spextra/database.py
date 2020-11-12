@@ -143,16 +143,15 @@ class Database(DataContainer):
 class Default:
     """
     small class just to define defaults spectra and filters
-
     """
     def __init__(self):
 
-        self.filters = self.set("default_filters.yml")
-        self.spectra = self.set("default_spectra.yml")
-        self.extcurves = self.set("default_curves.yml")
+        self.filters = self.setdict("default_filters.yml")
+        self.spectra = self.setdict("default_spectra.yml")
+        self.extcurves = self.setdict("default_curves.yml")
 
     @staticmethod
-    def set(file):
+    def setdict(file):
         database = Database()
         path = database.abspath(file)
         with open(path) as filename:
@@ -248,6 +247,14 @@ class FilterSystem(Library):
         for filt in self.filter_names:
             database.abspath(os.path.join(self.filter_system, filt))
 
+    def __repr__(self):
+        description = "Filter system: " + self.filter_system + " " + self.title
+        spec_cov = "spectral coverage: " + str(self.spectral_coverage)
+        units = "wave_unit: " + self.wave_unit + "  flux_unit: " + self.flux_unit
+        templates = "Templates: " + str(self.filters)
+
+        return ' %s \n %s \n %s \n %s' % (description, spec_cov, units, templates)
+
 
 class ExtCurvesLibrary(Library):
     """
@@ -269,6 +276,13 @@ class ExtCurvesLibrary(Library):
         database = Database()
         for curve in self.curve_names:
             database.abspath(os.path.join(self.curve_name, curve))
+
+    def __repr__(self):
+        description = "Extinction Curves: " + self.name + " " + self.title
+        units = "wave_unit: " + self.wave_unit + "  flux_unit: " + self.flux_unit
+        templates = "Templates: " + str(self.curves)
+
+        return ' %s \n %s \n %s \n %s' % (description, units, templates)
 
 
 class SpectrumContainer(SpecLibrary):
