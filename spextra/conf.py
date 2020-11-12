@@ -8,7 +8,10 @@ __all__ = ["Conf"]
 
 
 class Conf(ConfigNamespace):
-    """Configuration parameters for spextra."""
+    """Configuration parameters for spextra.
+    TODO: Write default configuration to an archive so it can be _really_ changed in runtime
+    """
+
     data_dir = ConfigItem(None,
                           "Directory where spextra will store and read downloaded data "
                           "resources. "

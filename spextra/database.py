@@ -26,6 +26,7 @@ __data_dir__ = os.path.join(__pkg_dir__, "data")
 # Table.show_in_browser.__defaults__ = (5000, True, 'default', {'use_local_files': True},
 #                                              None, 'display compact', None, 'idx')
 
+
 with open(os.path.join(__data_dir__,  "default_filters.yml")) as filter_file:
     FILTER_DEFAULTS = yaml.safe_load(filter_file)
 
@@ -137,6 +138,26 @@ class Database(DataContainer):
         relpathlist = [separator.join(e) for e in a]
 
         return liblist, relpathlist
+
+
+class Default:
+    """
+    small class just to define defaults spectra and filters
+
+    """
+    def __init__(self):
+
+        self.filters = self.set("default_filters.yml")
+        self.spectra = self.set("default_spectra.yml")
+        self.extcurves = self.set("default_curves.yml")
+
+    @staticmethod
+    def set(file):
+        database = Database()
+        path = database.abspath(file)
+        with open(path) as filename:
+            dictionary = yaml.safe_load(filename)
+        return dictionary
 
 
 class Library(DataContainer):
