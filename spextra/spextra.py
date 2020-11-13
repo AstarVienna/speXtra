@@ -93,9 +93,9 @@ class Passband(SpectralElement, FilterContainer):
         Parameters
         ----------
         waves: list-like
-        transmission: list-like
+        trans: list-like
         meta: dictionary containing the metadata
-        wave_unit= u.Quantity, defaulted to angstroms
+        wave_unit: u.Quantity, defaulted to angstroms
 
         Returns
         -------
@@ -104,8 +104,7 @@ class Passband(SpectralElement, FilterContainer):
         if isinstance(waves, u.Quantity) is False:
             waves = waves*wave_unit
 
-        modelclass = SpectralElement(Empirical1D, points=waves, lookup_table=trans,
-                                     meta=meta)
+        modelclass = SpectralElement(Empirical1D, points=waves, lookup_table=trans, meta=meta)
 
         return cls(modelclass=modelclass)
 
@@ -115,6 +114,26 @@ class Passband(SpectralElement, FilterContainer):
         modelclass = SpectralElement.from_file(filename, **kwargs)
 
         return cls(modelclass=modelclass)
+
+    @classmethod
+    def gaussian(cls, center, fwhm, peak_transmission):
+        """
+        Creates a filter with a gaussian shape with given user parameters
+        Returns
+        -------
+
+        """
+        pass
+
+    @classmethod
+    def square(cls, wmin, wmax, transmission):
+        """
+        Creates a filter with a rectangular shape
+        Returns
+        -------
+
+        """
+        pass
 
     def _from_svo(self, filter_name):
         if filter_name in FILTER_DEFAULTS.keys():
@@ -145,6 +164,29 @@ class ExtinctionCurve(ReddeningLaw, ExtCurveContainer):
             ReddeningLaw.__init__(self, modelclass)
         else:
             raise ValueError("please define a filter")
+
+    @classmethod
+    def from_vectors(cls, waves, flux, meta=None, wave_unit=u.AA):
+        """
+        Create a ``Passband`` directly from from vectos (lists, numpy.arrays, etc)
+        Parameters
+        ----------
+        waves: list-like
+        flux: list-like
+        meta: dictionary containing the metadata
+        wave_unit: u.Quantity, defaulted to angstroms
+        flux_unit: u.Quantiy, defaulted to FLAM
+
+        Returns
+        -------
+        Passband
+        """
+        if isinstance(waves, u.Quantity) is False:
+            waves = waves * wave_unit
+
+        modelclass = SpectralElement(Empirical1D, points=waves, lookup_table=flux, meta=meta)
+
+        return cls(modelclass=modelclass)
 
     @classmethod
     def from_file(cls, filename, **kwargs):
@@ -241,6 +283,31 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
                                               wave_unit=self.wave_unit, flux_unit=self.flux_unit)
 
         return meta, lam, flux
+
+    @classmethod
+    def from_vectors(cls, waves, flux, meta=None, wave_unit=u.AA, flux_unit=units.FLAM):
+        """
+        Create a ``Passband`` directly from from vectos (lists, numpy.arrays, etc)
+        Parameters
+        ----------
+        waves: list-like
+        flux: list-like
+        meta: dictionary containing the metadata
+        wave_unit: u.Quantity, defaulted to angstroms
+        flux_unit: u.Quantiy, defaulted to FLAM
+
+        Returns
+        -------
+        Passband
+        """
+        if isinstance(waves, u.Quantity) is False:
+            waves = waves * wave_unit
+        if isinstance(flux, (u.Quantity, u.core.Unit)) is False:
+            flux = flux * flux_unit
+
+        modelclass = SpectralElement(Empirical1D, points=waves, lookup_table=flux, meta=meta)
+
+        return cls(modelclass=modelclass)
 
     @classmethod
     def from_file(cls, filename, **kwargs):
