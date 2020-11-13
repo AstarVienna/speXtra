@@ -95,17 +95,6 @@ def database_url():
 
 # ------ shamefully copied from SNCOSMO ------
 
-def clean_cache():
-    """
-    To clean the cache
-    Returns
-    -------
-
-    """
-
-    pass
-
-
 def get_rootdir():
     # use the environment variable if set
     data_dir = os.environ.get('SPEXTRA_DATA_DIR')
