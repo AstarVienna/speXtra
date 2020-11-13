@@ -1,0 +1,58 @@
+# MICADO Design - pre PDR list of filters
+
+filter_system : micado
+
+instrument : micado
+
+title : MICADO Design - pre PDR list of filterswa
+
+author : Ric Davies
+
+source : Ric Davies
+
+spectral_coverage :
+  - nir
+
+data_type : ascii
+
+file_extension : .dat
+
+wave_unit : um
+
+wave_column_name : wavelength
+
+trans_column_name : transmission
+
+filters: # filtername
+  Br-gamma :            Br-gamma
+  FeII :                FeII
+  H2_1-0S1 :            H2_1-0S1
+  H-cont :              H-cont
+  H :                   H
+  He-I :                He-I
+  H-long :              H-long
+  H-short :             H-short
+  I-long :              I-long
+  J :                   J
+  J-long :              J-long
+  J-short :             J-short
+  K-cont :              K-cont
+  K-long :              K-long
+  K-mid :               K-mid
+  Ks2 :                 Ks2
+  Ks :                  Ks
+  K-short :             K-short
+  Pa-beta :             Pa-beta
+  Spec_HK :             Spec_HK
+  Spec_IJ :             Spec_IJ
+  xH1 :                 xH1
+  xH2 :                 xH2
+  xI1 :                 xI1
+  xI2 :                 xI2
+  xJ1 :                 xJ1
+  xJ2 :                 xJ2
+  xK1 :                 xK1
+  xK2 :                 xK2
+  xY1 :                 xY1
+  xY2 :                 xY2
+  Y :                   Y

@@ -1,0 +1,53 @@
+# THE KINNEY-CALZETTI SPECTRAL ATLAS OF GALAXIES
+
+library_name : ref
+
+type : stars
+
+title : Reference library for objects
+
+summary : |
+  This library collects few objects than an be used as reference for calculations
+
+reference : Multiple
+
+link : None
+
+spectral_coverage :
+  - uv
+  - vis
+  - nir
+  - mir
+
+resolution : 10
+
+wave_unit: Angstrom
+
+flux_unit : FLAM
+
+wave_column_name : WAVELENGTH
+
+flux_column_name : FLUX
+
+data_type: fits
+
+file_extension: .fits
+
+templates:    # comments
+  vega : Vega spectrum
+  sirius : Sirius spectrum
+  sun    : Solar spectrum
+
+
+
+
+
+
+
+
+
+
+
+
+
+

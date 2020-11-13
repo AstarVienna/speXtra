@@ -1,6 +1,7 @@
 # Database contents
 
 libraries:
+  ref       : A library of reference stars
   kc96      : Kinney-Calzetti Atlas
   pickles   : Pickles Stellar Library
   sdss      : SDSS galaxy composite spectra
@@ -23,5 +24,7 @@ extinction_curves:
 filter_systems:
   micado : MICADO filters
   metis  : METIS filters
-
+  elt :   # ELT instruments, #to test nesting
+    micado : MICADO filters
+    metis : METIS filters
 
