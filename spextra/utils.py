@@ -88,7 +88,7 @@ def database_url():
     except AssertionError as error:
         print(error)
         print("Database address not reachable", loc)
-        raise
+        pass
 
     return loc
 

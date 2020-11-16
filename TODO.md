@@ -5,16 +5,15 @@ List of things I'd like to add
 ## Coding
 
 - Stricter tests for the algorithms
-- Add metadata registering the operations in a consistent manner
+- Add metadata registering the operations in a consistent manner (50% done, TBC)
 - Better interactive browsing of the database
 - clear versioning
-- make function ``make_passband`` a class so metadata is better conserved? Maybe merge with 
-  database classes data holders. 
-- replace method ``from1Dspec`` for something that can read the most basic fits 1d spectrum 
-  using ``astropy.io.fits`` and add another method that can read a ``Spectrum1D`` objects
-- Clean cache in database, specifying for example a library, etc. 
 - Add ``.wave`` and ``.flux`` (or similar) properties for a quicker access to these quantities
 - Power law spectra F(lambda) ~ lambda^alpha specified by the spectral index alpha
+- Make sure that code works without internet connection
+- Make easy to configure different database locations. 
+- Make sure that Jansky units work properly
+
 
 ## Spectral Libraries
 
@@ -22,6 +21,7 @@ List of things I'd like to add
 - Moon spectrum at different phases/distances?
 - MIR spectra of different objects, preferentially at high resolutions
 - UV spectra of galaxies at higher resolution (for LyA studies for example)
+- reference spectra for important objects (vega, sirius, sun, etc) 50% done
 
 ## Filters
 
