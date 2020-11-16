@@ -8,16 +8,14 @@ import warnings
 import numpy as np
 from scipy.ndimage import gaussian_filter1d
 
-from astropy.table import Table
 import astropy.units as u
-from astropy.constants import c as speed_of_light
+import astropy.constants as constants
 from astropy.modeling.models import Scale
-
 
 from synphot import (units, SourceSpectrum, SpectralElement, Observation,
                      BaseUnitlessSpectrum, ReddeningLaw, utils)
 from synphot.models import (Empirical1D, GaussianFlux1D, Box1D, ConstFlux1D, BlackBody1D, PowerLawFlux1D)
-from synphot.specio import read_ascii_spec, read_fits_spec, read_spec
+from synphot.specio import read_ascii_spec, read_fits_spec
 from synphot import exceptions
 
 from .database import SpectrumContainer, FilterContainer, ExtCurveContainer, FILTER_DEFAULTS
@@ -25,6 +23,8 @@ from .utils import download_svo_filter
 
 
 __all__ = ["Spextrum", "Passband", "ExtinctionCurve",  "get_vega_spectrum"]
+
+speed_of_light = constants.c
 
 
 class Passband(SpectralElement, FilterContainer):
@@ -956,26 +956,16 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
 def get_vega_spectrum():
     """
-    Copied from SimCADO
-    Retrieve the Vega spectrum from stsci and return it in synphot format
+    Retrieve the Vega spectrum from the database
 
     Notes
     -----
     To access wavelength and fluxes use::
-
-        wave, flux = vega_sp._get_arrays(wavelengths=None)
+        sp = get_vega_spectrum()
+        waves, fluxes = sp.waveset, sp(sp.waveset)
 
     """
-    import synphot
-    location = "http://ssb.stsci.edu/cdbs/calspec/alpha_lyr_stis_009.fits"
-    remote = synphot.specio.read_remote_spec(location, cache=True)
-    header = remote[0]
-    wave = remote[1]
-    flux = remote[2]
-    url = 'Vega from ' + location
-    meta = {'header': header, 'expr': url}
-    vega_sp = Spextrum(modelclass=Empirical1D, points=wave, lookup_table=flux, meta=meta)
-    return vega_sp
+    return Spextrum("ref/vega")
 
 
 

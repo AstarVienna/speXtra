@@ -11,7 +11,7 @@ from astropy.config import get_cache_dir
 from .conf import Conf
 
 
-__all__ = ["is_url", "download_file", "get_rootdir", "database_url", "dict_generator"]
+__all__ = ["is_url", "download_file", "get_rootdir", "database_url", "dict_generator", "download_svo_filter"]
 
 __pkg_dir__ = os.path.dirname(inspect.getfile(inspect.currentframe()))
 __data_dir__ = os.path.join(__pkg_dir__, "data")
@@ -115,7 +115,7 @@ def get_rootdir():
     return data_dir
 
 
-def _download_file(remote_url, target):
+def _download_file(remote_url, target, silent=False):
     """
     Accepts a URL, downloads the file to a given open file object.
     This is a modified version of astropy.utils.data.download_file that
@@ -124,6 +124,11 @@ def _download_file(remote_url, target):
 
     timeout = conf.remote_timeout
     download_block_size = 32768
+
+    msg_file = None
+    if silent is True:  # write the messages to dev/null
+        msg_file = open(os.devnull, "w")
+
     try:
         # Pretend to be a web browser (IE 6.0). Some servers that we download
         # from forbid access from programs.
@@ -143,7 +148,9 @@ def _download_file(remote_url, target):
                     pass
 
             dlmsg = "Downloading {0}".format(remote_url)
-            with ProgressBarOrSpinner(size, dlmsg) as p:
+
+            f = open("/tmp/x", "w")
+            with ProgressBarOrSpinner(size, dlmsg, file=msg_file) as p:
                 bytes_read = 0
                 block = remote.read(download_block_size)
                 while block:
@@ -176,7 +183,7 @@ def _download_file(remote_url, target):
         raise URLError(e)
 
 
-def download_file(remote_url, local_name):
+def download_file(remote_url, local_name, silent=False):
     """
     Download a remote file to local path
     ----------
@@ -197,7 +204,7 @@ def download_file(remote_url, local_name):
 
     try:
         with open(local_name, 'wb') as target:
-            _download_file(remote_url, target)
+            _download_file(remote_url, target, silent=silent)
     except:  # noqa
         # in case of error downloading, remove file.
         if os.path.exists(local_name):

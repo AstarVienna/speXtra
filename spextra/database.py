@@ -2,10 +2,10 @@
 """
 Database for speXtra
 """
-import inspect
-from posixpath import join as urljoin
 import os
+import inspect
 import shutil
+from posixpath import join as urljoin
 
 import yaml
 
@@ -86,7 +86,7 @@ class Database(DataContainer):
         Root URL of the remote server.
     """
 
-    def __init__(self, rootdir=get_rootdir(), remote_root=database_url()):
+    def __init__(self, rootdir=get_rootdir(), remote_root=database_url(), reload=False, silent=False):
 
         if not remote_root.endswith('/'):
             remote_root = remote_root + '/'
@@ -94,13 +94,13 @@ class Database(DataContainer):
         self.rootdir = rootdir
         self.remote_root = remote_root
         self.ymlfile = "index.yml"
-        self.path = self.abspath(self.ymlfile)
+        self.path = self.abspath(self.ymlfile, reload=reload, silent=silent)
 
         super().__init__(filename=self.path)
 
         self.liblist,  self.relpathlist = self._makelists()
 
-    def abspath(self, relpath):
+    def abspath(self, relpath, reload=False, silent=False):
         """
         Return absolute path to file or directory, ensuring that it exists.
         If it doesn't exist it will download it from the remote host
@@ -109,9 +109,9 @@ class Database(DataContainer):
         """
 
         abspath = os.path.join(self.rootdir, relpath)
-        if os.path.exists(abspath) is False:
+        if (os.path.exists(abspath) is False) or (reload is True):
             url = urljoin(self.remote_root, relpath)
-            download_file(url, abspath)
+            download_file(url, abspath, silent=silent)
 
         return abspath
 
@@ -294,7 +294,7 @@ class SpectrumContainer(SpecLibrary):
         self.template = template
         self.template_name = os.path.basename(self.template)
 
-        library_name = os.path.split(self.template)[0]
+        library_name = os.path.dirname(self.template)
         super().__init__(library_name=library_name)
 
         if self.template_name not in self.template_names:
@@ -347,7 +347,7 @@ class FilterContainer(FilterSystem):
         self.filter_name = filter_name
 
         self.basename = os.path.basename(self.filter_name)
-        filter_system = os.path.split(self.filter_name)[0]
+        filter_system = os.path.dirname(self.filter_name)
 
         super().__init__(filter_system=filter_system)
         if self.basename not in self.filters:
@@ -397,7 +397,7 @@ class ExtCurveContainer(ExtCurvesLibrary):
 
         self.curve_name = curve_name
         self.basename = os.path.basename(self.curve_name)
-        curve_library = os.path.split(self.curve_name)[0]
+        curve_library = os.path.dirname(self.curve_name)
 
         super().__init__(curve_library=curve_library)
 

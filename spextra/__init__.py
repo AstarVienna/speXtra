@@ -11,3 +11,6 @@ from .database import Database, SpecLibrary, FilterSystem, ExtCurvesLibrary
 __pkg_dir__ = os.path.dirname(inspect.getfile(inspect.currentframe()))
 __data_dir__ = os.path.join(__pkg_dir__, "data")
 
+Database(reload=True, silent=True)  # ensures that the database is always up to the date
+
+
