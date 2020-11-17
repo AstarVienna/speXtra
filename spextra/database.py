@@ -86,7 +86,7 @@ class Database(DataContainer):
         Root URL of the remote server.
     """
 
-    def __init__(self, rootdir=get_rootdir(), remote_root=database_url(), reload=False, silent=False):
+    def __init__(self, rootdir=get_rootdir(), remote_root=database_url(), silent=False):
 
         if not remote_root.endswith('/'):
             remote_root = remote_root + '/'
@@ -94,7 +94,7 @@ class Database(DataContainer):
         self.rootdir = rootdir
         self.remote_root = remote_root
         self.ymlfile = "index.yml"
-        self.path = self.abspath(self.ymlfile, reload=reload, silent=silent)
+        self.path = self.abspath(self.ymlfile, silent=silent)
 
         super().__init__(filename=self.path)
 
@@ -126,6 +126,12 @@ class Database(DataContainer):
             print("database at %s doesn't exist" % self.rootdir)
             raise
 
+    def update(self):
+        """
+        Force an update of the cached database file
+        """
+        self.abspath(self.ymlfile, reload=True,  silent=False)
+
     def _makelists(self):
         """
         just make lists of the libraries and paths in the database"
@@ -138,6 +144,17 @@ class Database(DataContainer):
         relpathlist = [separator.join(e) for e in a]
 
         return liblist, relpathlist
+
+    def __repr__(self):
+        description = "Database:"
+        remote = "url: " + self.remote_root
+        local = "path: " + self.rootdir
+
+        return ' %s \n %s \n %s ' % (description, remote, local)
+
+    def __dir__(self):
+        str = "Database of spextra"
+        return str
 
 
 class Default:
@@ -183,10 +200,6 @@ class Library(DataContainer):
     def remove(self):
         """
         Remove library and all files.
-
-        Returns
-        -------
-
         """
         try:
             shutil.rmtree(self.dir)
@@ -194,6 +207,13 @@ class Library(DataContainer):
         except FileNotFoundError:
             print("library %s doesn't exist" % self.name)
             raise
+
+    def update(self):
+        """
+        Update the library file
+        """
+        database = Database()
+        database.abspath(os.path.join(self.relpath, self.ymlfile), reload=True, silent=False)
 
 
 class SpecLibrary(Library):
@@ -222,6 +242,9 @@ class SpecLibrary(Library):
         templates = "Templates: " + str(self.template_names)
 
         return ' %s \n %s \n %s \n %s' % (description, spec_cov, units, templates)
+
+    def __str__(self):
+        return self.library_name
 
 
 class FilterSystem(Library):
@@ -255,6 +278,9 @@ class FilterSystem(Library):
 
         return ' %s \n %s \n %s \n %s' % (description, spec_cov, units, templates)
 
+    def __str__(self):
+        return self.filter_system
+
 
 class ExtCurvesLibrary(Library):
     """
@@ -283,6 +309,9 @@ class ExtCurvesLibrary(Library):
         templates = "Templates: " + str(self.curves)
 
         return ' %s \n %s \n %s \n %s' % (description, units, templates)
+
+    def __str__(self):
+        return self.curve_name
 
 
 class SpectrumContainer(SpecLibrary):
