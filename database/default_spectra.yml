@@ -1,4 +1,5 @@
-vega : "reference/vega"
-sirus : "reference/sirius"
-sun : "reference/sun"
+vega : "ref/vega"
+sirus : "ref/sirius"
+sun : "ref/sunHR"
+
 

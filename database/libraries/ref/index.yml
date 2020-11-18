@@ -9,9 +9,9 @@ title : Reference library for objects
 summary : |
   This library collects few objects than an be used as reference for calculations
 
-reference : Multiple
+reference : see CALSPEC
 
-link : None
+link : https://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/calspec
 
 spectral_coverage :
   - uv
@@ -34,9 +34,12 @@ data_type: fits
 file_extension: .fits
 
 templates:    # comments
-  vega : Vega spectrum
-  sirius : Sirius spectrum
-  sun    : Solar spectrum
+  vega   : Vega spectrum, 900A to 300um
+  vegaLR : Vega LR spectrum, 1148A to 2.6um
+  sirius : Sirius spectrum, 900A to 300um
+  sun    : Solar spectrum,  1195A to 2.7um
+  sunHR  : Solar HR spectrum, 1500A to 300um
+  
 
 
 
