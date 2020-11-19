@@ -4,7 +4,7 @@ libraries:
   ref       : A library of reference stars
   kc96      : Kinney-Calzetti Atlas
   pickles   : Pickles Stellar Library
-  sdss      : SDSS galaxy composite spectra
+  dobos      : SDSS galaxy composite spectra
   irtf      : IRTF spectral library
   agn       : AGN templates
   nebulae   : Emission line nebulae
@@ -22,9 +22,7 @@ extinction_curves:
 
 # here go filters not found at SVO
 filter_systems:
-  micado : MICADO filters
-  metis  : METIS filters
-  elt :   # ELT instruments, #to test nesting
+   elt :   # ELT instruments, #to test nesting
     micado : MICADO filters
     metis : METIS filters
 

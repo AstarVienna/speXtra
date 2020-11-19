@@ -8,8 +8,10 @@ Getting Started
 Create a spectra using the built-in ``'s0'`` galaxy source from the Kinney-Calzetti library
 ``'kc96'``:
 
-    >>> from speXtra import Spextrum
-    >>> sp = Spextrum("kc96/s0")
+.. jupyter-execute::
+
+  from spextra import Spextrum
+  sp = Spextrum("kc96/s0")
 
 and ``spextra`` will download the spectra and create an object
 

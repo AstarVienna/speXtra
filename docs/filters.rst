@@ -4,25 +4,39 @@
 Filters
 *******
 
-
-At the moment ``speXtra`` mostly relies on `tynt <https://tynt.readthedocs.io/en/latest/>` to fetch
-the filters from the `SVO database <http://svo2.cab.inta-csic.es/theory/fps/>`, however a few
-filters systems have been included in the database
+Most of the filters available to ``speXtra`` are downloaded from
+the `SVO database <http://svo2.cab.inta-csic.es/theory/fps/>`. However, many other
+system are not included in that database so a few (at the moment) are included in the database.
 
 To list the filter systems included in the database
 
-.. code-block:: python
+.. jupyter-execute::
 
-    from spextra import SpecDatabase
-    db = SpecDatabase()
-    print(db.filter_systems)
+    from spextra import Database
+    db = Database()
+    db.filter_systems
 
-To list the filter systems available in the `SVO database <http://svo2.cab.inta-csic.es/theory/fps/>`
 
-.. code-block:: python
+Many filters in the SVO database have been defined using shortcuts for quicker access.
+Here is a list.
 
-    from spextra.database import get_filter_systems
-    print(get_filter_systems())
+.. jupyter-execute::
+
+    from spextra import DEFAULT_FILTERS
+    DEFAULT_FILTERS
+
+
+These filters can be used simply using the shortcut
+
+.. jupyter-execute::
+
+    from spextra import Passband
+
+    filt = Passband("g")  # for sdss g-band filter
+    filt.plot()
+
+
+Additionally below you can find the filter systems for prospective ELT instruments
 
 --------------------------------------------------------------------
 
@@ -31,6 +45,11 @@ To list the filter systems available in the `SVO database <http://svo2.cab.inta-
 MICADO
 ======
 
-.. literalinclude:: ../database/filter_systems/micado/index.yml
+.. literalinclude:: ../database/filter_systems/elt/micado/index.yml
     :language: yaml
 
+METIS
+=====
+
+.. literalinclude:: ../database/filter_systems/elt/metis/index.yml
+    :language: yaml

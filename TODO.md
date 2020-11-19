@@ -21,7 +21,8 @@ List of things I'd like to add
 - Moon spectrum at different phases/distances?
 - MIR spectra of different objects, preferentially at high resolutions
 - UV spectra of galaxies at higher resolution (for LyA studies for example)
-- reference spectra for important objects (vega, sirius, sun, etc) 50% done
+- Include a subset of BOSZ spectra (UV-MIR) https://archive.stsci.edu/prepds/bosz/
+
 
 ## Filters
 

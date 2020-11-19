@@ -34,20 +34,16 @@ programately
 
 
 
+.. jupyter-execute::
 
-
-
-
-
-.. code-block:: python
-
-    from spextra.database import SpecDatabase
-    db = SpecDatabase()
+    from spextra.database import Database
+    db = Database()
     print(db.libraries)
 
 it will list the spectral libraries available
 
-.. code-block:: python
+
+.. jupyter-execute::
 
     print(db.extinction_curves)
     print(db.filter_systems)
@@ -58,9 +54,10 @@ will print the extinction curves and filter systems available
 :class:`SpecLibrary` is also important to examine the contents
 of each spectral library. To use it, simply call it like this
 
-.. code-block:: python
+.. jupyter-execute::
+
     from spextra.database import SpecLibrary
-    lib = SpecLibrary("kc96)
+    lib = SpecLibrary("kc96")
     print(lib.templates)
 
 and it will list all templates available for that library.
@@ -82,18 +79,6 @@ Database contents
     :language: yaml
 
 
-
-
-
-
-
-.. toctree::
-   :maxdepth: 2
-
-
-   spectral_libraries
-   extinction_curves
-   filters
 
 
 

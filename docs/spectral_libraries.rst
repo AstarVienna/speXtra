@@ -11,25 +11,36 @@ See :ref:`database-contents` for a summary what is included in the database.
 
 To list the names of the libraries included in the database
 
-.. code-block:: python
+.. jupyter-execute::
 
-    from spextra import SpecDatabase
-    db = SpecDatabase()
-    print(db.libraries)
+    from spextra import Database
+    db = Database()
+    db.libraries
 
 
 To see which templates are available in each library
 
-.. code-block:: python
+.. jupyter-execute::
 
     from spextra.database import SpecLibrary
+    name = "kc96"
     lib = SpecLibrary(name)
-    print(lib.templates)
+    lib.templates
 
 
 Below you can find a detailed description of each library.
 
 --------------------------------------------------------------------
+
+.. _ref:
+
+A Library of Reference Stars
+----------------------------
+
+.. literalinclude:: ../database/libraries/ref/index.yml
+    :language: yaml
+
+
 
 .. _kc96:
 
@@ -53,7 +64,7 @@ Pickles Stellar Library
 SDSS galaxy composite spectra
 -----------------------------
 
-.. literalinclude:: ../database/libraries/sdss/index.yml
+.. literalinclude:: ../database/libraries/dobos/index.yml
     :language: yaml
 
 .. _irtf:

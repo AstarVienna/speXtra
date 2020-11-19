@@ -22,11 +22,12 @@ The last statement will create a plot of the spectrum for a quick visualization
 
 All operations available in   :class:`synphot.SourceSpectrum` are possible:
 
-.. code-block:: python
+.. jupyter-execute::
 
     sp1 = Spextrum("kc96/s0")
     sp2 = Spextrum("agn/qso")
     sp = sp1 + 0.3*sp2
+    sp.plot()
 
 
 
@@ -37,28 +38,32 @@ It is possible to add emission lines, either individually or as a list. Paramete
 `astropy.Units` are allowed. If units are not specified it defaults to Angstroms for wavelengths (center and fwhm)
 and ergs/s/AA/cm^2 (FLAM) for flux.
 
-.. code-block:: python
+.. jupyter-execute::
+
+    import astropy.units as u
 
     sp3 = sp1.add_emi_lines(center=4000,flux=4e-13, fwhm=5*u.AA)
+    sp3.plot()
 
 
 
 Scaling to a magnitude
 ----------------------
 
-.. code-block:: python
+.. jupyter-execute::
 
     sp1 = Spextrum("kc96/s0")
     sp2 = sp1.scale_to_magnitude(amplitude=13 * u.ABmag, filter_name="g")
+    sp2.plot()
 
 
 
 Obtaining magnitudes from spectra
 ---------------------------------
 
-.. code-block:: python
+.. jupyter-execute::
 
-    sp1.get_magnitude(filter_name="g"
+    sp1.get_magnitude(filter_name="g")
 
 
 Redshifting the spectra
@@ -66,14 +71,14 @@ Redshifting the spectra
 
 It is possible to specify a redshift `z` ir a velocity `vel` (negative velocities are allowed)
 
-.. code-block:: python
+.. jupyter-execute::
 
     sp3 = sp2.redshift(z=1)
 
     import astropy.units as u
 
     vel = -1000 * u.km / u.s
-    sp2 = sp1.redshift(vel=ve)
+    sp2 = sp1.redshift(vel=vel)
 
 
 
@@ -83,7 +88,7 @@ Smooth the spectral
 
 Spectra can be smoothed with a kernel with a size in velocities (default km/s)
 
-.. code-block:: python
+.. jupyter-execute::
 
     sp1 = Spextrum("nebulae/pn")
 

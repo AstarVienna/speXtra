@@ -14,17 +14,21 @@ from astropy.modeling.models import Scale
 
 from synphot import (units, SourceSpectrum, SpectralElement, Observation,
                      BaseUnitlessSpectrum, ReddeningLaw, utils)
-from synphot.models import (Empirical1D, GaussianFlux1D, Box1D, ConstFlux1D, BlackBody1D, PowerLawFlux1D)
+from synphot.models import (Empirical1D, GaussianFlux1D, Gaussian1D, Box1D, ConstFlux1D, BlackBody1D, PowerLawFlux1D)
 from synphot.specio import read_ascii_spec, read_fits_spec
 from synphot import exceptions
 
-from .database import SpectrumContainer, FilterContainer, ExtCurveContainer, FILTER_DEFAULTS
+from .database import SpectrumContainer, FilterContainer, ExtCurveContainer, DefaultData
 from .utils import download_svo_filter
 
 
 __all__ = ["Spextrum", "Passband", "ExtinctionCurve",  "get_vega_spectrum"]
 
 speed_of_light = constants.c
+
+DEFAULT_FILTERS = DefaultData().filters
+DEFAULT_SPECTRA = DefaultData().spectra
+DEFAULT_CURVES = DefaultData().extcurves
 
 
 class Passband(SpectralElement, FilterContainer):
@@ -39,6 +43,8 @@ class Passband(SpectralElement, FilterContainer):
     def __init__(self, filter_name=None, modelclass=None, **kwargs):
 
         if filter_name is not None:
+            if filter_name in DEFAULT_FILTERS.keys():
+                filter_name = DEFAULT_FILTERS[filter_name]
 
             try:
                 FilterContainer.__init__(self, filter_name)
@@ -116,14 +122,23 @@ class Passband(SpectralElement, FilterContainer):
         return cls(modelclass=modelclass)
 
     @classmethod
-    def gaussian(cls, center, fwhm, peak_transmission):
+    def gaussian(cls, center, fwhm, peak, **kwargs):
         """
         Creates a filter with a gaussian shape with given user parameters
         Returns
         -------
 
         """
-        pass
+        if isinstance(center, u.Quantity) is False:
+            center = center*u.AA
+        if isinstance(fwhm, u.Quantity) is False:
+            fwhm = fwhm*u.AA
+
+        sigma = fwhm / (2.0 * np.sqrt(2.0 * np.log(2.0)))
+
+        modelclass = SpectralElement(Gaussian1D, amplitude=peak, mean=center, stddev=sigma, **kwargs)
+
+        return cls(modelclass=modelclass)
 
     @classmethod
     def square(cls, wmin, wmax, transmission):
@@ -133,11 +148,19 @@ class Passband(SpectralElement, FilterContainer):
         -------
 
         """
-        pass
+        if isinstance(wmin, u.Quantity) is False:
+            wmin = wmin*u.AA
+        if isinstance(wmax, u.Quantity) is False:
+            wmax = wmax*u.AA
+
+        center = (wmax + wmin) * 0.5
+        width = wmax - wmin
+        modelclass = SpectralElement(Box1D, amplitude=transmission, x_0=center, width=width)
+
+        return cls(modelclass=modelclass)
 
     def _from_svo(self, filter_name):
-        if filter_name in FILTER_DEFAULTS.keys():
-            filter_name = FILTER_DEFAULTS[filter_name]
+
         wave, trans = download_svo_filter(filter_name)
         meta = {"filter_name": filter_name, "source": "SVO"}
         self.filter_name = filter_name
@@ -155,6 +178,8 @@ class ExtinctionCurve(ReddeningLaw, ExtCurveContainer):
     def __init__(self, curve_name=None, modelclass=None, **kwargs):
 
         if curve_name is not None:
+            if curve_name in DEFAULT_CURVES:
+                curve_name = DEFAULT_CURVES[curve_name]
 
             ExtCurveContainer.__init__(self, curve_name)
             meta, wave, rvs = self._loader()
@@ -243,6 +268,9 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
     def __init__(self, template_name=None, modelclass=None, **kwargs):
 
         if template_name is not None:
+            if template_name in DEFAULT_SPECTRA:
+                template_name = DEFAULT_SPECTRA[template_name]
+
             SpectrumContainer.__init__(self, template_name)
             meta, lam, flux = self._loader()
             SourceSpectrum.__init__(self, Empirical1D, points=lam, lookup_table=flux, meta=meta,   **kwargs)

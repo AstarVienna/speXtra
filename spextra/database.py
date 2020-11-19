@@ -14,7 +14,7 @@ from .utils import get_rootdir, database_url, download_file, dict_generator
 # Configurations
 
 __all__ = ["Database", "SpecLibrary", "SpectrumContainer", "ExtCurvesLibrary",
-           "ExtCurveContainer", "FilterSystem", "FilterContainer"]
+           "ExtCurveContainer", "FilterSystem", "FilterContainer", "DefaultData"]
 
 # Do we need this?
 __pkg_dir__ = os.path.dirname(inspect.getfile(inspect.currentframe()))
@@ -110,6 +110,7 @@ class Database(DataContainer):
 
         abspath = os.path.join(self.rootdir, relpath)
         if (os.path.exists(abspath) is False) or (reload is True):
+            print("updating/loading '%s'" % relpath )
             url = urljoin(self.remote_root, relpath)
             download_file(url, abspath, silent=silent)
 
@@ -157,23 +158,32 @@ class Database(DataContainer):
         return str
 
 
-class Default:
+class DefaultData:
     """
     small class just to define defaults spectra and filters
     """
-    def __init__(self):
+    def __init__(self, **kwargs):
 
-        self.filters = self.setdict("default_filters.yml")
-        self.spectra = self.setdict("default_spectra.yml")
-        self.extcurves = self.setdict("default_curves.yml")
+        self.default_filters_file = "default_filters.yml"
+        self.default_spectra_file = "default_spectra.yml"
+        self.default_curves_file = "default_curves.yml"
+
+        self.filters = self.setdict(self.default_filters_file, **kwargs)
+        self.spectra = self.setdict(self.default_spectra_file, **kwargs)
+        self.extcurves = self.setdict(self.default_curves_file, **kwargs)
 
     @staticmethod
-    def setdict(file):
+    def setdict(ymlfile, **kwargs):
         database = Database()
-        path = database.abspath(file)
+        path = database.abspath(ymlfile, **kwargs)
+
         with open(path) as filename:
             dictionary = yaml.safe_load(filename)
         return dictionary
+
+    @staticmethod
+    def update():
+        DefaultData(silent=False, reload=True)
 
 
 class Library(DataContainer):
@@ -471,7 +481,6 @@ class ExtCurveContainer(ExtCurvesLibrary):
         return s
 
 #
-
 
 def database_as_table():
     """

@@ -39,6 +39,9 @@ to commonly used spectral templates, extinction curves and filters.
    install
    starting
    database
+   spectral_libraries
+   extinction_curves
+   filters
 
 
 

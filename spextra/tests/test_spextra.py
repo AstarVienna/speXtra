@@ -40,7 +40,7 @@ class TestPassbandInstances:
         assert isinstance(passband, SpectralElement)
 
     def test_database(self):
-        passband = Passband("micado/Y")
+        passband = Passband("elt/micado/Y")
         assert isinstance(passband, SpectralElement)
 
     def test_filename(self):

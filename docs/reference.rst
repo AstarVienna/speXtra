@@ -13,6 +13,8 @@ Spectroscopic Module
    :toctree: api
 
    Spextrum
+   Passband
+   ExtinctionCurve
 
 Database
 ========
@@ -22,7 +24,9 @@ Database
 .. autosummary::
    :toctree: api
 
-   SpecDatabase
+   Database
    SpecLibrary
+   FilterSystem
+   ExtCurveLibrary
 
 

@@ -1,6 +1,6 @@
 # T A High Resolution Atlas of Composite SDSS Galaxy Spectra
 
-library_name : sdss
+library_name : dobos
 
 type : galaxies
 
