@@ -379,6 +379,126 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         return cls(modelclass=modelclass)
 
+    @classmethod
+    def flat_spectrum(cls, mag=0, system_name="AB", wavelengths=None):
+        """
+        Creates a flat spectrum in the preferred system scaled to a magnitude,
+        default a zero magnitude spectrum
+        Parameters
+        ----------
+        mag: float,
+            magnitude of the reference spectrum, default=0
+        system_name: AB, Vega or ST, default AB
+
+        wavelengths: The waveset of the reference spectrum if not Vega
+
+        Returns
+        -------
+        a Spextrum instance
+        """
+        if wavelengths is None:  # set a default waveset with R~805
+            wavelengths, info = utils.generate_wavelengths(minwave=100, maxwave=50000, num=5000,
+                                                           log=True, wave_unit=u.AA)
+        if system_name.lower() in ["vega"]:
+            spec = get_vega_spectrum()
+            spec = spec * 10 ** (-0.4 * mag)
+        elif system_name.lower() in ["ab"]:
+            spec = SourceSpectrum(ConstFlux1D, amplitude=mag * u.ABmag)
+            spec = SourceSpectrum(Empirical1D, points=wavelengths,
+                                  lookup_table=spec(wavelengths, flux_unit=u.ABmag))
+        elif system_name.lower() in ["st", "hst"]:
+            spec = SourceSpectrum(ConstFlux1D, amplitude=mag * u.STmag)
+            spec = SourceSpectrum(Empirical1D, points=wavelengths,
+                                  lookup_table=spec(wavelengths, flux_unit=u.STmag))
+        else:
+            raise ValueError("only AB, ST and Vega systems are supported")
+
+        return cls(modelclass=spec)
+
+    @classmethod
+    def black_body_spectrum(cls, temperature=9500, amplitude=0, filter_name=None, filter_file=None):
+        """
+        Produce a blackbody spectrum for a given temperature and scale it to a magnitude
+        in a filter
+
+        Parameters
+        ----------
+        temperature: the temperature in Kelvin degrees
+        amplitude: `astropy.Quantity``, float
+                The value that the spectrum should have in the given filter. Acceptable
+                astropy quantities are:
+                - u.mag : Vega magnitudes
+                - u.ABmag : AB magnitudes
+                - u.STmag : HST magnitudes
+                - u.Jy : Jansky per filter bandpass
+                Additionally the ``FLAM`` and ``FNU`` units from ``synphot.units`` can
+                be used when passing the quantity for ``amplitude``:
+
+        filter_name : str
+                Name of a filter from
+                - a generic filter name (see ``FILTER_DEFAULTS``)
+                - a spanish-vo filter service reference (e.g. ``"Paranal/HAWKI.Ks"``)
+                - a filter in the spextra database
+
+        filter_file: str
+                A file with a transmission curve
+
+        Returns
+        -------
+        a scaled black-body spectrum
+        """
+        sp = cls(modelclass=BlackBody1D, temperature=temperature)
+
+        return sp.scale_to_magnitude(amplitude=amplitude,
+                                     filter_name=filter_name,
+                                     filter_file=filter_file)
+
+    @classmethod
+    def powerlaw(cls, alpha=1, amplitude=0, filter_name=None, filter_file=None):
+        """
+        Return a power law spectrum F(lambda) ~ lambda^alpha scaled to a magnitude
+        (amplitude) in an particular band
+
+        Parameters
+        ----------
+        alpha
+        amplitude
+        filter_name
+        filter_file
+
+        TODO: definition of x0 as filter pivot wavelength
+        Returns
+        -------
+
+        """
+        sp = cls(modelclass=PowerLawFlux1D, amplitude=amplitude, x_0=2000, alpha=alpha)
+
+        return sp.scale_to_magnitude(amplitude=amplitude, filter_name=filter_name, filter_file=filter_file)
+
+    def cut(self, wmin, wmax):
+        """
+        Cut the spectrum between wmin and wmax
+
+        Parameters
+        ----------
+        wmin: float, u.Quantity,
+        wmax: float, u.Quantity,
+
+        Returns
+        -------
+
+        a new spextrum
+        """
+        if isinstance(wmin, u.Quantity) is False:
+            wmin = wmin*u.AA
+        if isinstance(wmax, u.Quantity) is False:
+            wmax = wmax * u.AA
+
+        new_waves = self.waveset[(self.waveset > wmin) & (self.waveset < wmax)]
+        sp = self(new_waves)
+
+        return sp
+
     def redshift(self, z=0, vel=0):
         """
         Redshift or blueshift a spectra
@@ -644,102 +764,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         return sp
 
-    @classmethod
-    def flat_spectrum(cls, mag=0, system_name="AB", wavelengths=None):
-        """
-        Creates a flat spectrum in the preferred system scaled to a magnitude,
-        default a zero magnitude spectrum
-        Parameters
-        ----------
-        mag: float,
-            magnitude of the reference spectrum, default=0
-        system_name: AB, Vega or ST, default AB
 
-        wavelengths: The waveset of the reference spectrum if not Vega
-
-        Returns
-        -------
-        a Spextrum instance
-        """
-        if wavelengths is None:  # set a default waveset with R~805
-            wavelengths, info = utils.generate_wavelengths(minwave=100, maxwave=50000, num=5000,
-                                                           log=True, wave_unit=u.AA)
-        if system_name.lower() in ["vega"]:
-            spec = get_vega_spectrum()
-            spec = spec * 10**(-0.4*mag)
-        elif system_name.lower() in ["ab"]:
-            spec = SourceSpectrum(ConstFlux1D, amplitude=mag * u.ABmag)
-            spec = SourceSpectrum(Empirical1D, points=wavelengths,
-                                  lookup_table=spec(wavelengths, flux_unit=u.ABmag))
-        elif system_name.lower() in ["st", "hst"]:
-            spec = SourceSpectrum(ConstFlux1D, amplitude=mag * u.STmag)
-            spec = SourceSpectrum(Empirical1D, points=wavelengths,
-                                  lookup_table=spec(wavelengths, flux_unit=u.STmag))
-        else:
-            raise ValueError("only AB, ST and Vega systems are supported")
-
-        return cls(modelclass=spec)
-
-    @classmethod
-    def black_body_spectrum(cls, temperature=9500, amplitude=0, filter_name=None, filter_file=None):
-        """
-        Produce a blackbody spectrum for a given temperature and scale it to a magnitude
-        in a filter
-
-        Parameters
-        ----------
-        temperature: the temperature in Kelvin degrees
-        amplitude: `astropy.Quantity``, float
-                The value that the spectrum should have in the given filter. Acceptable
-                astropy quantities are:
-                - u.mag : Vega magnitudes
-                - u.ABmag : AB magnitudes
-                - u.STmag : HST magnitudes
-                - u.Jy : Jansky per filter bandpass
-                Additionally the ``FLAM`` and ``FNU`` units from ``synphot.units`` can
-                be used when passing the quantity for ``amplitude``:
-
-        filter_name : str
-                Name of a filter from
-                - a generic filter name (see ``FILTER_DEFAULTS``)
-                - a spanish-vo filter service reference (e.g. ``"Paranal/HAWKI.Ks"``)
-                - a filter in the spextra database
-
-        filter_file: str
-                A file with a transmission curve
-
-        Returns
-        -------
-        a scaled black-body spectrum
-        """
-        sp = cls(modelclass=BlackBody1D, temperature=temperature)
-
-        return sp.scale_to_magnitude(amplitude=amplitude,
-                                     filter_name=filter_name,
-                                     filter_file=filter_file)
-
-    @classmethod
-    def powerlaw(cls, alpha=1, amplitude=0, filter_name=None, filter_file=None):
-        """
-        Return a power law spectrum F(lambda) ~ lambda^alpha scaled to a magnitude
-        (amplitude) in an particular band
-
-        Parameters
-        ----------
-        alpha
-        amplitude
-        filter_name
-        filter_file
-
-        TODO: definition of x0 as filter pivot wavelength
-        Returns
-        -------
-
-        """
-
-        sp = cls(modelclass=PowerLawFlux1D, amplitude=amplitude, x_0=2000, alpha=alpha)
-
-        return sp.scale_to_magnitude(amplitude=amplitude, filter_name=filter_name, filter_file=filter_file)
 
     def scale_to_magnitude(self, amplitude, filter_name=None, filter_file=None):
         """

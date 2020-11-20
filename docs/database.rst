@@ -45,7 +45,7 @@ it will list the spectral libraries available
 
 .. jupyter-execute::
 
-    print(db.extinction_curves)
+    db.extinction_curves
 
 .. jupyter-execute::
 

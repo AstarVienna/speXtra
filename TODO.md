@@ -6,14 +6,14 @@ List of things I'd like to add
 
 - Stricter tests for the algorithms
 - Add metadata registering the operations in a consistent manner (50% done, TBC)
-- Better interactive browsing of the database
-- clear versioning
+- Better interactive browsing of the database (50% done?)
+- clear versioning  (Done?)
 - Add ``.wave`` and ``.flux`` (or similar) properties for a quicker access to these quantities
 - Power law spectra F(lambda) ~ lambda^alpha specified by the spectral index alpha
 - Make sure that code works without internet connection
 - Make easy to configure different database locations. 
 - Make sure that Jansky units work properly
-
+- method to cut spectra
 
 ## Spectral Libraries
 
