@@ -1,8 +1,0 @@
-numpy>=1.13
-matplotlib
-scipy
-astropy
-synphot
-PyYAML
-numpydoc
-
