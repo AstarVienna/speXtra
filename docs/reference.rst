@@ -27,6 +27,6 @@ Database
    Database
    SpecLibrary
    FilterSystem
-   ExtCurveLibrary
+   ExtCurvesLibrary
 
 
