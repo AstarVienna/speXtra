@@ -10,7 +10,7 @@ from datetime import datetime
 # Version number
 MAJOR = 0
 MINOR = 1
-ATTR = 'dev1'
+ATTR = '0'
 
 VERSION = '%d.%d%s' % (MAJOR, MINOR, ATTR)
 
