@@ -196,10 +196,9 @@ def download_file(remote_url, local_name, silent=False):
     URLError
         Whenever there's a problem getting the remote file.
     """
-
     # ensure target directory exists
     dn = os.path.dirname(local_name)
-    if not os.path.exists(dn):
+    if os.path.exists(dn) is False:
         os.makedirs(dn)
 
     try:

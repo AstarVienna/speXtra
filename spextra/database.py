@@ -480,8 +480,53 @@ class ExtCurveContainer(ExtCurvesLibrary):
         s = "Extinction curve: " + self.curve_name
         return s
 
-#
 
+# TODO: functions
+
+
+def get_library(library_name):
+    """
+    Download library and all files
+    """
+    pass
+
+
+def get_filter_system(filter_system):
+    """
+    download all filters of a system
+    """
+    pass
+
+
+def get_extcurves(extinction_curves):
+    """
+    Download all extinction curves
+    """
+    pass
+
+
+def download_database():
+    """
+    Download
+    """
+    pass
+
+
+def set_root_dir(path):
+    """
+    Set the root dir where the files will be stored.
+    Probably best way is to write a small file in the data directory.
+
+
+    Also get root dir should be also able to read from that file.
+
+    Database should be get rid of initialiting parameters or use them
+    to set new directories
+    """
+    pass
+
+
+#
 def database_as_table():
     """
     Show the contents of the database as table
