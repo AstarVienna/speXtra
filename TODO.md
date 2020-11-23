@@ -10,7 +10,7 @@ List of things I'd like to add
 - clear versioning  (Done?)
 - Add ``.wave`` and ``.flux`` (or similar) properties for a quicker access to these quantities
 - Power law spectra F(lambda) ~ lambda^alpha specified by the spectral index alpha
-- Make sure that code works without internet connection
+- Make sure that code works without internet connection. _apparently it does with the built-in database_
 - Make easy to configure different database locations. 
 - Make sure that Jansky units work properly
 - method to cut spectra
