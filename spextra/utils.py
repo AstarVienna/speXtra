@@ -7,16 +7,20 @@ import socket
 
 from astropy.utils.console import ProgressBarOrSpinner
 from astropy.config import get_cache_dir
+import yaml
 
-from .conf import Conf
+from .conf import Conf, Config
 
 
 __all__ = ["is_url", "download_file", "get_rootdir", "database_url", "dict_generator", "download_svo_filter"]
 
 __pkg_dir__ = os.path.dirname(inspect.getfile(inspect.currentframe()))
 __data_dir__ = os.path.join(__pkg_dir__, "data")
+__config_file__ = os.path.join(__pkg_dir__, "data", "config.yml")
 
 conf = Conf()
+
+config = Config(__config_file__)
 
 
 def dict_generator(indict, pre=None):

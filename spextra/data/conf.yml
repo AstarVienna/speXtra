@@ -1,0 +1,4 @@
+data_dir : Null   # defaults to ASTROPY_CACHE_DIR/spextra
+database_url : https://homepage.univie.ac.at/miguel.verdugo/database/  # URL rootdir of the database
+remote_timeout : 30  # remote timeout in seconds
+

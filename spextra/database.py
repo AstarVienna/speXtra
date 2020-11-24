@@ -27,10 +27,6 @@ __data_dir__ = os.path.join(__pkg_dir__, "data")
 #                                              None, 'display compact', None, 'idx')
 
 
-with open(os.path.join(__data_dir__,  "default_filters.yml")) as filter_file:
-    FILTER_DEFAULTS = yaml.safe_load(filter_file)
-
-
 class DataContainer:
     """
     Just a general container for the data
