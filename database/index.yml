@@ -13,6 +13,10 @@ libraries:
   sne       : Supernova Legacy Survey
   moehler   : flux/telluric standards with X-Shooter
   madden    : High-Resolution Spectra of Habitable Zone Planets
+  bosz      :
+    hr      :  BOSZ stellar atmosphere Grid - High Resolution
+    mr      :  BOSZ stellar atmosphere Grid - Medium Resolution
+    lw      :  BOSZ stellar atmosphere Grid - Low Resolution
 
 # here go the extinction curves
 extinction_curves:
