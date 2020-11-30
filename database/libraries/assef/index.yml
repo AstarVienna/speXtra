@@ -1,0 +1,60 @@
+# LOW-RESOLUTION SPECTRAL TEMPLATES FOR ACTIVE GALACTIC NUCLEI AND GALAXIES FROM 0.03 TO 30 μm
+
+library_name : assef
+
+type : galaxies
+
+title : Low Resolution Spectral Templates for AGN and Galaxies from 0.03 to 30um
+
+summary : |
+  We present a set of low-resolution empirical spectral energy distribution (SED) templates for active
+  galactic nuclei (AGNs) and galaxies in the wavelength range from 0.03 μm to 30 μm based on the multi-
+  wavelength photometric observations of the NOAO Deep-Wide Field Survey Boötes field and the
+  spectroscopic observations of the AGN and Galaxy Evolution Survey.
+  
+  This libary is specially suited for fast photometric calculations. 
+
+reference : Assef et al. 2010, 713, 2
+
+link : "http://www.astronomy.ohio-state.edu/~rjassef/lrt/"
+
+spectral_coverage :
+  - uv
+  - vis
+  - nir
+  - mir
+
+resolution : 45  
+
+wave_unit: um
+
+flux_unit : erg / (s cm**2 Hz)  # Fnu?  # Normalization arbitrary
+
+wave_column_name : wavelength
+
+flux_column_name : flux
+
+data_type: ascii
+
+file_extension: .dat
+
+templates:    # comments
+  agn        : flux * 1e-11
+  agn2       : flux * 1e-14
+  ellip      : flux * 1e-16 , E
+  spiral     : flux * 1e-17 , Sbc 
+  irr        : flux * 1e-15 , Im 
+
+
+
+
+
+
+
+
+
+
+
+
+
+

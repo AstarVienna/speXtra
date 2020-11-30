@@ -279,7 +279,7 @@ class FilterSystem(Library):
     def __repr__(self):
         description = "Filter system: " + self.filter_system + " " + self.title
         spec_cov = "spectral coverage: " + str(self.spectral_coverage)
-        units = "wave_unit: " + self.wave_unit + "  flux_unit: " + self.flux_unit
+        units = "wave_unit: " + self.wave_unit
         templates = "Templates: " + str(self.filters)
 
         return ' %s \n %s \n %s \n %s' % (description, spec_cov, units, templates)
