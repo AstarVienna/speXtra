@@ -13,10 +13,9 @@ libraries:
   sne       : Supernova Legacy Survey
   moehler   : flux/telluric standards with X-Shooter
   madden    : High-Resolution Spectra of Habitable Zone Planets
-  bosz      :
-    hr      :  BOSZ stellar atmosphere Grid - High Resolution
-    mr      :  BOSZ stellar atmosphere Grid - Medium Resolution
-    lw      :  BOSZ stellar atmosphere Grid - Low Resolution
+  bosz/hr   :  BOSZ stellar atmosphere Grid - High Resolution
+  bosz/mr   :  BOSZ stellar atmosphere Grid - Medium Resolution
+  bosz/lr   :  BOSZ stellar atmosphere Grid - Low Resolution
   assef     :  Low-resolution spectral templates for AGN and galaxies
 
 # here go the extinction curves
@@ -27,7 +26,6 @@ extinction_curves:
 
 # here go filters not found at SVO
 filter_systems:
-   elt :   # ELT instruments, #to test nesting
-    micado : MICADO filters
-    metis : METIS filters
+   elt/micado : MICADO filters
+   elt/metis  : METIS filters
 

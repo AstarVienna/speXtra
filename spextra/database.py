@@ -133,7 +133,6 @@ class Database(DataContainer):
         """
         just make lists of the libraries and paths in the database"
         """
-
         a = list(dict_generator(self.meta))
         separator = '/'
         libs = [e[1:] for e in a]
