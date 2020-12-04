@@ -19,9 +19,10 @@ List of things I'd like to add
 
 - Night sky spectrum at different resolutions?
 - Moon spectrum at different phases/distances?
-- MIR spectra of different objects, preferentially at high resolutions
-- UV spectra of galaxies at higher resolution (for LyA studies for example)
-- Include a subset of BOSZ spectra (UV-MIR) https://archive.stsci.edu/prepds/bosz/
+- MIR spectra of different objects, preferentially at high resolutions 
+- UV spectra of galaxies at higher resolution (for LyA studies for example) Check: https://www.astro.uu.se/~ez/lycan/lycan.html#resume
+  and https://www.astro.uu.se/~ez/yggdrasil/yggdrasil.html  
+
 
 
 ## Filters

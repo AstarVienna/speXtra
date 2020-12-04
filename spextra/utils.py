@@ -153,7 +153,6 @@ def _download_file(remote_url, target, silent=False):
 
             dlmsg = "Downloading {0}".format(remote_url)
 
-            f = open("/tmp/x", "w")
             with ProgressBarOrSpinner(size, dlmsg, file=msg_file) as p:
                 bytes_read = 0
                 block = remote.read(download_block_size)

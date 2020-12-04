@@ -333,14 +333,14 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         if isinstance(flux, (u.Quantity, u.core.Unit)) is False:
             flux = flux * flux_unit
 
-        modelclass = SpectralElement(Empirical1D, points=waves, lookup_table=flux, meta=meta)
+        modelclass = SourceSpectrum(Empirical1D, points=waves, lookup_table=flux, meta=meta)
 
         return cls(modelclass=modelclass)
 
     @classmethod
     def from_file(cls, filename, **kwargs):
         """
-        This is just an adaptation of the ``synphot.SourceSpectrum.from_file()`` method
+        This is just an wrapper of the ``synphot.SourceSpectrum.from_file()`` method
 
         Parameters
         ----------
