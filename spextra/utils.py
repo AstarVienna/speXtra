@@ -1,5 +1,6 @@
 import os
 import inspect
+import warnings
 from contextlib import closing
 from urllib.request import urlopen, Request
 from urllib.error import URLError, HTTPError
@@ -9,18 +10,91 @@ from astropy.utils.console import ProgressBarOrSpinner
 from astropy.config import get_cache_dir
 import yaml
 
-from .conf import Conf, Config
 
-
-__all__ = ["is_url", "download_file", "get_rootdir", "database_url", "dict_generator", "download_svo_filter"]
+__all__ = ["Config", "download_file", "dict_generator", "download_svo_filter"]
 
 __pkg_dir__ = os.path.dirname(inspect.getfile(inspect.currentframe()))
 __data_dir__ = os.path.join(__pkg_dir__, "data")
 __config_file__ = os.path.join(__pkg_dir__, "data", "config.yml")
 
-conf = Conf()
 
-config = Config(__config_file__)
+class Config:
+    """
+    set up configuration
+    """
+
+    def __init__(self, data_dir=None, database_url=None, remote_timeout=None):
+
+        self.config_file = __config_file__
+
+        with open(self.config_file) as f:
+            self.meta = yaml.safe_load(f)
+            self.data_dir = self.meta["data_dir"]
+            self.database_url = self.meta["database_url"]
+            self.remote_timeout = self.meta["remote_timeout"]
+            self.default_data_dir = os.path.join(get_cache_dir(), self.meta["default_data_dir"])
+
+        if data_dir is not None:
+            self.set_param("data_dir", data_dir)
+
+        if database_url is not None:
+            self.set_param("database_url", database_url)
+
+        if remote_timeout is not None:
+            self.set_param("remote_timeout", remote_timeout)
+
+    def get_data_dir(self):
+        # use the environment variable if set
+        data_dir = os.environ.get('SPEXTRA_DATA_DIR')
+
+        # otherwise, use config file value if set.
+
+        if data_dir is None:
+            data_dir = self.data_dir
+
+        # if still None, use astropy cache dir (and create if necessary!)
+        if data_dir is None:
+            data_dir = self.default_data_dir
+            if not os.path.isdir(data_dir):
+                if os.path.exists(data_dir):
+                    raise RuntimeError("{0} not a directory".format(data_dir))
+                os.mkdir(data_dir)
+
+        return data_dir
+
+    def get_database_url(self):
+        """
+        Check if the database is reachable
+
+        Returns
+        -------
+        the database_location
+        """
+        loc = self.database_url
+        try:
+            request = Request(loc)
+            request.get_method = lambda: 'HEAD'
+            urlopen(request)
+            is_url = True
+        except URLError:
+            is_url = False
+        except ValueError:
+            is_url = False
+
+        if is_url is False:
+            warnings.warn("Database might not be reachable")
+
+        return loc
+
+    def set_param(self, name, value):
+        d = {name: value}
+        self.meta.update(d)
+        self.__dict__.update(d)
+        with open(self.config_file, "w") as f:
+            yaml.dump(self.meta, f, sort_keys=False)
+
+    def __repr__(self):
+        return yaml.dump(self.meta, indent=4, sort_keys=False, default_flow_style=False)
 
 
 def dict_generator(indict, pre=None):
@@ -52,72 +126,6 @@ def dict_generator(indict, pre=None):
         yield pre + [indict]
 
 
-def is_url(url):  #
-    """
-    Checks that a given URL is reachable.
-    Depending on the configuration of the server it might return True even if the page doesn't exist.
-
-    Parameters
-    -----------
-    url: A URL
-
-    Returns
-    -------
-    Boolean
-    """
-    try:
-        request = Request(url)
-        request.get_method = lambda: 'HEAD'
-        urlopen(request)
-        output = True
-    except URLError:
-        output = False
-    except ValueError:
-        output = False
-    finally:
-        return output
-
-
-def database_url():
-    """
-    Check if the database is reachable
-
-    Returns
-    -------
-    the database_location
-    """
-    loc = conf.database_url
-    try:
-        assert is_url(loc)
-    except AssertionError as error:
-        print(error)
-        print("Database address not reachable", loc)
-        pass
-
-    return loc
-
-
-# ------ shamefully copied from SNCOSMO ------
-
-def get_rootdir():
-    # use the environment variable if set
-    data_dir = os.environ.get('SPEXTRA_DATA_DIR')
-
-    # otherwise, use config file value if set.
-
-    if data_dir is None:
-        data_dir = conf.data_dir
-
-    # if still None, use astropy cache dir (and create if necessary!)
-    if data_dir is None:
-        data_dir = os.path.join(get_cache_dir(), "spextra")
-        if not os.path.isdir(data_dir):
-            if os.path.exists(data_dir):
-                raise RuntimeError("{0} not a directory".format(data_dir))
-            os.mkdir(data_dir)
-
-    return data_dir
-
 
 def _download_file(remote_url, target, silent=False):
     """
@@ -126,6 +134,7 @@ def _download_file(remote_url, target, silent=False):
     downloads to an open file object instead of a cache directory.
     """
 
+    conf = Config()
     timeout = conf.remote_timeout
     download_block_size = 32768
 
@@ -229,10 +238,12 @@ def download_svo_filter(filter_name):
     """
     from astropy.table import Table
 
+    conf = Config()
+
     origin = 'http://svo2.cab.inta-csic.es/'\
              'theory/fps3/fps.php?ID={}'.format(filter_name)
 
-    local_path = os.path.join(get_rootdir(), "svo_filters", filter_name)
+    local_path = os.path.join(conf.get_data_dir(), "svo_filters", filter_name)
 
     if os.path.exists(local_path) is False:
         download_file(origin, local_path)

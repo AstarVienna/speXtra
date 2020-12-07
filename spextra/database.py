@@ -9,7 +9,7 @@ from posixpath import join as urljoin
 
 import yaml
 
-from .utils import get_rootdir, database_url, download_file, dict_generator
+from .utils import Config,  download_file, dict_generator
 
 # Configurations
 
@@ -19,8 +19,6 @@ __all__ = ["Database", "SpecLibrary", "SpectrumContainer", "ExtCurvesLibrary",
 # Do we need this?
 __pkg_dir__ = os.path.dirname(inspect.getfile(inspect.currentframe()))
 __data_dir__ = os.path.join(__pkg_dir__, "data")
-
-# Default filters
 
 # Tables are displayed with a jsviewer by default
 # Table.show_in_browser.__defaults__ = (5000, True, 'default', {'use_local_files': True},
@@ -82,13 +80,15 @@ class Database(DataContainer):
         Root URL of the remote server.
     """
 
-    def __init__(self, rootdir=get_rootdir(), remote_root=database_url(), silent=False):
+    def __init__(self, silent=False):
 
-        if not remote_root.endswith('/'):
-            remote_root = remote_root + '/'
+        conf = Config()
+        self.database_url = conf.get_database_url()
 
-        self.rootdir = rootdir
-        self.remote_root = remote_root
+        if not self.database_url.endswith('/'):
+            self.database_url = self.database_url + '/'
+
+        self.data_dir = conf.get_data_dir()
         self.ymlfile = "index.yml"
         self.path = self.abspath(self.ymlfile, silent=silent)
 
@@ -104,10 +104,10 @@ class Database(DataContainer):
         Otherwise, just look for ``{relpath}``.
         """
 
-        abspath = os.path.join(self.rootdir, relpath)
+        abspath = os.path.join(self.data_dir, relpath)
         if (os.path.exists(abspath) is False) or (reload is True):
             print("updating/loading '%s'" % relpath )
-            url = urljoin(self.remote_root, relpath)
+            url = urljoin(self.database_url, relpath)
             download_file(url, abspath, silent=silent)
 
         return abspath
@@ -117,10 +117,10 @@ class Database(DataContainer):
         Remove database and all files
         """
         try:
-            shutil.rmtree(self.rootdir)
-            print("database at %s removed" % self.rootdir)
+            shutil.rmtree(self.data_dir)
+            print("database at %s removed" % self.data_dir)
         except FileNotFoundError:
-            print("database at %s doesn't exist" % self.rootdir)
+            print("database at %s doesn't exist" % self.data_dir)
             raise
 
     def update(self):
@@ -143,8 +143,8 @@ class Database(DataContainer):
 
     def __repr__(self):
         description = "Database:"
-        remote = "url: " + self.remote_root
-        local = "path: " + self.rootdir
+        remote = "url: " + self.database_url
+        local = "path: " + self.data_dir
 
         return ' %s \n %s \n %s ' % (description, remote, local)
 
@@ -199,7 +199,7 @@ class Library(DataContainer):
         self.ymlfile = "index.yml"
         self.path = database.abspath(os.path.join(self.relpath, self.ymlfile))
         self.dir = database.abspath(self.relpath)
-        self.url = urljoin(database.remote_root, self.relpath, self.ymlfile)
+        self.url = urljoin(database.data_dir, self.relpath, self.ymlfile)
         super().__init__(filename=self.path)
 
     def remove(self):
@@ -339,7 +339,7 @@ class SpectrumContainer(SpecLibrary):
         database = Database()
 
         self.path = database.abspath(os.path.join(self.relpath, self.datafile))
-        self.url = urljoin(database.remote_root, self.relpath, self.datafile)
+        self.url = urljoin(database.database_url, self.relpath, self.datafile)
         self.template_comment = self.templates[self.template_name]
         self.filename = self.path
         self._update_attrs()
@@ -391,7 +391,7 @@ class FilterContainer(FilterSystem):
 
         self.datafile = self.basename + self.file_extension
         self.path = database.abspath(os.path.join(self.relpath, self.datafile))
-        self.url = urljoin(database.remote_root, self.relpath, self.datafile)
+        self.url = urljoin(database.database_url, self.relpath, self.datafile)
         self.filter_comment = self.filters[self.basename]
         self.filename = self.path
 
@@ -442,7 +442,7 @@ class ExtCurveContainer(ExtCurvesLibrary):
 
         self.datafile = self.basename + self.file_extension
         self.path = database.abspath(os.path.join(self.relpath, self.datafile))
-        self.url = urljoin(database.remote_root, self.relpath, self.datafile)
+        self.url = urljoin(database.database_url, self.relpath, self.datafile)
         self.curve_comment = self.curves[self.basename]
         self.filename = self.path
 
