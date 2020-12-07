@@ -15,12 +15,27 @@ __all__ = ["Config", "download_file", "dict_generator", "download_svo_filter"]
 
 __pkg_dir__ = os.path.dirname(inspect.getfile(inspect.currentframe()))
 __data_dir__ = os.path.join(__pkg_dir__, "data")
-__config_file__ = os.path.join(__pkg_dir__, "data", "config.yml")
+__config_file__ = os.path.join(__data_dir__, "config.yml")
 
 
 class Config:
     """
-    set up configuration
+    Set up the configuration for the database.
+    This class reads a yaml file in the directory data_dir that contains the default configuration of the database
+    that contain default values for the following attributes
+
+    database_url: The location of the remote database
+    data_dir: The location of the database in the local hard disk, where the files are saved. Default is Null (None) which
+    then lead to .astropy/cache/spextra
+    remote_timeout: The time before timeout
+
+    Normally, the user will not need to call this class, except when chaning
+
+    If the user needs to change these values the class can be simply called as
+
+    >> Config(data_dir="path_to_new_data_directory")
+
+    and the new path will be used from that moment on
     """
 
     def __init__(self, data_dir=None, database_url=None, remote_timeout=None):
@@ -35,40 +50,43 @@ class Config:
             self.default_data_dir = os.path.join(get_cache_dir(), self.meta["default_data_dir"])
 
         if data_dir is not None:
-            self.set_param("data_dir", data_dir)
+            self._set_param("data_dir", data_dir)
 
         if database_url is not None:
-            self.set_param("database_url", database_url)
+            self._set_param("database_url", database_url)
 
         if remote_timeout is not None:
-            self.set_param("remote_timeout", remote_timeout)
+            self._set_param("remote_timeout", remote_timeout)
 
     def get_data_dir(self):
-        # use the environment variable if set
-        data_dir = os.environ.get('SPEXTRA_DATA_DIR')
-
-        # otherwise, use config file value if set.
-
-        if data_dir is None:
-            data_dir = self.data_dir
-
-        # if still None, use astropy cache dir (and create if necessary!)
-        if data_dir is None:
-            data_dir = self.default_data_dir
-            if not os.path.isdir(data_dir):
-                if os.path.exists(data_dir):
-                    raise RuntimeError("{0} not a directory".format(data_dir))
-                os.mkdir(data_dir)
-
-        return data_dir
-
-    def get_database_url(self):
         """
-        Check if the database is reachable
+        Retrieve the current data directory where the data from the database is stored
+        Check whether the directory exists and if not create it. Raise a RuntimeError if not possible
 
         Returns
         -------
-        the database_location
+        path
+        """
+        if self.data_dir is None:
+            self.data_dir = self.default_data_dir
+
+        if os.path.isdir(self.data_dir) is False: 
+            try:
+                os.mkdir(self.data_dir)
+            except FileExistsError as e:
+                raise("{0} not a directory".format(self.data_dir), e)
+            except PermissionError as e :
+                raise("Cannot create {0}".format(self.data_dir), e)
+
+        return self.data_dir
+
+    def get_database_url(self):
+        """
+        Retrieve the database url and check whether is reachable
+
+        Returns
+        -------
+        url
         """
         loc = self.database_url
         try:
@@ -86,7 +104,7 @@ class Config:
 
         return loc
 
-    def set_param(self, name, value):
+    def _set_param(self, name, value):
         d = {name: value}
         self.meta.update(d)
         self.__dict__.update(d)
@@ -95,36 +113,6 @@ class Config:
 
     def __repr__(self):
         return yaml.dump(self.meta, indent=4, sort_keys=False, default_flow_style=False)
-
-
-def dict_generator(indict, pre=None):
-    """
-    Make a generator out of a dictionary
-    Parameters
-    ----------
-    indict
-    pre
-
-    Returns
-    -------
-
-    """
-
-    pre = pre[:] if pre else []
-    if isinstance(indict, dict):
-        for key, value in indict.items():
-            if isinstance(value, dict):
-                for d in dict_generator(value, pre + [key]):
-                    yield d
-            elif isinstance(value, list) or isinstance(value, tuple):
-                for v in value:
-                    for d in dict_generator(v, pre + [key]):
-                        yield d
-            else:
-                yield pre + [key]
-    else:
-        yield pre + [indict]
-
 
 
 def _download_file(remote_url, target, silent=False):
@@ -239,11 +227,12 @@ def download_svo_filter(filter_name):
     from astropy.table import Table
 
     conf = Config()
+    data_dir = conf.get_data_dir()
 
     origin = 'http://svo2.cab.inta-csic.es/'\
              'theory/fps3/fps.php?ID={}'.format(filter_name)
 
-    local_path = os.path.join(conf.get_data_dir(), "svo_filters", filter_name)
+    local_path = os.path.join(data_dir, "svo_filters", filter_name)
 
     if os.path.exists(local_path) is False:
         download_file(origin, local_path)
@@ -256,8 +245,36 @@ def download_svo_filter(filter_name):
     return wave, trans
 
 
-#    This is based on scopesim.effects.ter_curves_utils.py
+def dict_generator(indict, pre=None):
+    """
+    Make a generator out of a dictionary
+    Parameters
+    ----------
+    indict
+    pre
 
+    Returns
+    -------
+
+    """
+
+    pre = pre[:] if pre else []
+    if isinstance(indict, dict):
+        for key, value in indict.items():
+            if isinstance(value, dict):
+                for d in dict_generator(value, pre + [key]):
+                    yield d
+            elif isinstance(value, list) or isinstance(value, tuple):
+                for v in value:
+                    for d in dict_generator(v, pre + [key]):
+                        yield d
+            else:
+                yield pre + [key]
+    else:
+        yield pre + [indict]
+
+
+# ------
 
 def get_filter_systems():
     """

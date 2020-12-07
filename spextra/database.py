@@ -16,10 +16,6 @@ from .utils import Config,  download_file, dict_generator
 __all__ = ["Database", "SpecLibrary", "SpectrumContainer", "ExtCurvesLibrary",
            "ExtCurveContainer", "FilterSystem", "FilterContainer", "DefaultData"]
 
-# Do we need this?
-__pkg_dir__ = os.path.dirname(inspect.getfile(inspect.currentframe()))
-__data_dir__ = os.path.join(__pkg_dir__, "data")
-
 # Tables are displayed with a jsviewer by default
 # Table.show_in_browser.__defaults__ = (5000, True, 'default', {'use_local_files': True},
 #                                              None, 'display compact', None, 'idx')
