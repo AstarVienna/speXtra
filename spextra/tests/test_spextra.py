@@ -7,7 +7,9 @@ import os
 
 import numpy as np
 import astropy.units as u
+from astropy.constants import c
 from synphot import SpectralElement, SourceSpectrum, units
+
 
 from spextra import Spextrum, Passband
 
@@ -166,7 +168,7 @@ class TestSpextrum:
         assert np.isclose(mean, 10**0.4)
 
     @pytest.mark.parametrize("unit", [u.mag, u.ABmag, u.STmag])
-    def test_scaling_is_right(self, unit):
+    def test_correct_scaling(self, unit):
         sp1 = Spextrum("kc96/s0").scale_to_magnitude(amplitude=14*unit, filter_name="r")
         sp2 = Spextrum("kc96/s0").scale_to_magnitude(amplitude=15*unit, filter_name="r")
 
@@ -178,8 +180,49 @@ class TestSpextrum:
         mean = np.mean(flux1 / flux2)
         assert np.isclose(mean, 10**0.4)
 
-    def test_units(self):
-        pass
+    @pytest.mark.parametrize("filt", ["U", "B", "V", "R", "I", "J", "H", "Ks"])
+    def test_vega2ab(self, filt):
+        """
+        test if the convertion between AB and Vega is correct
+        conversions taken from:  http://www.astronomy.ohio-state.edu/~martini/usefuldata.html
+
+        absolute tolerance set to 0.1 mag to account for filter differences
+
+        Parameters
+        ----------
+        filt: str
+            name of the filter
+        """
+        ab2vega = {"U":  0.79,   # magAB - magVega taken from
+                   "B": -0.09,   #
+                   "V":  0.02,
+                   "R":  0.21,
+                   "I":  0.45,
+                   "J":  0.91,
+                   "H":  1.39,
+                   "Ks": 1.85}
+
+        sp = Spextrum.flat_spectrum(mag=0, system_name="AB")
+
+        magAB = sp.get_magnitude(filt, system_name="AB")
+        magVega = sp.get_magnitude(filt, system_name="vega")
+
+        diff = (magAB.value - magVega.value)
+
+        assert np.isclose(diff, ab2vega[filt], atol=0.1)
+
+    def test_hz2angstrom(self):
+
+        waves = np.array([1, 2, 3]) * u.Hz
+        flux = np.array([1, 1, 2]) * units.FLAM
+
+        sp = Spextrum.from_vectors(waves, flux)
+
+        inwaves  = c.value / waves.value
+        outwaves = sp.waveset.to(u.m).value
+
+        print(inwaves[::-1], outwaves, "XXX"*5)
+        assert np.isclose(inwaves[::-1], outwaves).all()
 
 
 

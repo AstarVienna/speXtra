@@ -61,16 +61,25 @@ class Config:
     def get_data_dir(self):
         """
         Retrieve the current data directory where the data from the database is stored
-        Check whether the directory exists and if not create it. Raise a RuntimeError if not possible
+        Check whether the directory exists and if not it will create it. Raises a FileExistsError or PermissionError
+        if not possible
 
         Returns
         -------
-        path
+        path: str
+            Path to the local data directory
+
+        Raises
+        ------
+        FileExistsError
+             if it is not a directory
+        PermissionError
+             if not possible to create the directory
         """
         if self.data_dir is None:
             self.data_dir = self.default_data_dir
 
-        if os.path.isdir(self.data_dir) is False: 
+        if os.path.isdir(self.data_dir) is False:
             try:
                 os.mkdir(self.data_dir)
             except FileExistsError as e:
@@ -86,7 +95,8 @@ class Config:
 
         Returns
         -------
-        url
+        url: str
+           the url location of the database
         """
         loc = self.database_url
         try:
@@ -250,12 +260,12 @@ def dict_generator(indict, pre=None):
     Make a generator out of a dictionary
     Parameters
     ----------
-    indict
+    indict: dict
     pre
 
-    Returns
-    -------
-
+    Yields
+    ------
+    list
     """
 
     pre = pre[:] if pre else []

@@ -529,19 +529,25 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         return sp
 
-    def add_emi_lines(self, center, flux, fwhm):
+    def add_emi_lines(self, center, fwhm, flux):
         """
-        TODO: accept different profiles (Lorentz1D, Voigt1D, etc)
+        Add emission lines to an `Spextrum`
+
+        TODO: accept different profiles (Lorentz1D, Voigt1D, etc)\
+
         Parameters
         ----------
-        spectrum: a synphot spectrum
-        center: center of the line, astropy.units accepted
-        flux: total flux of the line, astropy.units accepted
-        fwhm: fwhm of the line, astropy.units accepted
+        center: float, list, np.ndarray, u.Quantity
+            The center of the line
+
+        fwhm:  float, list, np.ndarray, u.Quantity
+            The FWHM of the line
+        flux: float, list, np.ndarray, u.Quantity
+            The Equivalent Width of the line
 
         Returns
         -------
-        the spectrum with the emission lines
+        Spextrum
 
         """
         if isinstance(center, u.Quantity) is True:
@@ -577,13 +583,17 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         Parameters
         ----------
-        center
-        fwhm
-        ew
+        center: float, list, np.ndarray, u.Quantity
+            The center of the line
+
+        fwhm:  float, list, np.ndarray, u.Quantity
+            The FWHM of the line
+        ew: float, list, np.ndarray, u.Quantity
+            The Equivalent Width of the line
 
         Returns
         -------
-        a synphot.SourceSpectrum
+        Spextrum
         """
         if isinstance(center, u.Quantity) is True:
             center = center.to(u.AA).value
