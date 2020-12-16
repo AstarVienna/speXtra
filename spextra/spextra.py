@@ -490,13 +490,15 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         a new spextrum
         """
         if isinstance(wmin, u.Quantity) is False:
-            wmin = wmin*u.AA
+            wmin = wmin * u.AA
         if isinstance(wmax, u.Quantity) is False:
             wmax = wmax * u.AA
 
+        wmin = wmin.to(u.AA)
+        wmax = wmax.to(u.AA)
         new_waves = self.waveset[(self.waveset > wmin) & (self.waveset < wmax)]
         sp = self(new_waves)
-
+        # TODO: Copy meta here and add stuff
         return sp
 
     def redshift(self, z=0, vel=0):
