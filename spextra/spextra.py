@@ -498,6 +498,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         wmax = wmax.to(u.AA)
         new_waves = self.waveset[(self.waveset > wmin) & (self.waveset < wmax)]
         sp = self(new_waves)
+
         # TODO: Copy meta here and add stuff
         return sp
 
@@ -571,8 +572,9 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
             self.meta.update({"fwhm_line_" + str(c): str(f)})
 
             line = GaussianFlux1D(mean=c, total_flux=x, fwhm=f)
-            lam = line.sampleset(factor_step=0.35)  # bit better than Nyquist
-            g_em = SourceSpectrum(Empirical1D, points=lam, lookup_table=line(lam))
+            lam = line.sampleset(factor_step=0.3)  # bit better than Nyquist
+            g_em = SourceSpectrum(Empirical1D, points=lam, lookup_table=line(lam), meta=self.meta)
+
             sp = sp + g_em
 
         return sp
