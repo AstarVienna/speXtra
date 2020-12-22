@@ -265,7 +265,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
     """
 
-    def __init__(self, template_name=None, modelclass=None, **kwargs):
+    def __init__(self, template_name=None, modelclass=None, origin=None, **kwargs):
 
         if template_name is not None:
             if template_name in DEFAULT_SPECTRA:
@@ -274,10 +274,14 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
             SpectrumContainer.__init__(self, template_name)
             meta, lam, flux = self._loader()
             SourceSpectrum.__init__(self, Empirical1D, points=lam, lookup_table=flux, meta=meta,   **kwargs)
+
+            self.origin = "origin:" + self.template
           #  modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=flux, meta=meta)
         elif modelclass is not None:
            # modelclass = SourceSpectrum(modelclass=modelclass)
             SourceSpectrum.__init__(self, modelclass, **kwargs)
+            self.origin = origin
+
         else:
             raise ValueError("please define a spectra")
 
@@ -313,9 +317,9 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         return meta, lam, flux
 
     @classmethod
-    def from_vectors(cls, waves, flux, meta=None, wave_unit=u.AA, flux_unit=units.FLAM):
+    def from_arrays(cls, waves, flux, meta=None, wave_unit=u.AA, flux_unit=units.FLAM):
         """
-        Create a ``Passband`` directly from from vectos (lists, numpy.arrays, etc)
+        Create a ``Passband`` directly from from arrays (lists, numpy.arrays, etc)
         Parameters
         ----------
         waves: list-like
@@ -334,8 +338,9 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
             flux = flux * flux_unit
 
         modelclass = SourceSpectrum(Empirical1D, points=waves, lookup_table=flux, meta=meta)
+        origin = "origin: arrays"
 
-        return cls(modelclass=modelclass)
+        return cls(modelclass=modelclass, origin=origin)
 
     @classmethod
     def from_file(cls, filename, **kwargs):
@@ -353,8 +358,9 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         """
         modelclass = SourceSpectrum.from_file(filename, **kwargs)
+        origin = "from file: " + filename
 
-        return cls(modelclass=modelclass)
+        return cls(modelclass=modelclass, origin=origin)
 
     @classmethod
     def from_specutils(cls, spectrum_object):
@@ -376,11 +382,12 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         lam = spectrum_object.spectral_axis
         flux = spectrum_object.flux
         modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=flux, meta=meta)
+        origin = "origin: " + "specutils"
 
         return cls(modelclass=modelclass)
 
     @classmethod
-    def flat_spectrum(cls, mag=0, system_name="AB", wavelengths=None):
+    def flat_spectrum(cls, amplitude=0, system_name="AB", wavelengths=None):
         """
         Creates a flat spectrum in the preferred system scaled to a magnitude,
         default a zero magnitude spectrum
@@ -401,19 +408,21 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
                                                            log=True, wave_unit=u.AA)
         if system_name.lower() in ["vega"]:
             spec = get_vega_spectrum()
-            spec = spec * 10 ** (-0.4 * mag)
+            spec = spec * 10 ** (-0.4 * amplitude)
         elif system_name.lower() in ["ab"]:
-            spec = SourceSpectrum(ConstFlux1D, amplitude=mag * u.ABmag)
+            spec = SourceSpectrum(ConstFlux1D, amplitude=amplitude * u.ABmag)
             spec = SourceSpectrum(Empirical1D, points=wavelengths,
                                   lookup_table=spec(wavelengths, flux_unit=u.ABmag))
         elif system_name.lower() in ["st", "hst"]:
-            spec = SourceSpectrum(ConstFlux1D, amplitude=mag * u.STmag)
+            spec = SourceSpectrum(ConstFlux1D, amplitude=amplitude * u.STmag)
             spec = SourceSpectrum(Empirical1D, points=wavelengths,
                                   lookup_table=spec(wavelengths, flux_unit=u.STmag))
         else:
             raise ValueError("only AB, ST and Vega systems are supported")
 
-        return cls(modelclass=spec)
+        origin = "origin: flatspectrum with %s " % str(amplitude)
+
+        return cls(modelclass=spec, origin=origin)
 
     @classmethod
     def black_body_spectrum(cls, temperature=9500, amplitude=0, filter_name=None, filter_file=None):
@@ -447,7 +456,9 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         -------
         a scaled black-body spectrum
         """
-        sp = cls(modelclass=BlackBody1D, temperature=temperature)
+        origin = "origin: Blackbody spectrum with %s and temperature %s" % (str(amplitude) , str(temperature))
+
+        sp = cls(modelclass=BlackBody1D, temperature=temperature, origin=origin)
 
         return sp.scale_to_magnitude(amplitude=amplitude,
                                      filter_name=filter_name,
@@ -560,22 +571,23 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         if isinstance(fwhm, u.Quantity) is True:
             fwhm = fwhm.to(u.AA).value
 
-        center = np.array([center]).flatten()
-        flux = np.array([flux]).flatten()
-        fwhm = np.array([fwhm]).flatten()
+        centers = np.array([center]).flatten()
+        fluxes = np.array([flux]).flatten()
+        fwhms = np.array([fwhm]).flatten()
         sp = self #Spextrum(modelclass=self.model)
+        sp.meta.update({"em_lines": {"center": list(centers),
+                                   "flux": list(fluxes),
+                                   "fwhm": list(fwhms)}})
 
-        meta = self.meta
+        for c, f, w in zip(center, flux, fwhm):
 
-        for c, x, f in zip(center, flux, fwhm):
-            self.meta.update({"flux_line_" + str(c): str(x)})
-            self.meta.update({"fwhm_line_" + str(c): str(f)})
-
-            line = GaussianFlux1D(mean=c, total_flux=x, fwhm=f)
+            line = GaussianFlux1D(mean=c, total_flux=f, fwhm=w)
             lam = line.sampleset(factor_step=0.3)  # bit better than Nyquist
-            g_em = SourceSpectrum(Empirical1D, points=lam, lookup_table=line(lam), meta=self.meta)
+            g_em = SourceSpectrum(Empirical1D, points=lam, lookup_table=line(lam)) #, meta=sp.meta)
 
             sp = sp + g_em
+
+        sp = self._restore_attr(Spextrum(modelclass=sp))
 
         return sp
 
@@ -609,8 +621,12 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         center = np.array([center]).flatten()
         ew = np.array([ew]).flatten()
         fwhm = np.array([fwhm]).flatten()
-
         sp = self  #  .__class__(modelclass=self.model)
+
+        sp.meta.update({"em_lines": {"center": list(centers),
+                                     "ew": list(ew),
+                                     "fwhm": list(fwhms)}})
+
         for c, e, f in zip(center, ew, fwhm):
             sign = -1 * np.sign(e)  # to keep the convention that EL are negative and ABS are positive
             left, right = c - np.abs(e / 2), c + np.abs(e / 2)
@@ -624,14 +640,14 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
             g_abs = SourceSpectrum(Empirical1D, points=lam, lookup_table=line(lam))
 
             sp = sp + g_abs
-            self.meta.update({"EW_line_" + str(c): str(e)})
-            self.meta.update({"fwhm_line_" + str(c): str(f)})
 
             if (sp(wavelengths).value < 0).any():
                 warnings.warn("Warning: Flux<0 for specified EW and FHWM, setting it to Zero")
                 waves = sp.waveset[sp(sp.waveset) < 0]
                 zero_sp = SourceSpectrum(Empirical1D, points=waves, lookup_table=-1 * sp(waves).value)
                 sp = sp + zero_sp  # Spextrum(modelclass=sp.model + zero_sp.model)
+
+        sp = self._restore_attr(Spextrum(modelclass=sp))
 
         return sp
 
@@ -1017,7 +1033,9 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
             raise exceptions.IncompatibleSources(
                 'Can only operate on real scalar number')
 
+    def __repr__(self):
 
+        return self.origin
 #------------------------------ END    -------------------------------------------
 
 

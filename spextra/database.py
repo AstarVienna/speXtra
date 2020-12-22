@@ -366,7 +366,9 @@ class SpectrumContainer(SpecLibrary):
         self.__dict__.pop("ymlfile", None)
 
     def __repr__(self):
-        s1 = "Spectral template: " + self.template_name
+
+        s1 = "Spectral template: %s" % (self.template)
+
         return s1
 
 
