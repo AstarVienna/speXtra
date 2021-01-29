@@ -393,8 +393,8 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         default a zero magnitude spectrum
         Parameters
         ----------
-        mag: float,
-            magnitude of the reference spectrum, default=0
+        amplitude: float,
+            amplitude/magnitude of the reference spectrum, default=0
         system_name: AB, Vega or ST, default AB
 
         wavelengths: The waveset of the reference spectrum if not Vega
@@ -794,8 +794,6 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         return sp
 
-
-
     def scale_to_magnitude(self, amplitude, filter_name=None, filter_file=None):
         """
             Scales a Spectrum to a value in a filter
@@ -897,7 +895,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         else:
             unit = u.ABmag
 
-        ref_spec = self.flat_spectrum(mag=0, system_name=system_name)
+        ref_spec = self.flat_spectrum(amplitude=0, system_name=system_name)
         ref_flux = Observation(SourceSpectrum(modelclass=ref_spec),
                                filter_curve).effstim(flux_unit=units.PHOTLAM)
         real_flux = Observation(self, filter_curve).effstim(flux_unit=units.PHOTLAM)
@@ -953,6 +951,52 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         return counts
 
+    def get_flux(self, wmin=None, wmax=None, filter_name=None, filter_file=None, flux_unit=units.FLAM):
+        """
+        Return the flux within a passband
+
+        Parameters
+        ----------
+        wmin : float, u.Quantity
+           minimum wavelength
+        wmax : float, u.Quantity
+          maximum wavelength
+        filter_name
+        filter_file
+        flux_unit: synphot.units, u.Quantity
+
+        Returns
+        -------
+
+        """
+
+        if isinstance(wmin, u.Quantity):
+            wmin = wmin.to(u.Angstrom).value
+        if isinstance(wmax, u.Quantity):
+            wmin = wmax.to(u.Angstrom).value
+
+        if (filter_name is None) and (filter_file is None):
+            # this makes a bandpass out of wmin and wmax
+            try:
+                mid_point = 0.5 * (wmin + wmax)
+                width = np.abs(wmax - wmin)
+                filter_curve = SpectralElement(Box1D, amplitude=1, x_0=mid_point, width=width)
+
+            except ValueError("Please specify wmin/wmax or a filter"):
+                raise
+
+        elif filter_file is not None:
+            filter_curve = Passband.from_file(filename=filter_file)
+        elif filter_name is not None:
+            filter_curve = Passband(filter_name=filter_name)
+
+        else:
+            raise ValueError("Please define a filter curve or wavelength range")
+
+        flux = Observation(self, filter_curve).effstim(flux_unit=flux_unit)
+
+        return flux
+
     def add_noise(self, wmin, wmax):
         """
         Returns a spectra with a given S/N in the specified wavelength range
@@ -960,7 +1004,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         -------
 
         """
-        pass
+        raise NotImplementedError
 
     def _restore_attr(self, spextrum):
         """

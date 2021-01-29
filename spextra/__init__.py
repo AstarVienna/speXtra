@@ -5,7 +5,7 @@ from . import spextra
 from . import database
 from . import utils
 
-from .spextra import Spextrum, Passband, ExtinctionCurve, DEFAULT_FILTERS, DEFAULT_SPECTRA, DEFAULT_CURVES
+from .spextra import Spextrum, Passband, ExtinctionCurve, get_vega_spectrum, DEFAULT_FILTERS, DEFAULT_SPECTRA, DEFAULT_CURVES
 from .database import Database, SpecLibrary, FilterSystem, ExtCurvesLibrary, DefaultData
 from .utils import Config
 
