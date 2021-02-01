@@ -1,0 +1,43 @@
+# ESO ETC standard filters
+
+filter_system : etc
+
+instrument : etc
+
+title : Exposure Time Calculator filter set
+
+author : ESO
+
+source : https://www.eso.org/observing/etc/doc/skycalc/helpskycalc.html#mags
+
+spectral_coverage :
+  - vis
+  - nir
+  - mir
+
+data_type : ascii
+
+file_extension : .dat
+
+wave_unit : um
+
+wave_column_name : wavelength
+
+trans_column_name : transmission
+
+filters: # filtername
+  U :   U-band
+  B :   B-band
+  V :   V-band
+  R :   R-band
+  I :   I-band
+  Z :   Z-band
+  Y :   Y-band
+  J :   J-band
+  H :   H-band
+  K :   K-band
+  L :   L-band
+  M :   M-band
+  N :   N-band
+  Q :   Q-band
+    
