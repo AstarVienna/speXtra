@@ -155,9 +155,10 @@ class DefaultData:
     """
     def __init__(self, **kwargs):
 
-        self.default_filters_file = "default_filters.yml"
-        self.default_spectra_file = "default_spectra.yml"
-        self.default_curves_file = "default_curves.yml"
+        database = Database()
+        self.default_filters_file = database.abspath("default_filters.yml")
+        self.default_spectra_file = database.abspath("default_spectra.yml")
+        self.default_curves_file = database.abspath("default_curves.yml")
 
         self.filters = self.setdict(self.default_filters_file, **kwargs)
         self.spectra = self.setdict(self.default_spectra_file, **kwargs)

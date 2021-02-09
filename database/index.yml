@@ -4,7 +4,7 @@ libraries:
   ref       : A library of reference stars
   kc96      : Kinney-Calzetti Atlas
   pickles   : Pickles Stellar Library
-  dobos      : SDSS galaxy composite spectra
+  dobos     : SDSS galaxy composite spectra
   irtf      : IRTF spectral library
   agn       : AGN templates
   nebulae   : Emission line nebulae
@@ -13,10 +13,10 @@ libraries:
   sne       : Supernova Legacy Survey
   moehler   : flux/telluric standards with X-Shooter
   madden    : High-Resolution Spectra of Habitable Zone Planets
-  bosz/hr   :  BOSZ stellar atmosphere Grid - High Resolution
-  bosz/mr   :  BOSZ stellar atmosphere Grid - Medium Resolution
-  bosz/lr   :  BOSZ stellar atmosphere Grid - Low Resolution
-  assef     :  Low-resolution spectral templates for AGN and galaxies
+  bosz/hr   : BOSZ stellar atmosphere Grid - High Resolution
+  bosz/mr   : BOSZ stellar atmosphere Grid - Medium Resolution
+  bosz/lr   : BOSZ stellar atmosphere Grid - Low Resolution
+  assef     : Low-resolution spectral templates for AGN and galaxies
 
 # here go the extinction curves
 extinction_curves:
@@ -28,4 +28,5 @@ extinction_curves:
 filter_systems:
    elt/micado : MICADO filters
    elt/metis  : METIS filters
+   etc        : ESO ETC standard filters
 

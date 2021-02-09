@@ -10,7 +10,7 @@ import astropy.units as u
 from astropy.constants import c
 from synphot import SpectralElement, SourceSpectrum, units
 
-
+import spextra
 from spextra import Spextrum, Passband
 
 
@@ -141,6 +141,26 @@ class TestSpextrumInstances:
             scale_to_magnitude(amplitude=15*u.ABmag, filter_name="g").\
             redden("calzetti/starburst", Ebv=0.1)
         assert isinstance(sp, Spextrum)
+
+
+class TestGetMagnitudes:
+    """
+    Tests to make sure that magnitudes for similar filters are similar
+    """
+
+    @pytest.mark.parametrize("spec_name", ["vega", "sun", "brown/NGC5992"])
+    @pytest.mark.parametrize("filters", [["2MASS/2MASS.Ks", "elt/micado/Ks"],
+                                         ["J", "elt/micado/J"],
+                                         ["Generic/Bessell.B", "B"],
+                                         ])
+    def test_magnitudes(self, spec_name, filters):
+        sp = Spextrum(spec_name)
+        filter1 = filters[0]
+        filter2 = filters[1]
+        mag1 = sp.get_magnitude(filter_name=filter1)
+        mag2 = sp.get_magnitude(filter_name=filter2)
+
+        assert np.isclose(mag1.value, mag2.value, atol=0.3)
 
 
 class TestSpextrum:

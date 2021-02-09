@@ -43,7 +43,7 @@ class Passband(SpectralElement, FilterContainer):
     def __init__(self, filter_name=None, modelclass=None, **kwargs):
 
         if filter_name is not None:
-            if filter_name in DEFAULT_FILTERS.keys():
+            if filter_name in DEFAULT_FILTERS:
                 filter_name = DEFAULT_FILTERS[filter_name]
 
             try:
@@ -81,16 +81,15 @@ class Passband(SpectralElement, FilterContainer):
 
         # make try and except here to catch most problems
         if self.data_type == "fits":
-            meta, lam, trans = read_fits_spec(self.filename, ext=1,
-                                              wave_unit=self.wave_unit,
-                                              wave_col=self.wave_column_name, flux_col=self.trans_column_name)
+            meta, lam, trans = read_fits_spec(self.filename, ext=1, wave_unit=self.wave_unit)
+                                        #      wave_col=self.wave_column_name, flux_col=self.trans_column_name)
         elif self.data_type == "ascii":
-            meta, lam, trans = read_ascii_spec(self.filename,
-                                               wave_unit=self.wave_unit, flux_unit=self._internal_flux_unit,
-                                             #  wave_col=self.wave_column_name, flux_col=self.trans_column_name,
-                                               )
+            meta, lam, trans = read_ascii_spec(self.filename,  wave_unit=self.wave_unit)
+                                     #          wave_col=self.wave_column_name, flux_col=self.trans_column_name)
+                                             # , flux_unit=self._internal_flux_unit,
+        lam = lam.to(u.AA)
 
-        return meta, lam, trans
+        return meta, lam, trans.value
 
     @classmethod
     def from_vectors(cls, waves, trans, meta=None, wave_unit=u.AA):
@@ -164,6 +163,7 @@ class Passband(SpectralElement, FilterContainer):
         wave, trans = download_svo_filter(filter_name)
         meta = {"filter_name": filter_name, "source": "SVO"}
         self.filter_name = filter_name
+        self.wave_unit = u.AA
 
         return meta, wave, trans
 
@@ -896,8 +896,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
             unit = u.ABmag
 
         ref_spec = self.flat_spectrum(amplitude=0, system_name=system_name)
-        ref_flux = Observation(SourceSpectrum(modelclass=ref_spec),
-                               filter_curve).effstim(flux_unit=units.PHOTLAM)
+        ref_flux = Observation(ref_spec, filter_curve).effstim(flux_unit=units.PHOTLAM)
         real_flux = Observation(self, filter_curve).effstim(flux_unit=units.PHOTLAM)
         mag = -2.5*np.log10(real_flux.value/ref_flux.value)
 
