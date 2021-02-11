@@ -4,6 +4,7 @@ speXtra: A python tool to manage and manipulate astronomical spectra
 """
 import numbers
 import warnings
+import os
 
 import numpy as np
 from scipy.ndimage import gaussian_filter1d
@@ -20,6 +21,7 @@ from synphot import exceptions
 
 from .database import SpectrumContainer, FilterContainer, ExtCurveContainer, DefaultData
 from .utils import download_svo_filter
+
 
 
 __all__ = ["Spextrum", "Passband", "ExtinctionCurve",  "get_vega_spectrum"]
@@ -425,7 +427,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         return cls(modelclass=spec, origin=origin)
 
     @classmethod
-    def black_body_spectrum(cls, temperature=9500, amplitude=0, filter_name=None, filter_file=None):
+    def black_body_spectrum(cls, temperature=9500, amplitude=0, filter_curve=None):
         """
         Produce a blackbody spectrum for a given temperature and scale it to a magnitude
         in a filter
@@ -448,6 +450,8 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
                 - a generic filter name (see ``FILTER_DEFAULTS``)
                 - a spanish-vo filter service reference (e.g. ``"Paranal/HAWKI.Ks"``)
                 - a filter in the spextra database
+                - a filename with the filter file
+                - a ``Passband`` or ``synphot.SpectralElement`` object
 
         filter_file: str
                 A file with a transmission curve
@@ -460,9 +464,8 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         sp = cls(modelclass=BlackBody1D, temperature=temperature, origin=origin)
 
-        return sp.scale_to_magnitude(amplitude=amplitude,
-                                     filter_name=filter_name,
-                                     filter_file=filter_file)
+        return sp.scale_to_magnitude(amplitude=amplitude, filter_curve=filter_curve)
+
 
     @classmethod
     def powerlaw(cls, alpha=1, amplitude=0, filter_name=None, filter_file=None):
@@ -794,7 +797,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         return sp
 
-    def scale_to_magnitude(self, amplitude, filter_name=None, filter_file=None):
+    def scale_to_magnitude(self, amplitude, filter_curve=None):
         """
             Scales a Spectrum to a value in a filter
             copied from scopesim.effects.ter_curves.scale_spectrum with slight modifications
@@ -812,9 +815,11 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
             filter_name : str
                 Name of a filter from
-                - a generic filter name (see ``FILTER_DEFAULTS``)
+                - a generic filter name (see ``DEFAULT_FILTERS``)
                 - a spanish-vo filter service reference (e.g. ``"Paranal/HAWKI.Ks"``)
                 - a filter in the spextra database
+                - the path to a filename containing the curve (see ``Passband``)
+                - a ``Passband`` or ``synphot.SpectralElement`` instance
             filter_file: str
                 A file with a transmission curve
 
@@ -825,30 +830,32 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
                 Input spectrum scaled to the given amplitude in the given filter
         """
 
-        if filter_file is not None:
-            filter_curve = Passband.from_file(filename=filter_file)
+        if os.path.exists(filter_curve):
+            filter_curve = Passband.from_file(filename=filter_curve)
+        elif isinstance(filter_curve, (Passband, SpectralElement)):
+            filter_curve = filter_curve
         else:
-            filter_curve = Passband(filter_name=filter_name)
+            filter_curve = Passband(filter_curve)
 
         if isinstance(amplitude, u.Quantity):
             if amplitude.unit.physical_type == "spectral flux density":
                 if amplitude.unit != u.ABmag:
                     amplitude = amplitude.to(u.ABmag)
-                ref_spec = self.flat_spectrum(mag=amplitude.value, system_name="AB")
+                ref_spec = self.flat_spectrum(amplitude=amplitude.value, system_name="AB")
 
             elif amplitude.unit.physical_type == "spectral flux density wav":
                 if amplitude.unit != u.STmag:
                     amplitude = amplitude.to(u.STmag)
-                ref_spec = self.flat_spectrum(mag=amplitude.value, system_name="ST")
+                ref_spec = self.flat_spectrum(amplitude=amplitude.value, system_name="ST")
 
             elif amplitude.unit == u.mag:
-                ref_spec = self.flat_spectrum(mag=amplitude.value, system_name="Vega")
+                ref_spec = self.flat_spectrum(amplitude=amplitude.value, system_name="Vega")
 
             else:
                 raise ValueError("Units of amplitude must be one of "
                                  "[u.mag, u.ABmag, u.STmag]: {}".format(amplitude))
         else:
-            ref_spec = self.flat_spectrum(mag=amplitude, system_name="Vega")
+            ref_spec = self.flat_spectrum(amplitude=amplitude, system_name="Vega")
 
         ref_flux = Observation(SourceSpectrum(modelclass=ref_spec),
                                filter_curve).effstim(flux_unit=units.PHOTLAM)
@@ -860,19 +867,19 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         return sp
 
-    def get_magnitude(self, filter_name=None, filter_file=None, system_name="AB"):
+    def get_magnitude(self, filter_curve=None,  system_name="AB"):
         """
             Obtain the magnitude in filter for a user specified photometric system
 
             Parameters
             ----------
-            filter_name : str
+            filter_curve : str
                 Name of a filter from
-                - a generic filter name (see ``FILTER_DEFAULTS``)
+                - a generic filter name (see ``DEFAULT_FILTERS``)
                 - a spanish-vo filter service reference (e.g. ``"Paranal/HAWKI.Ks"``)
                 - a filter in the spextra database
-            filter_file: str
-                A file with a transmission curve
+                - the path to the file containing the filter (see ``Passband``)
+                - a ``Passband`` or ``synphot.SpectralElement`` object
             system_name: str
                 The photometric system Vega, AB or ST
 
@@ -882,11 +889,12 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
             spectrum : a Spextrum
                 Input spectrum scaled to the given amplitude in the given filter
         """
-
-        if filter_file is not None:
-            filter_curve = Passband.from_file(filename=filter_file)
+        if os.path.exists(filter_curve):
+            filter_curve = Passband.from_file(filename=filter_curve)
+        elif isinstance(filter_curve, (Passband, SpectralElement)):
+            filter_curve = filter_curve
         else:
-            filter_curve = Passband(filter_name=filter_name)
+            filter_curve = Passband(filter_curve)
 
         if system_name.lower() in ["vega"]:
             unit = u.mag
