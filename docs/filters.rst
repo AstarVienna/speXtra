@@ -53,3 +53,16 @@ METIS
 
 .. literalinclude:: ../database/filter_systems/elt/metis/index.yml
     :language: yaml
+
+----------------------------------------------------------------------
+
+Also the standard filters used by the ESO Exposure Time Calculator
+
+.. _etc:
+
+ETC
+===
+
+.. literalinclude:: ../database/filter_systems/etc/index.yml
+    :language: yaml
+

@@ -17,6 +17,7 @@ libraries:
   bosz/mr   : BOSZ stellar atmosphere Grid - Medium Resolution
   bosz/lr   : BOSZ stellar atmosphere Grid - Low Resolution
   assef     : Low-resolution spectral templates for AGN and galaxies
+  sky       : Paranal sky background spectra
 
 # here go the extinction curves
 extinction_curves:

@@ -1,0 +1,54 @@
+# Paranal Night Sky Spectra
+
+library_name : sky
+
+type : background
+
+title : Paranal Night Sky Spectra
+
+summary : |
+  This spectra have been generated with skycalc_ipy, an python interface to the ESO Skycalc,
+  at different resolutions (vLR: R800, LR: R4000, MR: R20000, HR: R100000)using standard
+  parameters. Wavelength steps are logaritmic so so resolution remains constant.    
+  Noinstrumental background is included. No scattered Moon light is included. Parameters
+  used for running skycalc_ipy are stored in the header of each table. 
+  
+  Tables also include values for transmission, but those aren't used in spextra and are 
+  provided for completeness
+  
+  Values for emission are in photons s-1 cm-2 angstrom-1 arcsec-2
+
+
+reference : https://www.eso.org/observing/etc/bin/gen/form?INS.MODE=swspectr+INS.NAME=SKYCALC
+
+link : https://skycalc-ipy.readthedocs.io/en/latest/
+
+spectral_coverage :
+  - uv
+  - vis
+  - nir
+  - mir
+
+resolution : 1
+
+wave_unit: angstrom
+
+flux_unit : photlam
+
+wave_column_name : wavelength
+
+flux_column_name : flux
+
+data_type: fits
+
+file_extension: .fits
+
+templates:    # comments
+  HR :  High Resolution, R=100000
+  MR :  Medium Resolution, R=20000
+  LR :  Low Resolution, R=4000
+  vLR : very Low Resolution, R=800
+  
+  
+  
+

@@ -61,7 +61,7 @@ class Passband(SpectralElement, FilterContainer):
                     print("filter %s doesn't exist" % filter_name)
 
         elif modelclass is not None:
-            SpectralElement.__init__(self, modelclass)
+            SpectralElement.__init__(self, modelclass, **kwargs)
         else:
             raise ValueError("please define a filter")
 
@@ -316,7 +316,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
             meta, lam, flux = read_ascii_spec(self.path,
                                               wave_unit=self.wave_unit, flux_unit=self.flux_unit)
 
-        return meta, lam, flux
+        return meta, lam.data * self.wave_unit, flux.data * self.flux_unit
 
     @classmethod
     def from_arrays(cls, waves, flux, meta=None, wave_unit=u.AA, flux_unit=units.FLAM):
@@ -857,14 +857,13 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         else:
             ref_spec = self.flat_spectrum(amplitude=amplitude, system_name="Vega")
 
-        ref_flux = Observation(SourceSpectrum(modelclass=ref_spec),
-                               filter_curve).effstim(flux_unit=units.PHOTLAM)
-        real_flux = Observation(SourceSpectrum(modelclass=self),
-                                filter_curve).effstim(flux_unit=units.PHOTLAM)
+        ref_flux = Observation(ref_spec, filter_curve).effstim(flux_unit=units.PHOTLAM)
+        real_flux = Observation(self, filter_curve).effstim(flux_unit=units.PHOTLAM)
 
         scale_factor = ref_flux / real_flux
         sp = self * scale_factor
 
+        sp = self.normalize(amplitude, band=filter_curve)
         return sp
 
     def get_magnitude(self, filter_curve=None,  system_name="AB"):
@@ -906,6 +905,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         ref_spec = self.flat_spectrum(amplitude=0, system_name=system_name)
         ref_flux = Observation(ref_spec, filter_curve).effstim(flux_unit=units.PHOTLAM)
         real_flux = Observation(self, filter_curve).effstim(flux_unit=units.PHOTLAM)
+
         mag = -2.5*np.log10(real_flux.value/ref_flux.value)
 
         return mag * unit

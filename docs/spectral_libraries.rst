@@ -135,3 +135,41 @@ High-Resolution Spectra of Habitable Zone Planets (example)
 
 .. literalinclude:: ../database/libraries/madden/index.yml
     :language: yaml
+
+
+.. _bosz_hr:
+
+BOSZ Stellar Atmosphere Grid (subset) - High Resolution
+--------------------------------------------------------
+
+.. literalinclude:: ../database/libraries/bosz/hr/index.yml
+    :language: yaml
+
+
+.. _bosz_mr:
+
+BOSZ Stellar Atmosphere Grid (subset) - Medium Resolution
+--------------------------------------------------------
+
+.. literalinclude:: ../database/libraries/bosz/mr/index.yml
+    :language: yaml
+
+.. _bosz_lr:
+
+BOSZ Stellar Atmosphere Grid (subset) - Low Resolution
+--------------------------------------------------------
+
+.. literalinclude:: ../database/libraries/bosz/lr/index.yml
+    :language: yaml
+
+------------------------------------------------------------
+
+Additionally, the Paranal sky emission spectra is also included
+
+.. _sky:
+
+Paranal Night Sky Spectra
+-------------------------
+
+.. literalinclude:: ../database/libraries/sky/index.yml
+    :language: yaml
