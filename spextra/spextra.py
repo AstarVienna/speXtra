@@ -267,7 +267,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
     """
 
-    def __init__(self, template_name=None, modelclass=None, origin=None, **kwargs):
+    def __init__(self, template_name=None, modelclass=None, **kwargs):
 
         if template_name is not None:
             if template_name in DEFAULT_SPECTRA:
@@ -275,19 +275,15 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
             SpectrumContainer.__init__(self, template_name)
             meta, lam, flux = self._loader()
-            SourceSpectrum.__init__(self, Empirical1D, points=lam, lookup_table=flux, meta=meta,   **kwargs)
+            SourceSpectrum.__init__(self, Empirical1D, points=lam, lookup_table=flux, meta=meta,  **kwargs)
 
-            self.origin = "origin:" + self.template
-          #  modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=flux, meta=meta)
+            self.origin = "origin: " + self.template
         elif modelclass is not None:
-           # modelclass = SourceSpectrum(modelclass=modelclass)
-            SourceSpectrum.__init__(self, modelclass, **kwargs)
-            self.origin = origin
+
+            SourceSpectrum.__init__(self, modelclass=modelclass, **kwargs)
 
         else:
             raise ValueError("please define a spectra")
-
-#        SourceSpectrum.__init__(self, modelclass, **kwargs)
 
     def _loader(self):
         """
@@ -316,7 +312,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
             meta, lam, flux = read_ascii_spec(self.path,
                                               wave_unit=self.wave_unit, flux_unit=self.flux_unit)
 
-        return meta, lam.data * self.wave_unit, flux.data * self.flux_unit
+        return meta, lam, flux
 
     @classmethod
     def from_arrays(cls, waves, flux, meta=None, wave_unit=u.AA, flux_unit=units.FLAM):
@@ -340,9 +336,10 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
             flux = flux * flux_unit
 
         modelclass = SourceSpectrum(Empirical1D, points=waves, lookup_table=flux, meta=meta)
-        origin = "origin: arrays"
 
-        return cls(modelclass=modelclass, origin=origin)
+        sp = cls(modelclass=modelclass)
+        sp.origin = repr(sp.model)
+        return sp
 
     @classmethod
     def from_file(cls, filename, **kwargs):
@@ -360,9 +357,10 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         """
         modelclass = SourceSpectrum.from_file(filename, **kwargs)
-        origin = "from file: " + filename
+        sp = cls(modelclass=modelclass)
+        sp.origin = filename
 
-        return cls(modelclass=modelclass, origin=origin)
+        return sp
 
     @classmethod
     def from_specutils(cls, spectrum_object):
@@ -384,12 +382,14 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         lam = spectrum_object.spectral_axis
         flux = spectrum_object.flux
         modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=flux, meta=meta)
-        origin = "origin: " + "specutils"
 
-        return cls(modelclass=modelclass)
+        sp = cls(modelclass=modelclass)
+        sp.origin = repr(spectrum_object)
+
+        return sp
 
     @classmethod
-    def flat_spectrum(cls, amplitude=0, system_name="AB", wavelengths=None):
+    def flat_spectrum(cls, amplitude=0, system_name="AB", waves=None):
         """
         Creates a flat spectrum in the preferred system scaled to a magnitude,
         default a zero magnitude spectrum
@@ -399,35 +399,37 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
             amplitude/magnitude of the reference spectrum, default=0
         system_name: AB, Vega or ST, default AB
 
-        wavelengths: The waveset of the reference spectrum if not Vega
+        waves: The waveset of the reference spectrum if not Vega
 
         Returns
         -------
         a Spextrum instance
         """
-        if wavelengths is None:  # set a default waveset with R~805
-            wavelengths, info = utils.generate_wavelengths(minwave=100, maxwave=50000, num=5000,
-                                                           log=True, wave_unit=u.AA)
+        if waves is None:  # set a default waveset with R~805
+            waves, info = utils.generate_wavelengths(minwave=100, maxwave=50000, num=5000,
+                                                     log=True, wave_unit=u.AA)
         if system_name.lower() in ["vega"]:
             spec = get_vega_spectrum()
             spec = spec * 10 ** (-0.4 * amplitude)
         elif system_name.lower() in ["ab"]:
-            spec = SourceSpectrum(ConstFlux1D, amplitude=amplitude * u.ABmag)
-            spec = SourceSpectrum(Empirical1D, points=wavelengths,
-                                  lookup_table=spec(wavelengths, flux_unit=u.ABmag))
+            const = ConstFlux1D(amplitude=amplitude*u.ABmag)
+            spec = cls(modelclass=Empirical1D, points=waves.value, lookup_table=const(waves.value))
+           # spec = SourceSpectrum(Empirical1D, points=wavelengths,
+           #                       lookup_table=spec(wavelengths, flux_unit=u.ABmag))
         elif system_name.lower() in ["st", "hst"]:
-            spec = SourceSpectrum(ConstFlux1D, amplitude=amplitude * u.STmag)
-            spec = SourceSpectrum(Empirical1D, points=wavelengths,
-                                  lookup_table=spec(wavelengths, flux_unit=u.STmag))
+            const = ConstFlux1D(amplitude=amplitude * u.STmag)
+            spec = cls(modelclass=Empirical1D, points=waves.value, lookup_table=const(waves.value))
+
         else:
             raise ValueError("only AB, ST and Vega systems are supported")
 
-        origin = "origin: flatspectrum with %s " % str(amplitude)
+        #sp = cls(modelclass=spec)
+        spec.origin = "<flat spectrum, amplitude %s in system %s>" % (str(amplitude), str(system_name))
 
-        return cls(modelclass=spec, origin=origin)
+        return spec
 
     @classmethod
-    def black_body_spectrum(cls, temperature=9500, amplitude=0, filter_curve=None):
+    def black_body_spectrum(cls, temperature=9500, amplitude=0, filter_curve=None, wavelengths=None):
         """
         Produce a blackbody spectrum for a given temperature and scale it to a magnitude
         in a filter
@@ -460,15 +462,26 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         -------
         a scaled black-body spectrum
         """
-        origin = "origin: Blackbody spectrum with %s and temperature %s" % (str(amplitude) , str(temperature))
 
-        sp = cls(modelclass=BlackBody1D, temperature=temperature, origin=origin)
+        if wavelengths is None:  # set a default waveset with R~805
+            wavelengths, info = utils.generate_wavelengths(minwave=100, maxwave=50000, num=5000,
+                                                            log=True, wave_unit=u.AA)
 
-        return sp.scale_to_magnitude(amplitude=amplitude, filter_curve=filter_curve)
+        bb = BlackBody1D(temperature=temperature)
+     #   spec = SourceSpectrum(
 
+        sp = cls(modelclass=Empirical1D, points=wavelengths, lookup_table=bb(wavelengths))
+
+
+        sp = sp.scale_to_magnitude(amplitude=amplitude, filter_curve=filter_curve)
+
+        print(hasattr(sp.model, "points"))
+        sp.origin = "Blackbody spectrum, amplitude %s and temperature %s" % (str(amplitude) , str(temperature))
+
+        return sp
 
     @classmethod
-    def powerlaw(cls, alpha=1, amplitude=0, filter_name=None, filter_file=None):
+    def powerlaw(cls, alpha=1, amplitude=0, filter_curve=None):
         """
         Return a power law spectrum F(lambda) ~ lambda^alpha scaled to a magnitude
         (amplitude) in an particular band
@@ -486,8 +499,12 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         """
         sp = cls(modelclass=PowerLawFlux1D, amplitude=amplitude, x_0=2000, alpha=alpha)
+        sp = sp.scale_to_magnitude(amplitude=amplitude, filter_curve=filter_curve)
 
-        return sp.scale_to_magnitude(amplitude=amplitude, filter_name=filter_name, filter_file=filter_file)
+        sp.origin = "Power law spectrum: slope %s, amplitude %s in filter %s" % \
+                    (str(alpha), str(amplitude), filter_curve)
+
+        return sp
 
     def cut(self, wmin, wmax):
         """
@@ -512,8 +529,8 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         wmax = wmax.to(u.AA)
         new_waves = self.waveset[(self.waveset > wmin) & (self.waveset < wmax)]
         sp = self(new_waves)
+        sp.meta.update({"wmin": wmin, "wmax": wmax})
 
-        # TODO: Copy meta here and add stuff
         return sp
 
     def redshift(self, z=0, vel=0):
@@ -541,10 +558,218 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         lam = self.waveset * (1 + z)
         flux = self(self.waveset)
         self.meta.update({"redshift": z})
-        modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=flux, meta=self.meta)
-        sp = self._restore_attr(Spextrum(modelclass=modelclass))
+        sp = Spextrum(modelclass=Empirical1D, points=lam, lookup_table=flux, meta=self.meta)
+        sp = self._restore_attr(sp)
 
         return sp
+
+    def scale_to_magnitude(self, amplitude, filter_curve=None):
+        """
+            Scales a Spectrum to a value in a filter
+            copied from scopesim.effects.ter_curves.scale_spectrum with slight modifications
+            Parameters
+            ----------
+            amplitude : ``astropy.Quantity``, float
+                The value that the spectrum should have in the given filter. Acceptable
+                astropy quantities are:
+                - u.mag : Vega magnitudes
+                - u.ABmag : AB magnitudes
+                - u.STmag : HST magnitudes
+                - u.Jy : Jansky per filter bandpass
+                Additionally the ``FLAM`` and ``FNU`` units from ``synphot.units`` can
+                be used when passing the quantity for ``amplitude``:
+
+            filter_name : str
+                Name of a filter from
+                - a generic filter name (see ``DEFAULT_FILTERS``)
+                - a spanish-vo filter service reference (e.g. ``"Paranal/HAWKI.Ks"``)
+                - a filter in the spextra database
+                - the path to a filename containing the curve (see ``Passband``)
+                - a ``Passband`` or ``synphot.SpectralElement`` instance
+            filter_file: str
+                A file with a transmission curve
+
+
+            Returns
+            -------
+            spectrum : a Spectrum
+                Input spectrum scaled to the given amplitude in the given filter
+        """
+
+        if os.path.exists(filter_curve):
+            filter_curve = Passband.from_file(filename=filter_curve)
+        elif isinstance(filter_curve, (Passband, SpectralElement)):
+            filter_curve = filter_curve
+        else:
+            filter_curve = Passband(filter_curve)
+
+        if isinstance(amplitude, u.Quantity):
+            if amplitude.unit.physical_type == "spectral flux density":
+                if amplitude.unit != u.ABmag:
+                    amplitude = amplitude.to(u.ABmag)
+                ref_spec = self.flat_spectrum(amplitude=amplitude.value, system_name="AB")
+
+            elif amplitude.unit.physical_type == "spectral flux density wav":
+                if amplitude.unit != u.STmag:
+                    amplitude = amplitude.to(u.STmag)
+                ref_spec = self.flat_spectrum(amplitude=amplitude.value, system_name="ST")
+
+            elif amplitude.unit == u.mag:
+                ref_spec = self.flat_spectrum(amplitude=amplitude.value, system_name="Vega")
+
+            else:
+                raise ValueError("Units of amplitude must be one of "
+                                 "[u.mag, u.ABmag, u.STmag]: {}".format(amplitude))
+        else:
+            ref_spec = self.flat_spectrum(amplitude=amplitude, system_name="Vega")
+
+        ref_flux = Observation(ref_spec, filter_curve).effstim(flux_unit=units.PHOTLAM)
+        real_flux = Observation(self, filter_curve).effstim(flux_unit=units.PHOTLAM)
+
+        scale_factor = ref_flux / real_flux
+        sp = self * scale_factor
+
+#        sp = self.normalize(amplitude, band=filter_curve)
+        return sp
+
+    def get_magnitude(self, filter_curve=None,  system_name="AB"):
+        """
+            Obtain the magnitude in filter for a user specified photometric system
+
+            Parameters
+            ----------
+            filter_curve : str
+                Name of a filter from
+                - a generic filter name (see ``DEFAULT_FILTERS``)
+                - a spanish-vo filter service reference (e.g. ``"Paranal/HAWKI.Ks"``)
+                - a filter in the spextra database
+                - the path to the file containing the filter (see ``Passband``)
+                - a ``Passband`` or ``synphot.SpectralElement`` object
+            system_name: str
+                The photometric system Vega, AB or ST
+
+
+            Returns
+            -------
+            spectrum : a Spextrum
+                Input spectrum scaled to the given amplitude in the given filter
+        """
+        if os.path.exists(filter_curve):
+            filter_curve = Passband.from_file(filename=filter_curve)
+        elif isinstance(filter_curve, (Passband, SpectralElement)):
+            filter_curve = filter_curve
+        else:
+            filter_curve = Passband(filter_curve)
+
+        if system_name.lower() in ["vega"]:
+            unit = u.mag
+        elif system_name.lower() in ["st", "hst"]:
+            unit = u.STmag
+        else:
+            unit = u.ABmag
+
+        ref_spec = self.flat_spectrum(amplitude=0, system_name=system_name)
+        ref_flux = Observation(ref_spec, filter_curve).effstim(flux_unit=units.PHOTLAM)
+        real_flux = Observation(self, filter_curve).effstim(flux_unit=units.PHOTLAM)
+
+        mag = -2.5*np.log10(real_flux.value/ref_flux.value)
+
+        return mag * unit
+
+    def photons_in_range(self, wmin=None, wmax=None, area=1*u.cm**2,
+                         filter_name=None, filter_file=None):
+        """
+        Return the number of photons between wave_min and wave_max or within
+        a bandpass (filter)
+
+        Parameters
+        ----------
+        wmin :
+            [Angstrom]
+        wmax :
+            [Angstrom]
+        area : u.Quantity
+            [cm2]
+        filter_name :
+        filter_file :
+
+        Returns
+        -------
+        counts : u.Quantity array
+
+        """
+        if isinstance(area, u.Quantity):
+            area = area.to(u.cm ** 2).value  #
+        if isinstance(wmin, u.Quantity):
+            wmin = wmin.to(u.Angstrom).value
+        if isinstance(wmax, u.Quantity):
+            wmin = wmax.to(u.Angstrom).value
+
+        if (filter_name is None) and (filter_file is None):
+            # this makes a bandpass out of wmin and wmax
+            try:
+                mid_point = 0.5 * (wmin + wmax)
+                width = abs(wmax - wmin)
+                filter_curve = SpectralElement(Box1D, amplitude=1, x_0=mid_point, width=width)
+            except ValueError("Please specify wmin/wmax or a filter"):
+                raise
+
+        elif filter_file is not None:
+            filter_curve = Passband.from_file(filename=filter_file)
+        else:
+            filter_curve = Passband(filter_name=filter_name)
+
+        obs = Observation(self, filter_curve)
+        counts = obs.countrate(area=area * u.cm ** 2)
+
+        return counts
+
+    def get_flux(self, wmin=None, wmax=None, filter_name=None, filter_file=None, flux_unit=units.FLAM):
+        """
+        Return the flux within a passband
+
+        Parameters
+        ----------
+        wmin : float, u.Quantity
+           minimum wavelength
+        wmax : float, u.Quantity
+          maximum wavelength
+        filter_name
+        filter_file
+        flux_unit: synphot.units, u.Quantity
+
+        Returns
+        -------
+
+        """
+
+        if isinstance(wmin, u.Quantity):
+            wmin = wmin.to(u.Angstrom).value
+        if isinstance(wmax, u.Quantity):
+            wmin = wmax.to(u.Angstrom).value
+
+        if (filter_name is None) and (filter_file is None):
+            # this makes a bandpass out of wmin and wmax
+            try:
+                mid_point = 0.5 * (wmin + wmax)
+                width = np.abs(wmax - wmin)
+                filter_curve = SpectralElement(Box1D, amplitude=1, x_0=mid_point, width=width)
+
+            except ValueError("Please specify wmin/wmax or a filter"):
+                raise
+
+        elif filter_file is not None:
+            filter_curve = Passband.from_file(filename=filter_file)
+        elif filter_name is not None:
+            filter_curve = Passband(filter_name=filter_name)
+
+        else:
+            raise ValueError("Please define a filter curve or wavelength range")
+
+        flux = Observation(self, filter_curve).effstim(flux_unit=flux_unit)
+
+        return flux
+
 
     def add_emi_lines(self, center, fwhm, flux):
         """
@@ -626,9 +851,9 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         fwhm = np.array([fwhm]).flatten()
         sp = self  #  .__class__(modelclass=self.model)
 
-        sp.meta.update({"em_lines": {"center": list(centers),
+        sp.meta.update({"em_lines": {"center": list(center),
                                      "ew": list(ew),
-                                     "fwhm": list(fwhms)}})
+                                     "fwhm": list(fwhm)}})
 
         for c, e, f in zip(center, ew, fwhm):
             sign = -1 * np.sign(e)  # to keep the convention that EL are negative and ABS are positive
@@ -792,217 +1017,10 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         self.meta.update({"KERNEL_SIZE": sigma.value})
         modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=smoothed_flux, meta=self.meta)
-        sp = Spextrum(modelclass=modelclass)
-        sp = sp._restore_attr(sp)
+        sp = self._restore_attr(Spextrum(modelclass=modelclass))
 
         return sp
 
-    def scale_to_magnitude(self, amplitude, filter_curve=None):
-        """
-            Scales a Spectrum to a value in a filter
-            copied from scopesim.effects.ter_curves.scale_spectrum with slight modifications
-            Parameters
-            ----------
-            amplitude : ``astropy.Quantity``, float
-                The value that the spectrum should have in the given filter. Acceptable
-                astropy quantities are:
-                - u.mag : Vega magnitudes
-                - u.ABmag : AB magnitudes
-                - u.STmag : HST magnitudes
-                - u.Jy : Jansky per filter bandpass
-                Additionally the ``FLAM`` and ``FNU`` units from ``synphot.units`` can
-                be used when passing the quantity for ``amplitude``:
-
-            filter_name : str
-                Name of a filter from
-                - a generic filter name (see ``DEFAULT_FILTERS``)
-                - a spanish-vo filter service reference (e.g. ``"Paranal/HAWKI.Ks"``)
-                - a filter in the spextra database
-                - the path to a filename containing the curve (see ``Passband``)
-                - a ``Passband`` or ``synphot.SpectralElement`` instance
-            filter_file: str
-                A file with a transmission curve
-
-
-            Returns
-            -------
-            spectrum : a Spectrum
-                Input spectrum scaled to the given amplitude in the given filter
-        """
-
-        if os.path.exists(filter_curve):
-            filter_curve = Passband.from_file(filename=filter_curve)
-        elif isinstance(filter_curve, (Passband, SpectralElement)):
-            filter_curve = filter_curve
-        else:
-            filter_curve = Passband(filter_curve)
-
-        if isinstance(amplitude, u.Quantity):
-            if amplitude.unit.physical_type == "spectral flux density":
-                if amplitude.unit != u.ABmag:
-                    amplitude = amplitude.to(u.ABmag)
-                ref_spec = self.flat_spectrum(amplitude=amplitude.value, system_name="AB")
-
-            elif amplitude.unit.physical_type == "spectral flux density wav":
-                if amplitude.unit != u.STmag:
-                    amplitude = amplitude.to(u.STmag)
-                ref_spec = self.flat_spectrum(amplitude=amplitude.value, system_name="ST")
-
-            elif amplitude.unit == u.mag:
-                ref_spec = self.flat_spectrum(amplitude=amplitude.value, system_name="Vega")
-
-            else:
-                raise ValueError("Units of amplitude must be one of "
-                                 "[u.mag, u.ABmag, u.STmag]: {}".format(amplitude))
-        else:
-            ref_spec = self.flat_spectrum(amplitude=amplitude, system_name="Vega")
-
-        ref_flux = Observation(ref_spec, filter_curve).effstim(flux_unit=units.PHOTLAM)
-        real_flux = Observation(self, filter_curve).effstim(flux_unit=units.PHOTLAM)
-
-        scale_factor = ref_flux / real_flux
-        sp = self * scale_factor
-
-        sp = self.normalize(amplitude, band=filter_curve)
-        return sp
-
-    def get_magnitude(self, filter_curve=None,  system_name="AB"):
-        """
-            Obtain the magnitude in filter for a user specified photometric system
-
-            Parameters
-            ----------
-            filter_curve : str
-                Name of a filter from
-                - a generic filter name (see ``DEFAULT_FILTERS``)
-                - a spanish-vo filter service reference (e.g. ``"Paranal/HAWKI.Ks"``)
-                - a filter in the spextra database
-                - the path to the file containing the filter (see ``Passband``)
-                - a ``Passband`` or ``synphot.SpectralElement`` object
-            system_name: str
-                The photometric system Vega, AB or ST
-
-
-            Returns
-            -------
-            spectrum : a Spextrum
-                Input spectrum scaled to the given amplitude in the given filter
-        """
-        if os.path.exists(filter_curve):
-            filter_curve = Passband.from_file(filename=filter_curve)
-        elif isinstance(filter_curve, (Passband, SpectralElement)):
-            filter_curve = filter_curve
-        else:
-            filter_curve = Passband(filter_curve)
-
-        if system_name.lower() in ["vega"]:
-            unit = u.mag
-        elif system_name.lower() in ["st", "hst"]:
-            unit = u.STmag
-        else:
-            unit = u.ABmag
-
-        ref_spec = self.flat_spectrum(amplitude=0, system_name=system_name)
-        ref_flux = Observation(ref_spec, filter_curve).effstim(flux_unit=units.PHOTLAM)
-        real_flux = Observation(self, filter_curve).effstim(flux_unit=units.PHOTLAM)
-
-        mag = -2.5*np.log10(real_flux.value/ref_flux.value)
-
-        return mag * unit
-
-    def photons_in_range(self, wmin=None, wmax=None, area=1*u.cm**2,
-                         filter_name=None, filter_file=None):
-        """
-        Return the number of photons between wave_min and wave_max or within
-        a bandpass (filter)
-
-        Parameters
-        ----------
-        wmin :
-            [Angstrom]
-        wmax :
-            [Angstrom]
-        area : u.Quantity
-            [cm2]
-        filter_name :
-        filter_file :
-
-        Returns
-        -------
-        counts : u.Quantity array
-
-        """
-        if isinstance(area, u.Quantity):
-            area = area.to(u.cm ** 2).value  #
-        if isinstance(wmin, u.Quantity):
-            wmin = wmin.to(u.Angstrom).value
-        if isinstance(wmax, u.Quantity):
-            wmin = wmax.to(u.Angstrom).value
-
-        if (filter_name is None) and (filter_file is None):
-            # this makes a bandpass out of wmin and wmax
-            try:
-                mid_point = 0.5 * (wmin + wmax)
-                width = abs(wmax - wmin)
-                filter_curve = SpectralElement(Box1D, amplitude=1, x_0=mid_point, width=width)
-            except ValueError("Please specify wmin/wmax or a filter"):
-                raise
-
-        elif filter_file is not None:
-            filter_curve = Passband.from_file(filename=filter_file)
-        else:
-            filter_curve = Passband(filter_name=filter_name)
-
-        obs = Observation(self, filter_curve)
-        counts = obs.countrate(area=area * u.cm ** 2)
-
-        return counts
-
-    def get_flux(self, wmin=None, wmax=None, filter_name=None, filter_file=None, flux_unit=units.FLAM):
-        """
-        Return the flux within a passband
-
-        Parameters
-        ----------
-        wmin : float, u.Quantity
-           minimum wavelength
-        wmax : float, u.Quantity
-          maximum wavelength
-        filter_name
-        filter_file
-        flux_unit: synphot.units, u.Quantity
-
-        Returns
-        -------
-
-        """
-
-        if isinstance(wmin, u.Quantity):
-            wmin = wmin.to(u.Angstrom).value
-        if isinstance(wmax, u.Quantity):
-            wmin = wmax.to(u.Angstrom).value
-
-        if (filter_name is None) and (filter_file is None):
-            # this makes a bandpass out of wmin and wmax
-            try:
-                mid_point = 0.5 * (wmin + wmax)
-                width = np.abs(wmax - wmin)
-                filter_curve = SpectralElement(Box1D, amplitude=1, x_0=mid_point, width=width)
-
-            except ValueError("Please specify wmin/wmax or a filter"):
-                raise
-
-        elif filter_file is not None:
-            filter_curve = Passband.from_file(filename=filter_file)
-        elif filter_name is not None:
-            filter_curve = Passband(filter_name=filter_name)
-
-        else:
-            raise ValueError("Please define a filter curve or wavelength range")
-
-        flux = Observation(self, filter_curve).effstim(flux_unit=flux_unit)
-
-        return flux
 
     def add_noise(self, wmin, wmax):
         """
@@ -1086,7 +1104,9 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
     def __repr__(self):
 
-        return self.origin
+        rep = "origin " + str(self.origin)
+
+        return rep
 #------------------------------ END    -------------------------------------------
 
 
