@@ -80,9 +80,9 @@ class TestSpextrumInstances:
         sp2 = sp.add_abs_lines([5000, 6000], [15, 20], [10, 12])
         assert isinstance(sp2, Spextrum)
 
-    @pytest.mark.parametrize("system_name", ["ab", "st", "vega"])
-    def test_flat_spectrum(self, system_name):
-        sp = Spextrum.flat_spectrum(amplitude=10, system_name=system_name)
+    @pytest.mark.parametrize("unit", [u.mag, u.STmag, u.ABmag])
+    def test_flat_spectrum(self, unit):
+        sp = Spextrum.flat_spectrum(amplitude=10*unit)
         assert isinstance(sp, Spextrum)
 
     def test_mul_with_scalar(self, sp=sp):
@@ -152,11 +152,11 @@ class TestSpextrum:
         with pytest.raises(ValueError) as e_info:
             sp = Spextrum("kc96/wrong_name")
 
-    @pytest.mark.parametrize("system_name", ["ab", "st", "vega"])
-    def test_ref_spectrum_is_right(self, system_name):
-        sp1 = Spextrum.flat_spectrum(amplitude=10, system_name=system_name)
-        sp2 = Spextrum.flat_spectrum(amplitude=11, system_name=system_name)
-        if system_name == "vega":
+    @pytest.mark.parametrize("unit", [u.mag, u.STmag, u.ABmag])
+    def test_ref_spectrum_is_right(self, unit):
+        sp1 = Spextrum.flat_spectrum(amplitude=10*unit)
+        sp2 = Spextrum.flat_spectrum(amplitude=11*unit)
+        if unit == u.mag:
             flux1 = sp1(sp1.waveset[(sp1.waveset.value > 7000 - 200) &
                                     (sp1.waveset.value < 7000 + 200)]).value
             flux2 = sp2(sp2.waveset[(sp2.waveset.value > 7000 - 200) &
@@ -205,7 +205,7 @@ class TestSpextrum:
                    "H":  1.39,
                    "Ks": 1.85}
 
-        sp = Spextrum.flat_spectrum(amplitude=0, system_name="AB")
+        sp = Spextrum.flat_spectrum(amplitude=0*u.ABmag)
 
         magAB = sp.get_magnitude(filt, system_name="AB")
         magVega = sp.get_magnitude(filt, system_name="vega")

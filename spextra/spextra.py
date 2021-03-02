@@ -389,17 +389,19 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         return sp
 
     @classmethod
-    def flat_spectrum(cls, amplitude=0, system_name="AB", waves=None):
+    def flat_spectrum(cls, amplitude=0, waves=None):
         """
         Creates a flat spectrum in the preferred system scaled to a magnitude,
         default a zero magnitude spectrum
         Parameters
         ----------
-        amplitude: float,
+        amplitude: float, u.Quantity
             amplitude/magnitude of the reference spectrum, default=0
-        system_name: AB, Vega or ST, default AB
+            default is u.ABmag
+            for vega use u.mag or ``synphot.units.VEGAMAG``
 
         waves: The waveset of the reference spectrum if not Vega
+           if not provided they will be created at a resolution of R~800
 
         Returns
         -------
@@ -408,28 +410,25 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         if waves is None:  # set a default waveset with R~805
             waves, info = utils.generate_wavelengths(minwave=100, maxwave=50000, num=5000,
                                                      log=True, wave_unit=u.AA)
-        if system_name.lower() in ["vega"]:
+
+        if isinstance(amplitude, u.Quantity) is False:
+            amplitude = amplitude*u.ABmag
+
+        if amplitude.unit is u.Unit("mag") or amplitude.unit is u.Unit("vegamag"):
             spec = get_vega_spectrum()
-            spec = spec * 10 ** (-0.4 * amplitude)
-        elif system_name.lower() in ["ab"]:
-            const = ConstFlux1D(amplitude=amplitude*u.ABmag)
-            spec = cls(modelclass=Empirical1D, points=waves.value, lookup_table=const(waves.value))
-           # spec = SourceSpectrum(Empirical1D, points=wavelengths,
-           #                       lookup_table=spec(wavelengths, flux_unit=u.ABmag))
-        elif system_name.lower() in ["st", "hst"]:
-            const = ConstFlux1D(amplitude=amplitude * u.STmag)
-            spec = cls(modelclass=Empirical1D, points=waves.value, lookup_table=const(waves.value))
-
+            spec = spec * 10 ** (-0.4 * amplitude.value)
+            system_name = amplitude.unit
         else:
-            raise ValueError("only AB, ST and Vega systems are supported")
+            const = ConstFlux1D(amplitude=amplitude)
+            spec = cls(modelclass=Empirical1D, points=waves.value, lookup_table=const(waves.value))
+            system_name = amplitude.unit
 
-        #sp = cls(modelclass=spec)
         spec.origin = "<flat spectrum, amplitude %s in system %s>" % (str(amplitude), str(system_name))
 
         return spec
 
     @classmethod
-    def black_body_spectrum(cls, temperature=9500, amplitude=0, filter_curve=None, wavelengths=None):
+    def black_body_spectrum(cls, temperature=9500, amplitude=0, filter_curve=None, waves=None):
         """
         Produce a blackbody spectrum for a given temperature and scale it to a magnitude
         in a filter
@@ -447,7 +446,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
                 Additionally the ``FLAM`` and ``FNU`` units from ``synphot.units`` can
                 be used when passing the quantity for ``amplitude``:
 
-        filter_name : str
+        filter_curve : str
                 Name of a filter from
                 - a generic filter name (see ``FILTER_DEFAULTS``)
                 - a spanish-vo filter service reference (e.g. ``"Paranal/HAWKI.Ks"``)
@@ -455,50 +454,62 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
                 - a filename with the filter file
                 - a ``Passband`` or ``synphot.SpectralElement`` object
 
-        filter_file: str
-                A file with a transmission curve
 
         Returns
         -------
         a scaled black-body spectrum
         """
 
-        if wavelengths is None:  # set a default waveset with R~805
-            wavelengths, info = utils.generate_wavelengths(minwave=100, maxwave=50000, num=5000,
+        if waves is None:  # set a default waveset with R~805
+            waves, info = utils.generate_wavelengths(minwave=100, maxwave=50000, num=5000,
                                                             log=True, wave_unit=u.AA)
 
+        if isinstance(amplitude, u.Quantity) is False:
+            amplitude = amplitude*u.ABmag
+
         bb = BlackBody1D(temperature=temperature)
-     #   spec = SourceSpectrum(
 
-        sp = cls(modelclass=Empirical1D, points=wavelengths, lookup_table=bb(wavelengths))
-
-
+        sp = cls(modelclass=Empirical1D, points=waves, lookup_table=bb(waves))
         sp = sp.scale_to_magnitude(amplitude=amplitude, filter_curve=filter_curve)
-
-        print(hasattr(sp.model, "points"))
-        sp.origin = "Blackbody spectrum, amplitude %s and temperature %s" % (str(amplitude) , str(temperature))
+        sp.origin = "Blackbody spectrum, amplitude %s and temperature %s" % (str(amplitude), str(temperature))
 
         return sp
 
     @classmethod
-    def powerlaw(cls, alpha=1, amplitude=0, filter_curve=None):
+    def powerlaw(cls, alpha=1, x_0=5000, amplitude=0, filter_curve=None, waves=None):
         """
         Return a power law spectrum F(lambda) ~ lambda^alpha scaled to a magnitude
         (amplitude) in an particular band
 
         Parameters
         ----------
-        alpha
-        amplitude
-        filter_name
-        filter_file
+        alpha : The spectral slope
+        x_0 : float, u.Quantity
+           Pivot wavelength
+        amplitude : float, u.Quantity
+            normalize the spectrum to that quantity
+        filter_curve : str
+                Name of a filter from
+                - a generic filter name (see ``FILTER_DEFAULTS``)
+                - a spanish-vo filter service reference (e.g. ``"Paranal/HAWKI.Ks"``)
+                - a filter in the spextra database
+                - a filename with the filter file
+                - a ``Passband`` or ``synphot.SpectralElement`` object
 
-        TODO: definition of x0 as filter pivot wavelength
         Returns
         -------
 
         """
-        sp = cls(modelclass=PowerLawFlux1D, amplitude=amplitude, x_0=2000, alpha=alpha)
+        if waves is None:  # set a default waveset with R~805
+            waves, info = utils.generate_wavelengths(minwave=100, maxwave=50000, num=5000,
+                                                            log=True, wave_unit=u.AA)
+
+        if isinstance(amplitude, u.Quantity) is False:
+            amplitude = amplitude*u.ABmag
+
+        pl = PowerLawFlux1D(amplitude, alpha=alpha, x_0=x_0, amplitude=amplitude)
+        sp = cls(modelclass=Empirical1D, points=waves, lookup_table=pl(waves))
+
         sp = sp.scale_to_magnitude(amplitude=amplitude, filter_curve=filter_curve)
 
         sp.origin = "Power law spectrum: slope %s, amplitude %s in filter %s" % \
@@ -603,25 +614,29 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         else:
             filter_curve = Passband(filter_curve)
 
-        if isinstance(amplitude, u.Quantity):
-            if amplitude.unit.physical_type == "spectral flux density":
-                if amplitude.unit != u.ABmag:
-                    amplitude = amplitude.to(u.ABmag)
-                ref_spec = self.flat_spectrum(amplitude=amplitude.value, system_name="AB")
+        if isinstance(amplitude, u.Quantity) is False:
+            amplitude = amplitude*u.ABmag
 
-            elif amplitude.unit.physical_type == "spectral flux density wav":
-                if amplitude.unit != u.STmag:
-                    amplitude = amplitude.to(u.STmag)
-                ref_spec = self.flat_spectrum(amplitude=amplitude.value, system_name="ST")
 
-            elif amplitude.unit == u.mag:
-                ref_spec = self.flat_spectrum(amplitude=amplitude.value, system_name="Vega")
+       #     if amplitude.unit.physical_type == "spectral flux density":
+       #         if amplitude.unit != u.ABmag:
+       #             amplitude = amplitude.to(u.ABmag)
+       #         ref_spec = self.flat_spectrum(amplitude=amplitude.value, system_name="AB")
 
-            else:
-                raise ValueError("Units of amplitude must be one of "
-                                 "[u.mag, u.ABmag, u.STmag]: {}".format(amplitude))
-        else:
-            ref_spec = self.flat_spectrum(amplitude=amplitude, system_name="Vega")
+        #    elif amplitude.unit.physical_type == "spectral flux density wav":
+       #         if amplitude.unit != u.STmag:
+       #             amplitude = amplitude.to(u.STmag)
+       #         ref_spec = self.flat_spectrum(amplitude=amplitude.value, system_name="ST")
+
+#            elif amplitude.unit == u.mag:
+ #               ref_spec = self.flat_spectrum(amplitude=amplitude.value, system_name="Vega")
+
+  #          else:
+   #             raise ValueError("Units of amplitude must be one of "
+    #                             "[u.mag, u.ABmag, u.STmag]: {}".format(amplitude))
+    #    else:
+
+        ref_spec = self.flat_spectrum(amplitude=amplitude)
 
         ref_flux = Observation(ref_spec, filter_curve).effstim(flux_unit=units.PHOTLAM)
         real_flux = Observation(self, filter_curve).effstim(flux_unit=units.PHOTLAM)
@@ -629,7 +644,6 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         scale_factor = ref_flux / real_flux
         sp = self * scale_factor
 
-#        sp = self.normalize(amplitude, band=filter_curve)
         return sp
 
     def get_magnitude(self, filter_curve=None,  system_name="AB"):
@@ -668,7 +682,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         else:
             unit = u.ABmag
 
-        ref_spec = self.flat_spectrum(amplitude=0, system_name=system_name)
+        ref_spec = self.flat_spectrum(amplitude=0*unit)
         ref_flux = Observation(ref_spec, filter_curve).effstim(flux_unit=units.PHOTLAM)
         real_flux = Observation(self, filter_curve).effstim(flux_unit=units.PHOTLAM)
 
