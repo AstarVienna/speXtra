@@ -13,3 +13,18 @@ the data on demand.
 Changing the Data Directory
 ===========================
 
+Sometimes might be necessary to change the data directory for better accessibility.
+This can be done by using the following commands
+
+.. code-block:: python
+
+   from spextra.utils import Conf
+
+   conf = Conf(datadir="path/to/new/datadir")
+   print(conf.get_data_dir())
+
+   # To set it back to the default
+
+   Conf(datadir=conf.default_data_dir)
+
+

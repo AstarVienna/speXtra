@@ -691,7 +691,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         return mag * unit
 
     def photons_in_range(self, wmin=None, wmax=None, area=1*u.cm**2,
-                         filter_name=None, filter_file=None):
+                         filter_curve=None):
         """
         Return the number of photons between wave_min and wave_max or within
         a bandpass (filter)
@@ -704,8 +704,13 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
             [Angstrom]
         area : u.Quantity
             [cm2]
-        filter_name :
-        filter_file :
+        filter_curve : str
+                Name of a filter from
+                - a generic filter name (see ``DEFAULT_FILTERS``)
+                - a spanish-vo filter service reference (e.g. ``"Paranal/HAWKI.Ks"``)
+                - a filter in the spextra database
+                - the path to the file containing the filter (see ``Passband``)
+                - a ``Passband`` or ``synphot.SpectralElement`` object
 
         Returns
         -------
@@ -719,7 +724,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         if isinstance(wmax, u.Quantity):
             wmin = wmax.to(u.Angstrom).value
 
-        if (filter_name is None) and (filter_file is None):
+        if filter_curve is None:
             # this makes a bandpass out of wmin and wmax
             try:
                 mid_point = 0.5 * (wmin + wmax)
@@ -728,17 +733,19 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
             except ValueError("Please specify wmin/wmax or a filter"):
                 raise
 
-        elif filter_file is not None:
-            filter_curve = Passband.from_file(filename=filter_file)
+        elif os.path.exists(filter_curve):
+            filter_curve = Passband.from_file(filename=filter_curve)
+        elif isinstance(filter_curve, (Passband, SpectralElement)):
+            filter_curve = filter_curve
         else:
-            filter_curve = Passband(filter_name=filter_name)
+            filter_curve = Passband(filter_curve)
 
         obs = Observation(self, filter_curve)
         counts = obs.countrate(area=area * u.cm ** 2)
 
         return counts
 
-    def get_flux(self, wmin=None, wmax=None, filter_name=None, filter_file=None, flux_unit=units.FLAM):
+    def get_flux(self, wmin=None, wmax=None, filter_curve=None, flux_unit=units.FLAM):
         """
         Return the flux within a passband
 
@@ -748,8 +755,13 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
            minimum wavelength
         wmax : float, u.Quantity
           maximum wavelength
-        filter_name
-        filter_file
+        filter_curve : str
+                Name of a filter from
+                - a generic filter name (see ``DEFAULT_FILTERS``)
+                - a spanish-vo filter service reference (e.g. ``"Paranal/HAWKI.Ks"``)
+                - a filter in the spextra database
+                - the path to the file containing the filter (see ``Passband``)
+                - a ``Passband`` or ``synphot.SpectralElement`` object
         flux_unit: synphot.units, u.Quantity
 
         Returns
@@ -762,23 +774,19 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         if isinstance(wmax, u.Quantity):
             wmin = wmax.to(u.Angstrom).value
 
-        if (filter_name is None) and (filter_file is None):
+        if filter_curve is None:
             # this makes a bandpass out of wmin and wmax
             try:
-                mid_point = 0.5 * (wmin + wmax)
-                width = np.abs(wmax - wmin)
-                filter_curve = SpectralElement(Box1D, amplitude=1, x_0=mid_point, width=width)
+                filter_curve = Passband.square(wmin=wmin, wmax=wmax)
 
             except ValueError("Please specify wmin/wmax or a filter"):
                 raise
-
-        elif filter_file is not None:
-            filter_curve = Passband.from_file(filename=filter_file)
-        elif filter_name is not None:
-            filter_curve = Passband(filter_name=filter_name)
-
+        elif os.path.exists(filter_curve):
+            filter_curve = Passband.from_file(filename=filter_curve)
+        elif isinstance(filter_curve, (Passband, SpectralElement)):
+            filter_curve = filter_curve
         else:
-            raise ValueError("Please define a filter curve or wavelength range")
+            filter_curve = Passband(filter_curve)
 
         flux = Observation(self, filter_curve).effstim(flux_unit=flux_unit)
 
@@ -816,10 +824,10 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         centers = np.array([center]).flatten()
         fluxes = np.array([flux]).flatten()
         fwhms = np.array([fwhm]).flatten()
-        sp = self #Spextrum(modelclass=self.model)
+        sp = self
         sp.meta.update({"em_lines": {"center": list(centers),
-                                   "flux": list(fluxes),
-                                   "fwhm": list(fwhms)}})
+                                     "flux": list(fluxes),
+                                     "fwhm": list(fwhms)}})
 
         for c, f, w in zip(center, flux, fwhm):
 
@@ -1030,8 +1038,8 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         smoothed_flux = gaussian_filter1d(flux, conv_sigma.value)
 
         self.meta.update({"KERNEL_SIZE": sigma.value})
-        modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=smoothed_flux, meta=self.meta)
-        sp = self._restore_attr(Spextrum(modelclass=modelclass))
+        smoothed = Empirical1D(points=lam, lookup_table=smoothed_flux, meta=self.meta)
+        sp = self._restore_attr(Spextrum(modelclass=smoothed))
 
         return sp
 
