@@ -42,6 +42,7 @@ to commonly used spectral templates, extinction curves and filters.
    spectral_libraries
    extinction_curves
    filters
+   package
 
 
 

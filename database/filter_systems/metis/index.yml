@@ -24,7 +24,7 @@ wave_column_name : wavelength
 trans_column_name : transmission
 
 filters: # filtername
-  Br_alpha :              Br_alpha 	
+  Br_alpha :          Br_alpha
   Br_alpha_ref :	  Br_alpha_ref    
   CO_1-0_ice :		  CO_1-0_ice 	
   CO_ref :		  CO_ref 	   	
@@ -45,9 +45,9 @@ filters: # filtername
   ND_OD4 :		  ND_OD4 	   	
   ND_OD5 :		  ND_OD5 	   	
   Ne_II :		  Ne_II 	   	
-  Ne_II_ref :		  Ne_II_ref 	
-  open :		  open 	   	
-  PAH_11.25 :		  PAH_11.25 	
+  Ne_II_ref :	  Ne_II_ref
+  open :          open
+  PAH_11.25 :     PAH_11.25
   PAH_11.25_ref :	  PAH_11.25_ref   
   PAH_3.3 :		  PAH_3.3 	
   PAH_3.3_ref :		  PAH_3.3_ref 	
@@ -57,4 +57,3 @@ filters: # filtername
   short-L :		  short-L 	
   S_IV :		  S_IV 	   	
   S_IV_ref :		  S_IV_ref
-

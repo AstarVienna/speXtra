@@ -53,7 +53,7 @@ Scaling to a magnitude
 .. jupyter-execute::
 
     sp1 = Spextrum("kc96/s0")
-    sp2 = sp1.scale_to_magnitude(amplitude=13 * u.ABmag, filter_name="g")
+    sp2 = sp1.scale_to_magnitude(amplitude=13 * u.ABmag, filter_curve="g")
     sp2.plot()
 
 
@@ -63,7 +63,7 @@ Obtaining magnitudes from spectra
 
 .. jupyter-execute::
 
-    sp1.get_magnitude(filter_name="g")
+    sp1.get_magnitude(filter_curve="g")
 
 
 Redshifting the spectra

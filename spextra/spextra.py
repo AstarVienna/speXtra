@@ -35,8 +35,7 @@ DEFAULT_CURVES = DefaultData().extcurves
 
 class Passband(SpectralElement, FilterContainer):
     """
-    This should be the holder of all information and operations related to the filters
-    including path, etc.
+    Class to handle astronomical filters
 
     TODO: Implement proper __add__, __sub__, __mul__, etc
 
@@ -172,7 +171,7 @@ class Passband(SpectralElement, FilterContainer):
 
 class ExtinctionCurve(ReddeningLaw, ExtCurveContainer):
     """
-    Extinction curves
+    Class to handle extinction curves
 
     TODO: Implement proper __add__, __sub__, __mul__, etc
 
@@ -829,7 +828,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
                                      "flux": list(fluxes),
                                      "fwhm": list(fwhms)}})
 
-        for c, f, w in zip(center, flux, fwhm):
+        for c, f, w in zip(centers, fluxes, fwhms):
 
             line = GaussianFlux1D(mean=c, total_flux=f, fwhm=w)
             lam = line.sampleset(factor_step=0.3)  # bit better than Nyquist
@@ -868,16 +867,16 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         if isinstance(fwhm, u.Quantity) is True:
             fwhm = fwhm.to(u.AA).value
 
-        center = np.array([center]).flatten()
-        ew = np.array([ew]).flatten()
-        fwhm = np.array([fwhm]).flatten()
+        centers = np.array([center]).flatten()
+        ews = np.array([ew]).flatten()
+        fwhms = np.array([fwhm]).flatten()
         sp = self  #  .__class__(modelclass=self.model)
 
         sp.meta.update({"em_lines": {"center": list(center),
                                      "ew": list(ew),
                                      "fwhm": list(fwhm)}})
 
-        for c, e, f in zip(center, ew, fwhm):
+        for c, e, f in zip(centers, ews, fwhms):
             sign = -1 * np.sign(e)  # to keep the convention that EL are negative and ABS are positive
             left, right = c - np.abs(e / 2), c + np.abs(e / 2)
             wavelengths = self.waveset[(self.waveset.value >= left) & (self.waveset.value <= right)]
