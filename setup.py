@@ -9,7 +9,7 @@ from datetime import datetime
 
 # Version number
 MAJOR = 0
-MINOR = 1
+MINOR = 2
 ATTR = '0'
 
 VERSION = '%d.%d%s' % (MAJOR, MINOR, ATTR)
@@ -29,9 +29,9 @@ def write_version(filename='spextra/version.py'):
         else:
             fd.write(cnt.format(VERSION, timestamp))
 
+
 with open("README.rst", "r", encoding='utf-8') as fh:
     long_description = fh.read()
-
 
 
 def setup_sp():

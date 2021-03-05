@@ -16,9 +16,18 @@ To list the filter systems included in the database
     db = Database()
     db.filter_systems
 
+The ::class::`Pasband` holds the information of an astronomical filter and can be called simply using:
 
-Many filters in the SVO database have been defined using shortcuts for quicker access.
+.. jupyter-execute::
+
+    from spextra import Passband
+    filt = Passband("elt/micado/Y")
+    filt.plot()
+
+
+Many standard filters have been defined using shortcuts for quicker access.
 Here is a list.
+
 
 .. jupyter-execute::
 
@@ -36,7 +45,14 @@ These filters can be used simply using the shortcut
     filt.plot()
 
 
-Additionally below you can find the filter systems for prospective ELT instruments
+All methods in ::class::`Spextrum` that require to provide a filter name, can be used in either way,
+using the full name or just a shortcut.
+
+For a full list of the filters available to ``spextra`` please visit the `SVO <http://svo2.cab.inta-csic.es/theory/fps/>`_
+
+
+Additionally below you can find the filter systems for prospective ELT instruments and others not
+available at the SVO
 
 --------------------------------------------------------------------
 
@@ -47,6 +63,9 @@ MICADO
 
 .. literalinclude:: ../database/filter_systems/elt/micado/index.yml
     :language: yaml
+
+
+.. _metis:
 
 METIS
 =====
