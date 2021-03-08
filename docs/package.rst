@@ -15,7 +15,7 @@ speXtra Package
    spextra.Spextrum
    spextra.Passband
    spextra.ExtinctionCurve
-   spextra.spextra.get_vega_spextrum
+   spextra.get_vega_spectrum
 
 
 ``spextra.database module``
