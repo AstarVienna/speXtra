@@ -276,7 +276,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
             meta, lam, flux = self._loader()
             SourceSpectrum.__init__(self, Empirical1D, points=lam, lookup_table=flux, meta=meta,  **kwargs)
 
-            self.origin = "origin: " + self.template
+            self.repr = "Spextrum(%s)" % self.template
         elif modelclass is not None:
 
             SourceSpectrum.__init__(self, modelclass=modelclass, **kwargs)
@@ -337,7 +337,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         modelclass = SourceSpectrum(Empirical1D, points=waves, lookup_table=flux, meta=meta)
 
         sp = cls(modelclass=modelclass)
-        sp.origin = repr(sp.model)
+        sp.repr = repr(sp.model)
         return sp
 
     @classmethod
@@ -357,7 +357,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         """
         modelclass = SourceSpectrum.from_file(filename, **kwargs)
         sp = cls(modelclass=modelclass)
-        sp.origin = filename
+        sp.repr = "Spextrum.from_file(%s)" % filename
 
         return sp
 
@@ -383,7 +383,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=flux, meta=meta)
 
         sp = cls(modelclass=modelclass)
-        sp.origin = repr(spectrum_object)
+        sp.repr = "Spextrum.from_specutils(%s)" % repr(spectrum_object)
 
         return sp
 
@@ -422,7 +422,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
             spec = cls(modelclass=Empirical1D, points=waves.value, lookup_table=const(waves.value))
             system_name = amplitude.unit
 
-        spec.origin = "<flat spectrum, amplitude %s in system %s>" % (str(amplitude), str(system_name))
+        spec.repr = "Spextrum.flat_spectrum(amplitude=%s)" % str(amplitude)
 
         return spec
 
@@ -470,7 +470,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         sp = cls(modelclass=Empirical1D, points=waves, lookup_table=bb(waves))
         sp = sp.scale_to_magnitude(amplitude=amplitude, filter_curve=filter_curve)
-        sp.origin = "Blackbody spectrum, amplitude %s and temperature %s" % (str(amplitude), str(temperature))
+        sp.repr = "Spextrum.black_body_spectrum(amplitude=%s, temperature=%s)" % (str(amplitude), str(temperature))
 
         return sp
 
@@ -511,8 +511,8 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         sp = sp.scale_to_magnitude(amplitude=amplitude, filter_curve=filter_curve)
 
-        sp.origin = "Power law spectrum: slope %s, amplitude %s in filter %s" % \
-                    (str(alpha), str(amplitude), filter_curve)
+        sp.repr = "Spextrum.powerlaw(alpha=%s, amplitude=%s, filter_curve=%s)" % \
+                  (str(alpha), str(amplitude), str(filter_curve))
 
         return sp
 
@@ -642,6 +642,9 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         scale_factor = ref_flux / real_flux
         sp = self * scale_factor
+        sp = self._restore_attr(sp)
+        sp.meta.update({"magnitude": amplitude,
+                        "filter_curve": filter_curve})
 
         return sp
 
@@ -872,9 +875,9 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         fwhms = np.array([fwhm]).flatten()
         sp = self  #  .__class__(modelclass=self.model)
 
-        sp.meta.update({"em_lines": {"center": list(center),
-                                     "ew": list(ew),
-                                     "fwhm": list(fwhm)}})
+        sp.meta.update({"em_lines": {"center": list(centers),
+                                     "ew": list(ews),
+                                     "fwhm": list(fwhms)}})
 
         for c, e, f in zip(centers, ews, fwhms):
             sign = -1 * np.sign(e)  # to keep the convention that EL are negative and ABS are positive
@@ -1125,7 +1128,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
     def __repr__(self):
 
-        rep = "origin " + str(self.origin)
+        rep = "<%s>" % self.repr
 
         return rep
 #------------------------------ END    -------------------------------------------
