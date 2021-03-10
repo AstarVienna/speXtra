@@ -470,7 +470,8 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         sp = cls(modelclass=Empirical1D, points=waves, lookup_table=bb(waves))
         sp = sp.scale_to_magnitude(amplitude=amplitude, filter_curve=filter_curve)
-        sp.repr = "Spextrum.black_body_spectrum(amplitude=%s, temperature=%s)" % (str(amplitude), str(temperature))
+        sp.repr = "Spextrum.black_body_spectrum(amplitude=%s, temperature=%s, filter_curve=%s)" % \
+                  (str(amplitude), str(temperature), str(filter_curve))
 
         return sp
 
@@ -511,8 +512,8 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         sp = sp.scale_to_magnitude(amplitude=amplitude, filter_curve=filter_curve)
 
-        sp.repr = "Spextrum.powerlaw(alpha=%s, amplitude=%s, filter_curve=%s)" % \
-                  (str(alpha), str(amplitude), str(filter_curve))
+        sp.repr = "Spextrum.powerlaw(alpha=%s, x_0=%s, amplitude=%s, filter_curve=%s)" % \
+                  (str(alpha), str(x_0), str(amplitude), str(filter_curve))
 
         return sp
 
