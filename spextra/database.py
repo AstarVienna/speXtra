@@ -103,7 +103,8 @@ class Database(DataContainer):
         abspath = os.path.join(self.data_dir, relpath)
         if (os.path.exists(abspath) is False) or (reload is True):
             print("updating/loading '%s'" % relpath )
-            url = urljoin(self.database_url, relpath)
+            remote_path = relpath.split(os.sep)
+            url = urljoin(self.database_url, *remote_path)
             download_file(url, abspath, silent=silent)
 
         return abspath
