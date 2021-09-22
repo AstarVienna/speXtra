@@ -330,7 +330,7 @@ class SpectrumContainer(SpecLibrary):
         super().__init__(library_name=library_name)
 
         if self.template_name not in self.template_names:
-            raise ValueError("Template %s not in library" % self.template_name)
+            raise ValueError("Template '%s' not in library" % self.template)
 
         self.datafile = self.template_name + self.file_extension
 

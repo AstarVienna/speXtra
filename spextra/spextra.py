@@ -517,6 +517,26 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         return sp
 
+    @classmethod
+    def emission_line_spectra(cls, positions, fluxes, fwhms, magnitude=40*u.ABmag):
+        """
+        Create a emission line spextrum superimpossed to a faint continuum
+
+        TODO: Implement!
+
+        Parameters
+        ----------
+        positions
+        fluxes
+        fwhms
+        magnitude
+
+        Returns
+        -------
+
+        """
+        return NotImplementedError
+
     def cut(self, wmin, wmax):
         """
         Cut the spectrum between wmin and wmax

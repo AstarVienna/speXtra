@@ -14,3 +14,7 @@ Version 0.2
 - tynt requirement dropped
 - docs updated
 
+Version 0.23
+============
+
+- bug in path resolution in windows solved
