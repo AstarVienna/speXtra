@@ -610,7 +610,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
                 Additionally the ``FLAM`` and ``FNU`` units from ``synphot.units`` can
                 be used when passing the quantity for ``amplitude``:
 
-            filter_name : str
+            filter_curve : str
                 Name of a filter from
                 - a generic filter name (see ``DEFAULT_FILTERS``)
                 - a spanish-vo filter service reference (e.g. ``"Paranal/HAWKI.Ks"``)
