@@ -1,3 +1,6 @@
+.. image:: ./docs/_static/images/speXtra_logo.png
+    :width: 400pt
+
 =======
 SpeXtra
 =======
@@ -58,7 +61,7 @@ plot the resulting spectra, simply type
     sp.plot()
 
 .. image:: ./docs/_static/images/kc96_S0.png
-    :width: 40pt
+    :width: 400pt
 
 
 
