@@ -9,18 +9,19 @@ List of things I'd like to add
 - Better interactive browsing of the database (50% done?)
 - clear versioning  (Done?)
 - Add ``.wave`` and ``.flux`` (or similar) properties for a quicker access to these quantities
-- Power law spectra F(lambda) ~ lambda^alpha specified by the spectral index alpha
+- Power law spectra F(lambda) ~ lambda^alpha specified by the spectral index alpha. DONE
 - Make sure that code works without internet connection. _apparently it does with the built-in database_
 - Make easy to configure different database locations. 
-- Make sure that Jansky units work properly
-- method to cut spectra
+- Make sure that Jansky units work properly. (Does it?)
+- method to cut spectra  - DONE
 
 ## Spectral Libraries
 
-- Night sky spectrum at different resolutions?
+- Night sky spectrum at different resolutions?  DONE
 - Moon spectrum at different phases/distances?
 - MIR spectra of different objects, preferentially at high resolutions 
-- UV spectra of galaxies at higher resolution (for LyA studies for example) Check: https://www.astro.uu.se/~ez/lycan/lycan.html#resume
+- UV spectra of galaxies at higher resolution (for LyA studies for example) Check: 
+  https://www.astro.uu.se/~ez/lycan/lycan.html#resume
   and https://www.astro.uu.se/~ez/yggdrasil/yggdrasil.html  
 
 

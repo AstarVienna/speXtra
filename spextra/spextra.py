@@ -284,6 +284,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         else:
             raise ValueError("please define a spectra")
 
+
     def _loader(self):
         """
         Load a template from the database
@@ -362,32 +363,6 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         return sp
 
     @classmethod
-    def from_specutils(cls, spectrum_object):
-        """
-        This function _tries_ to create a Spectrum from a ``specutils.Spectrum1D`` instance.
-
-        ``specutils.Spectrum1D``  can read multiple file formats with the ``.read`` method.
-        please read ``specutils`` documentation.
-
-        Parameters
-        ----------
-        spectrum_object: specutils.Spectrum1D object
-
-        Returns
-        -------
-        a Spextrum instance
-        """
-        meta = spectrum_object.meta
-        lam = spectrum_object.spectral_axis
-        flux = spectrum_object.flux
-        modelclass = SourceSpectrum(Empirical1D, points=lam, lookup_table=flux, meta=meta)
-
-        sp = cls(modelclass=modelclass)
-        sp.repr = "Spextrum.from_specutils(%s)" % repr(spectrum_object)
-
-        return sp
-
-    @classmethod
     def flat_spectrum(cls, amplitude=0, waves=None):
         """
         Creates a flat spectrum in the preferred system scaled to a magnitude,
@@ -461,7 +436,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         if waves is None:  # set a default waveset with R~805
             waves, info = utils.generate_wavelengths(minwave=100, maxwave=50000, num=5000,
-                                                            log=True, wave_unit=u.AA)
+                                                     log=True, wave_unit=u.AA)
 
         if isinstance(amplitude, u.Quantity) is False:
             amplitude = amplitude*u.ABmag
@@ -502,12 +477,12 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         """
         if waves is None:  # set a default waveset with R~805
             waves, info = utils.generate_wavelengths(minwave=100, maxwave=50000, num=5000,
-                                                            log=True, wave_unit=u.AA)
+                                                     log=True, wave_unit=u.AA)
 
         if isinstance(amplitude, u.Quantity) is False:
             amplitude = amplitude*u.ABmag
 
-        pl = PowerLawFlux1D(amplitude, alpha=alpha, x_0=x_0, amplitude=amplitude)
+        pl = SourceSpectrum(PowerLawFlux1D, amplitude=1, x_0=x_0, alpha=alpha)
         sp = cls(modelclass=Empirical1D, points=waves, lookup_table=pl(waves))
 
         sp = sp.scale_to_magnitude(amplitude=amplitude, filter_curve=filter_curve)
@@ -518,49 +493,75 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         return sp
 
     @classmethod
-    def emission_line_spectra(cls, positions, fluxes, fwhms, magnitude=40*u.ABmag):
+    def emission_line_spectra(cls, center, fwhm,  flux,  amplitude=40*u.ABmag, waves=None):
         """
         Create a emission line spextrum superimpossed to a faint continuum
 
-        TODO: Implement!
 
         Parameters
         ----------
-        positions
-        fluxes
-        fwhms
-        magnitude
+        center
+        fwhm
+        flux
+        amplitude
+        waves
 
         Returns
         -------
 
         """
-        return NotImplementedError
+        if isinstance(center, u.Quantity) is False:
+            center = center * u.AA
+        else:
+            center = center.to(u.AA, equivalencies=u.spectral())
+        if isinstance(fwhm, u.Quantity) is False:
+            fwhm = fwhm * u.AA
+        else:
+            fwhm = fwhm.to(u.AA, equivalencies=u.spectral())
 
-    def cut(self, wmin, wmax):
+        if waves is None:
+            wmin = np.min(center.value) - 2000
+            wmax = np.max(center.value) + 2000
+            step = np.min(fwhm.value) / 3   # for Nyquist sampling
+            waves = np.arange(wmin, wmax, step) * u.AA
+
+        sp = cls.flat_spectrum(amplitude=amplitude, waves=waves)
+        sp.add_emi_lines(center=center, fwhm=fwhm, flux=flux)
+
+        return sp
+
+    @property
+    def wave_min(self):
+        return np.min(self.waveset)
+
+    @property
+    def wave_max(self):
+        return np.max(self.waveset)
+
+    def cut(self, wave_min, wave_max):
         """
         Cut the spectrum between wmin and wmax
 
         Parameters
         ----------
-        wmin: float, u.Quantity,
-        wmax: float, u.Quantity,
+        wave_min: float, u.Quantity,
+        wave_max: float, u.Quantity,
 
         Returns
         -------
 
         a new spextrum
         """
-        if isinstance(wmin, u.Quantity) is False:
-            wmin = wmin * u.AA
-        if isinstance(wmax, u.Quantity) is False:
-            wmax = wmax * u.AA
+        if isinstance(wave_min, u.Quantity) is False:
+            wave_min = wave_min * u.AA
+        if isinstance(wave_max, u.Quantity) is False:
+            wave_max = wave_max * u.AA
 
-        wmin = wmin.to(u.AA)
-        wmax = wmax.to(u.AA)
-        new_waves = self.waveset[(self.waveset > wmin) & (self.waveset < wmax)]
-        sp = self(new_waves)
-        sp.meta.update({"wmin": wmin, "wmax": wmax})
+        wave_min = wave_min.to(u.AA)
+        wave_max = wave_max.to(u.AA)
+        new_waves = self.waveset[(self.waveset >= wave_min) & (self.waveset <= wave_max)]
+        sp = Spextrum(modelclass=Empirical1D, points=new_waves, lookup_table=self(new_waves), meta=self.meta)
+        sp = self._restore_attr(sp)
 
         return sp
 
@@ -815,7 +816,6 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         return flux
 
-
     def add_emi_lines(self, center, fwhm, flux):
         """
         Add emission lines to an `Spextrum`
@@ -838,14 +838,15 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
 
         """
         if isinstance(center, u.Quantity) is True:
-            center = center.to(u.AA).value
-        if isinstance(flux, u.Quantity) is True:
-            flux = flux.to(u.erg / (u.cm ** 2 * u.s)).value
+            center = center.to(u.AA, equivalencies=u.spectral()).value
+        if isinstance(flux, u.Quantity) is False:
+            flux = flux*u.erg / (u.cm ** 2 * u.s)
+#            flux = flux.to(u.erg / (u.cm ** 2 * u.s), equivalencies=u.spectral()).value
         if isinstance(fwhm, u.Quantity) is True:
-            fwhm = fwhm.to(u.AA).value
+            fwhm = fwhm.to(u.AA, equivalencies=u.spectral()).value
 
         centers = np.array([center]).flatten()
-        fluxes = np.array([flux]).flatten()
+        fluxes = np.array([flux.value]).flatten()*flux.unit
         fwhms = np.array([fwhm]).flatten()
         sp = self
         sp.meta.update({"em_lines": {"center": list(centers),

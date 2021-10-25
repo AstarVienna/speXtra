@@ -143,9 +143,6 @@ class TestSpextrumInstances:
         assert isinstance(sp, Spextrum)
 
 
-
-
-
 class TestSpextrum:
 
     def test_wrong_load(self):
@@ -240,6 +237,12 @@ class TestSpextrum:
 
         assert np.isclose(inwaves[::-1], outwaves).all()
 
+    def test_spectrum_cut(self):
+        sp = Spextrum("kc96/s0")
+        w1 = 3001*u.AA
+        w2 = 4000*u.AA
+        sp2 = sp.cut(w1, w2)
+        assert np.isclose(sp2.wave_min.value, w1.value, atol=np.abs(sp2.waveset[0].value - sp2.waveset[1].value))
 
 
 
