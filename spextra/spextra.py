@@ -280,6 +280,7 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         elif modelclass is not None:
 
             SourceSpectrum.__init__(self, modelclass=modelclass, **kwargs)
+            self.repr = None
 
         else:
             raise ValueError("please define a spectra")

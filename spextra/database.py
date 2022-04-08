@@ -277,9 +277,9 @@ class FilterSystem(Library):
         description = "Filter system: " + self.filter_system + " " + self.title
         spec_cov = "spectral coverage: " + str(self.spectral_coverage)
         units = "wave_unit: " + self.wave_unit
-        templates = "Templates: " + str(self.filters)
+        filters = "filters: " + str([self.name + "/" + k for k in self.filters.keys()])
 
-        return ' %s \n %s \n %s \n %s' % (description, spec_cov, units, templates)
+        return ' %s \n %s \n %s \n %s' % (description, spec_cov, units, filters)
 
     def __str__(self):
         return self.filter_system
