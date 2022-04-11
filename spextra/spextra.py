@@ -1149,9 +1149,12 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
             raise exceptions.IncompatibleSources(
                 'Can only operate on real scalar number')
 
+    def __str__(self):
+        return self.__repr__()
+
     def __repr__(self):
 
-        rep = "<%s>" % self.repr
+        rep = "%s" % self.repr
 
         return rep
 #------------------------------ END    -------------------------------------------
