@@ -1,0 +1,98 @@
+# BOSZ STELLAR ATMOSPHERES GRID
+
+library_name : etc/marcs/p
+
+type : stars 
+
+title : MARCS stellar library (Plane Parallel) ESO ETC version
+
+summary : |
+  This is a subset of the large MARCS Stellar Atmosphere Grid used in the ESO Exposure Time 
+  Calculator with Plane Parallel Geometry. t denotes temperature, and z metallicy [Fe/H]  
+  Wavelength coverage = 1000A - 20um
+  Resolution = 20000
+  log(g) = 4.00
+  Microturbulent velocity = 2.0 km/s
+  [Fe/H] = -1.00,-2.00,-4.00,0.00,0.50,1.00
+  Teff = 4000,4500,5000,5500,6000,6500,7000,7500,8000
+  model = st
+  geometry = p
+  
+reference : Gustafsson B. et al 2008, Astronomy & Astrophysics 486, 951.
+
+link : "https://www.eso.org/observing/etc/doc/helpuves.html#marcs"
+
+spectral_coverage :
+  - uv
+  - vis
+  - nir
+  - mir
+
+resolution : 20000
+
+wave_unit: Angstrom
+
+flux_unit : FLAM
+
+wave_column_name : wavelength
+
+flux_column_name : flux
+
+data_type: ascii
+
+file_extension: .dat
+
+templates:  # comments
+  t4000:z+0.00 :    T=4000,  [Fe/H]=+0.00
+  t4000:z+0.50 :    T=4000,  [Fe/H]=+0.50
+  t4000:z-1.00 :    T=4000,  [Fe/H]=-1.00
+  t4000:z+1.00 :    T=4000,  [Fe/H]=+1.00
+  t4000:z-2.00 :    T=4000,  [Fe/H]=-2.00
+  t4500:z+0.00 :    T=4500,  [Fe/H]=+0.00
+  t4500:z+0.50 :    T=4500,  [Fe/H]=+0.50
+  t4500:z-1.00 :    T=4500,  [Fe/H]=-1.00
+  t4500:z+1.00 :    T=4500,  [Fe/H]=+1.00
+  t4500:z-2.00 :    T=4500,  [Fe/H]=-2.00
+  t4500:z-4.00 :    T=4500,  [Fe/H]=-4.00
+  t5000:z+0.00 :    T=5000,  [Fe/H]=+0.00
+  t5000:z+0.50 :    T=5000,  [Fe/H]=+0.50
+  t5000:z-1.00 :    T=5000,  [Fe/H]=-1.00
+  t5000:z+1.00 :    T=5000,  [Fe/H]=+1.00
+  t5000:z-2.00 :    T=5000,  [Fe/H]=-2.00
+  t5000:z-4.00 :    T=5000,  [Fe/H]=-4.00
+  t5500:z+0.00 :    T=5500,  [Fe/H]=+0.00
+  t5500:z+0.50 :    T=5500,  [Fe/H]=+0.50
+  t5500:z-1.00 :    T=5500,  [Fe/H]=-1.00
+  t5500:z+1.00 :    T=5500,  [Fe/H]=+1.00
+  t5500:z-2.00 :    T=5500,  [Fe/H]=-2.00
+  t5500:z-4.00 :    T=5500,  [Fe/H]=-4.00
+  t6000:z+0.00 :    T=6000,  [Fe/H]=+0.00
+  t6000:z+0.50 :    T=6000,  [Fe/H]=+0.50
+  t6000:z-1.00 :    T=6000,  [Fe/H]=-1.00
+  t6000:z+1.00 :    T=6000,  [Fe/H]=+1.00
+  t6000:z-2.00 :    T=6000,  [Fe/H]=-2.00
+  t6000:z-4.00 :    T=6000,  [Fe/H]=-4.00
+  t6250:z-3.00 :    T=6250,  [Fe/H]=-3.00
+  t6250:z-4.00 :    T=6250,  [Fe/H]=-4.00
+  t6250:z-5.00 :    T=6250,  [Fe/H]=-5.00
+  t6500:z+0.00 :    T=6500,  [Fe/H]=+0.00
+  t6500:z+0.50 :    T=6500,  [Fe/H]=+0.50
+  t6500:z-1.00 :    T=6500,  [Fe/H]=-1.00
+  t6500:z+1.00 :    T=6500,  [Fe/H]=+1.00
+  t6500:z-2.00 :    T=6500,  [Fe/H]=-2.00
+  t6500:z-4.00 :    T=6500,  [Fe/H]=-4.00
+  t7000:z+0.00 :    T=7000,  [Fe/H]=+0.00
+  t7000:z+0.50 :    T=7000,  [Fe/H]=+0.50
+  t7000:z-1.00 :    T=7000,  [Fe/H]=-1.00
+  t7000:z-2.00 :    T=7000,  [Fe/H]=-2.00
+  t7000:z-4.00 :    T=7000,  [Fe/H]=-4.00
+  t7500:z+0.00 :    T=7500,  [Fe/H]=+0.00
+  t7500:z+0.50 :    T=7500,  [Fe/H]=+0.50
+  t7500:z-1.00 :    T=7500,  [Fe/H]=-1.00
+  t7500:z+1.00 :    T=7500,  [Fe/H]=+1.00
+  t8000:z+0.00 :    T=8000,  [Fe/H]=+0.00
+  t8000:z+0.50 :    T=8000,  [Fe/H]=+0.50
+  t8000:z-1.00 :    T=8000,  [Fe/H]=-1.00
+  t8000:z+1.00 :    T=8000,  [Fe/H]=+1.00
+  t8000:z-2.00 :    T=8000,  [Fe/H]=-2.00
+  t8000:z-4.00 :    T=8000,  [Fe/H]=-4.00

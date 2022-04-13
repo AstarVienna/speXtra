@@ -1,0 +1,141 @@
+# BOSZ STELLAR ATMOSPHERES GRID
+
+library_name : etc/marcs/s
+
+type : stars 
+
+title : MARCS stellar library (spherical geometry) ESO ETC version
+
+summary : |
+  This is a subset of the large MARCS Stellar Atmosphere Grid used in the ESO Exposure Time 
+  Calculator with Spherical Geometry. 
+  t denotes temperature, g log(g), m mass and z metallicy [Fe/H]  
+  Wavelength coverage = 1000A - 20um
+  Resolution = 20000
+  log(g) = -0.50,0.00,1.00,2.00,3.50
+  Microturbulent velocity = 2.0 km/s
+  [Fe/H] = -1.00,-2.00,-4.00,0.00,0.50,1.00
+  Teff = 4000,4500,5000,5500,6000,6500,7000,7500,8000
+  mass = 1, 5
+  model = st
+  geometry = s
+  
+reference : Gustafsson B. et al 2008, Astronomy & Astrophysics 486, 951.
+
+link : "https://www.eso.org/observing/etc/doc/helpuves.html#marcs"
+
+spectral_coverage :
+  - uv
+  - vis
+  - nir
+  - mir
+
+resolution : 20000
+
+wave_unit: Angstrom
+
+flux_unit : FLAM
+
+wave_column_name : wavelength
+
+flux_column_name : flux
+
+data_type: ascii
+
+file_extension: .dat
+
+templates:  # comments
+  t4000:g+0.0:m1.0:z+0.00  :  T=4000,  log(g)=+0.0,  mass=1.0,  [Fe/H]+0.00
+  t4000:g+0.0:m1.0:z-1.00  :  T=4000,  log(g)=+0.0,  mass=1.0,  [Fe/H]-1.00
+  t4000:g+0.0:m5.0:z-1.00  :  T=4000,  log(g)=+0.0,  mass=5.0,  [Fe/H]-1.00
+  t4000:g-0.5:m1.0:z+0.00  :  T=4000,  log(g)=-0.5,  mass=1.0,  [Fe/H]+0.00
+  t4000:g+1.0:m1.0:z+0.00  :  T=4000,  log(g)=+1.0,  mass=1.0,  [Fe/H]+0.00
+  t4000:g+1.0:m1.0:z-1.00  :  T=4000,  log(g)=+1.0,  mass=1.0,  [Fe/H]-1.00
+  t4000:g+1.0:m1.0:z-2.00  :  T=4000,  log(g)=+1.0,  mass=1.0,  [Fe/H]-2.00
+  t4000:g+1.0:m5.0:z+0.00  :  T=4000,  log(g)=+1.0,  mass=5.0,  [Fe/H]+0.00
+  t4000:g+1.0:m5.0:z-1.00  :  T=4000,  log(g)=+1.0,  mass=5.0,  [Fe/H]-1.00
+  t4000:g+1.0:m5.0:z-2.00  :  T=4000,  log(g)=+1.0,  mass=5.0,  [Fe/H]-2.00
+  t4000:g+1.0:m5.0:z-4.00  :  T=4000,  log(g)=+1.0,  mass=5.0,  [Fe/H]-4.00
+  t4000:g+2.0:m1.0:z+0.00  :  T=4000,  log(g)=+2.0,  mass=1.0,  [Fe/H]+0.00
+  t4000:g+2.0:m1.0:z-1.00  :  T=4000,  log(g)=+2.0,  mass=1.0,  [Fe/H]-1.00
+  t4000:g+2.0:m1.0:z-2.00  :  T=4000,  log(g)=+2.0,  mass=1.0,  [Fe/H]-2.00
+  t4000:g+2.0:m1.0:z-4.00  :  T=4000,  log(g)=+2.0,  mass=1.0,  [Fe/H]-4.00
+  t4000:g+2.0:m5.0:z+0.00  :  T=4000,  log(g)=+2.0,  mass=5.0,  [Fe/H]+0.00
+  t4000:g+2.0:m5.0:z-1.00  :  T=4000,  log(g)=+2.0,  mass=5.0,  [Fe/H]-1.00
+  t4000:g+2.0:m5.0:z-4.00  :  T=4000,  log(g)=+2.0,  mass=5.0,  [Fe/H]-4.00
+  t4000:g+3.5:m1.0:z+0.00  :  T=4000,  log(g)=+3.5,  mass=1.0,  [Fe/H]+0.00
+  t4000:g+3.5:m1.0:z-1.00  :  T=4000,  log(g)=+3.5,  mass=1.0,  [Fe/H]-1.00
+  t4000:g+3.5:m1.0:z-2.00  :  T=4000,  log(g)=+3.5,  mass=1.0,  [Fe/H]-2.00
+  t4000:g+3.5:m1.0:z-4.00  :  T=4000,  log(g)=+3.5,  mass=1.0,  [Fe/H]-4.00
+  t4500:g+0.0:m1.0:z+0.00  :  T=4500,  log(g)=+0.0,  mass=1.0,  [Fe/H]+0.00
+  t4500:g+0.0:m1.0:z-1.00  :  T=4500,  log(g)=+0.0,  mass=1.0,  [Fe/H]-1.00
+  t4500:g+1.0:m1.0:z+0.00  :  T=4500,  log(g)=+1.0,  mass=1.0,  [Fe/H]+0.00
+  t4500:g+1.0:m1.0:z-1.00  :  T=4500,  log(g)=+1.0,  mass=1.0,  [Fe/H]-1.00
+  t4500:g+1.0:m1.0:z-2.00  :  T=4500,  log(g)=+1.0,  mass=1.0,  [Fe/H]-2.00
+  t4500:g+1.0:m1.0:z-3.00  :  T=4500,  log(g)=+1.0,  mass=1.0,  [Fe/H]-3.00
+  t4500:g+1.0:m5.0:z-2.00  :  T=4500,  log(g)=+1.0,  mass=5.0,  [Fe/H]-2.00
+  t4500:g+2.0:m1.0:z+0.00  :  T=4500,  log(g)=+2.0,  mass=1.0,  [Fe/H]+0.00
+  t4500:g+2.0:m1.0:z-1.00  :  T=4500,  log(g)=+2.0,  mass=1.0,  [Fe/H]-1.00
+  t4500:g+2.0:m1.0:z-2.00  :  T=4500,  log(g)=+2.0,  mass=1.0,  [Fe/H]-2.00
+  t4500:g+2.0:m5.0:z-2.00  :  T=4500,  log(g)=+2.0,  mass=5.0,  [Fe/H]-2.00
+  t4500:g+3.5:m1.0:z+0.00  :  T=4500,  log(g)=+3.5,  mass=1.0,  [Fe/H]+0.00
+  t5000:g+0.0:m1.0:z+0.00  :  T=5000,  log(g)=+0.0,  mass=1.0,  [Fe/H]+0.00
+  t5000:g+0.0:m1.0:z-1.00  :  T=5000,  log(g)=+0.0,  mass=1.0,  [Fe/H]-1.00
+  t5000:g+0.0:m5.0:z+0.00  :  T=5000,  log(g)=+0.0,  mass=5.0,  [Fe/H]+0.00
+  t5000:g+0.0:m5.0:z-1.00  :  T=5000,  log(g)=+0.0,  mass=5.0,  [Fe/H]-1.00
+  t5000:g+1.0:m1.0:z+0.00  :  T=5000,  log(g)=+1.0,  mass=1.0,  [Fe/H]+0.00
+  t5000:g+1.0:m1.0:z-1.00  :  T=5000,  log(g)=+1.0,  mass=1.0,  [Fe/H]-1.00
+  t5000:g+1.0:m1.0:z-2.00  :  T=5000,  log(g)=+1.0,  mass=1.0,  [Fe/H]-2.00
+  t5000:g+1.0:m5.0:z+0.00  :  T=5000,  log(g)=+1.0,  mass=5.0,  [Fe/H]+0.00
+  t5000:g+1.0:m5.0:z-1.00  :  T=5000,  log(g)=+1.0,  mass=5.0,  [Fe/H]-1.00
+  t5000:g+1.0:m5.0:z-2.00  :  T=5000,  log(g)=+1.0,  mass=5.0,  [Fe/H]-2.00
+  t5000:g+1.5:m1.0:z-3.00  :  T=5000,  log(g)=+1.5,  mass=1.0,  [Fe/H]-3.00
+  t5000:g+1.5:m1.0:z-4.00  :  T=5000,  log(g)=+1.5,  mass=1.0,  [Fe/H]-4.00
+  t5000:g+2.0:m1.0:z+0.00  :  T=5000,  log(g)=+2.0,  mass=1.0,  [Fe/H]+0.00
+  t5000:g+2.0:m1.0:z-1.00  :  T=5000,  log(g)=+2.0,  mass=1.0,  [Fe/H]-1.00
+  t5000:g+2.0:m1.0:z-2.00  :  T=5000,  log(g)=+2.0,  mass=1.0,  [Fe/H]-2.00
+  t5000:g+2.0:m1.0:z-3.00  :  T=5000,  log(g)=+2.0,  mass=1.0,  [Fe/H]-3.00
+  t5000:g+2.0:m1.0:z-4.00  :  T=5000,  log(g)=+2.0,  mass=1.0,  [Fe/H]-4.00
+  t5000:g+2.0:m1.0:z-5.00  :  T=5000,  log(g)=+2.0,  mass=1.0,  [Fe/H]-5.00
+  t5000:g+2.0:m5.0:z+0.00  :  T=5000,  log(g)=+2.0,  mass=5.0,  [Fe/H]+0.00
+  t5000:g+2.0:m5.0:z-1.00  :  T=5000,  log(g)=+2.0,  mass=5.0,  [Fe/H]-1.00
+  t5000:g+3.5:m1.0:z+0.00  :  T=5000,  log(g)=+3.5,  mass=1.0,  [Fe/H]+0.00
+  t5500:g+0.0:m1.0:z+0.00  :  T=5500,  log(g)=+0.0,  mass=1.0,  [Fe/H]+0.00
+  t5500:g+1.0:m1.0:z+0.00  :  T=5500,  log(g)=+1.0,  mass=1.0,  [Fe/H]+0.00
+  t5500:g+1.0:m1.0:z-1.00  :  T=5500,  log(g)=+1.0,  mass=1.0,  [Fe/H]-1.00
+  t5500:g+1.0:m5.0:z-2.00  :  T=5500,  log(g)=+1.0,  mass=5.0,  [Fe/H]-2.00
+  t5500:g+2.0:m1.0:z+0.00  :  T=5500,  log(g)=+2.0,  mass=1.0,  [Fe/H]+0.00
+  t5500:g+2.0:m1.0:z-1.00  :  T=5500,  log(g)=+2.0,  mass=1.0,  [Fe/H]-1.00
+  t5500:g+2.0:m1.0:z-2.00  :  T=5500,  log(g)=+2.0,  mass=1.0,  [Fe/H]-2.00
+  t5500:g+3.5:m1.0:z+0.00  :  T=5500,  log(g)=+3.5,  mass=1.0,  [Fe/H]+0.00
+  t6000:g+1.0:m1.0:z+0.00  :  T=6000,  log(g)=+1.0,  mass=1.0,  [Fe/H]+0.00
+  t6000:g+1.0:m1.0:z-1.00  :  T=6000,  log(g)=+1.0,  mass=1.0,  [Fe/H]-1.00
+  t6000:g+1.0:m1.0:z-2.00  :  T=6000,  log(g)=+1.0,  mass=1.0,  [Fe/H]-2.00
+  t6000:g+1.0:m5.0:z+0.00  :  T=6000,  log(g)=+1.0,  mass=5.0,  [Fe/H]+0.00
+  t6000:g+1.0:m5.0:z-1.00  :  T=6000,  log(g)=+1.0,  mass=5.0,  [Fe/H]-1.00
+  t6000:g+1.0:m5.0:z-2.00  :  T=6000,  log(g)=+1.0,  mass=5.0,  [Fe/H]-2.00
+  t6000:g+2.0:m1.0:z+0.00  :  T=6000,  log(g)=+2.0,  mass=1.0,  [Fe/H]+0.00
+  t6000:g+2.0:m1.0:z-1.00  :  T=6000,  log(g)=+2.0,  mass=1.0,  [Fe/H]-1.00
+  t6000:g+2.0:m1.0:z-4.00  :  T=6000,  log(g)=+2.0,  mass=1.0,  [Fe/H]-4.00
+  t6000:g+2.0:m5.0:z+0.00  :  T=6000,  log(g)=+2.0,  mass=5.0,  [Fe/H]+0.00
+  t6000:g+3.5:m1.0:z+0.00  :  T=6000,  log(g)=+3.5,  mass=1.0,  [Fe/H]+0.00
+  t6500:g+1.0:m1.0:z+0.00  :  T=6500,  log(g)=+1.0,  mass=1.0,  [Fe/H]+0.00
+  t6500:g+1.0:m1.0:z-1.00  :  T=6500,  log(g)=+1.0,  mass=1.0,  [Fe/H]-1.00
+  t6500:g+1.0:m5.0:z-2.00  :  T=6500,  log(g)=+1.0,  mass=5.0,  [Fe/H]-2.00
+  t6500:g+2.0:m1.0:z+0.00  :  T=6500,  log(g)=+2.0,  mass=1.0,  [Fe/H]+0.00
+  t6500:g+2.0:m1.0:z-2.00  :  T=6500,  log(g)=+2.0,  mass=1.0,  [Fe/H]-2.00
+  t6500:g+3.5:m1.0:z+0.00  :  T=6500,  log(g)=+3.5,  mass=1.0,  [Fe/H]+0.00
+  t7000:g+2.0:m1.0:z+0.00  :  T=7000,  log(g)=+2.0,  mass=1.0,  [Fe/H]+0.00
+  t7000:g+2.0:m1.0:z-1.00  :  T=7000,  log(g)=+2.0,  mass=1.0,  [Fe/H]-1.00
+  t7000:g+2.0:m5.0:z+0.00  :  T=7000,  log(g)=+2.0,  mass=5.0,  [Fe/H]+0.00
+  t7000:g+2.0:m5.0:z-1.00  :  T=7000,  log(g)=+2.0,  mass=5.0,  [Fe/H]-1.00
+  t7000:g+3.5:m1.0:z-1.00  :  T=7000,  log(g)=+3.5,  mass=1.0,  [Fe/H]-1.00
+  t7500:g+2.0:m1.0:z+0.00  :  T=7500,  log(g)=+2.0,  mass=1.0,  [Fe/H]+0.00
+  t7500:g+2.0:m1.0:z-1.00  :  T=7500,  log(g)=+2.0,  mass=1.0,  [Fe/H]-1.00
+  t7500:g+2.0:m1.0:z-2.00  :  T=7500,  log(g)=+2.0,  mass=1.0,  [Fe/H]-2.00
+  t7500:g+3.5:m1.0:z-1.00  :  T=7500,  log(g)=+3.5,  mass=1.0,  [Fe/H]-1.00
+  t8000:g+2.0:m1.0:z+0.00  :  T=8000,  log(g)=+2.0,  mass=1.0,  [Fe/H]+0.00
+  t8000:g+3.5:m1.0:z+0.00  :  T=8000,  log(g)=+3.5,  mass=1.0,  [Fe/H]+0.00
+  t8000:g+3.5:m1.0:z-1.00  :  T=8000,  log(g)=+3.5,  mass=1.0,  [Fe/H]-1.00
+  t8000:g+3.5:m1.0:z-2.00  :  T=8000,  log(g)=+3.5,  mass=1.0,  [Fe/H]-2.00
+  

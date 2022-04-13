@@ -1,23 +1,31 @@
 # Database contents
 
 libraries:
-  ref       : A library of reference stars
-  kc96      : Kinney-Calzetti Atlas
-  pickles   : Pickles Stellar Library
-  dobos     : SDSS galaxy composite spectra
-  irtf      : IRTF spectral library
-  agn       : AGN templates
-  nebulae   : Emission line nebulae
-  brown     : Galaxy SEDs from the UV to the Mid-IR 
-  kurucz    : Subset of Kurucz 1993 Models
-  sne       : Supernova Legacy Survey
-  moehler   : flux/telluric standards with X-Shooter
-  madden    : High-Resolution Spectra of Habitable Zone Planets
-  bosz/hr   : BOSZ stellar atmosphere Grid - High Resolution
-  bosz/mr   : BOSZ stellar atmosphere Grid - Medium Resolution
-  bosz/lr   : BOSZ stellar atmosphere Grid - Low Resolution
-  assef     : Low-resolution spectral templates for AGN and galaxies
-  sky       : Paranal sky background spectra
+  ref         : A library of reference stars
+  kc96        : Kinney-Calzetti Atlas
+  pickles     : Pickles Stellar Library
+  dobos       : SDSS galaxy composite spectra
+  irtf        : IRTF spectral library
+  agn         : AGN templates
+  nebulae     : Emission line nebulae
+  brown       : Galaxy SEDs from the UV to the Mid-IR 
+  kurucz      : Subset of Kurucz 1993 Models
+  sne         : Supernova Legacy Survey
+  moehler     : flux/telluric standards with X-Shooter
+  madden      : High-Resolution Spectra of Habitable Zone Planets
+  bosz/hr     : BOSZ stellar atmosphere Grid - High Resolution
+  bosz/mr     : BOSZ stellar atmosphere Grid - Medium Resolution
+  bosz/lr     : BOSZ stellar atmosphere Grid - Low Resolution
+  assef       : Low-resolution spectral templates for AGN and galaxies
+  sky         : Paranal sky background spectra
+  shapley     : Rest-Frame Ultraviolet Spectra of z ∼ 3 Lyman Break Galaxies
+  etc/kinney  : ESO ETC version of the Kinney-Calzetti Atlas
+  etc/kurucz  : ESO ETC subset of the Kurucz 1993 models
+  etc/marcs/p : ESO ETC subset of the MARCS Stellar Models with Plane Parallel Geometry
+  etc/marcs/s : ESO ETC subset of the MARCS Stellar Models with Spherical Geometry
+  etc/misc    : Other templates, nubulae and qso
+  etc/pickles : ESO ETC subset of the Pickles stellar library
+  
 
 # here go the extinction curves
 extinction_curves:

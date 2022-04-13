@@ -1,0 +1,57 @@
+# THE 1993 KURUCZ STELLAR ATMOSPHERES ATLAS
+
+library_name : etc/kurucz
+
+type : stars 
+
+title : The 1993 Kurucz Stellar Atmospheres Atlas ESO ETC version 
+
+summary : |
+  This is an subset of the Kurucz Stellar Atmospheres Atlas used in the ESO Exposure Time Calculator
+
+reference : Kurucz CD-ROM, Cambridge, MA; Smithsonian Astrophysical Observatory, c1993, December 4, 1993
+
+link : "http://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/kurucz-1993-models"
+
+spectral_coverage :
+  - uv
+  - vis
+  - nir
+
+resolution : 20
+
+wave_unit: Angstrom
+
+flux_unit : FLAM
+
+wave_column_name : WAVELENGTH
+
+flux_column_name : FLUX
+
+data_type: ascii
+
+file_extension: .dat
+
+templates:  #comments
+  o5v :  null
+  b1v :  null
+  b3v :  null
+  b5v :  null
+  b8v :  null
+  a1v :  null
+  a3v :  null
+  a5v :  null
+  f0i :  null
+  f0v :  null
+  f2v :  null
+  f5v :  null
+  f8v :  null
+  g2v :  null
+  g5i :  null
+  g5v :  null
+  g8v :  null
+  k7v :  null
+  m2v :  null
+  m4v :  null
+  m6v :  null
+

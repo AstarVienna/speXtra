@@ -1,0 +1,59 @@
+# Pickles Stellar Spectral Flux Library
+
+library_name : etc/pickles
+
+type : stars
+
+title : Pickles Stellar Spectral Flux Library (ESO ETC version)
+
+summary : |
+    This is a subset of Pickles Stellar Flux Library used in the ESO ETC. For the full version see here https://spextra.readthedocs.io/en/latest/spectral_libraries.html#pickles-stellar-library
+
+reference : Pickles, A. J. 1998, PASP, 110, 863
+
+link : "https://www.eso.org/sci/facilities/paranal/decommissioned/isaac/tools/lib.html"
+
+spectral_coverage :
+  - uv
+  - vis
+  - nir
+
+resolution : 5
+
+wave_unit: Angstrom
+
+flux_unit : FLAM
+
+wave_column_name : WAVELENGTH
+
+flux_column_name : FLUX
+
+data_type: ascii
+
+file_extension: .dat
+
+templates:      # comments
+  a0v
+  a2v  :  null
+  a5v  :  null
+  b0v  :  null
+  b3v  :  null
+  f0v  :  null
+  f2v  :  null
+  f5v  :  null
+  g0v  :  null
+  g2v  :  null
+  g5v  :  null
+  k0v  :  null
+  k2v  :  null
+  k4v  :  null
+  k5v  :  null
+  k7v  :  null
+  m0v  :  null
+  m2v  :  null
+  m3v  :  null
+  m4v  :  null
+  m5v  :  null
+  m6v  :  null
+  o9v  :  null
+

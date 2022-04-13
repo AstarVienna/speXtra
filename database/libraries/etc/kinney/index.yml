@@ -1,0 +1,68 @@
+# THE KINNEY-CALZETTI SPECTRAL ATLAS OF GALAXIES
+
+library_name : etc/kinney
+
+type : galaxies
+
+title : The Kinney-Calzetti Spectral Atlas of Galaxies (ESO ETC version)
+
+summary : |
+  This is the ESO ETC version of the Kinney-Calzetti Spectral Atlas of Galaxies
+
+  All spectra start at 1000A (bulge at 1235). 
+  bulge and sc templates ends at ~7550A, 
+  
+  WARNING!!! SPECTRA BEYOND 10000A (1 um) ARE NOT RELIABLE
+  
+
+reference : Kinney, A.L., Calzetti, D., Bohlin, R.C., McQuade, K., Storchi-Bergmann, T.  & Schmitt, H.R. 1996, ApJ, 467, 38
+
+link : "http://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/the-kinney-calzetti-spetral-atlas"
+
+spectral_coverage :
+  - uv
+  - vis
+  - nir
+
+resolution : 10
+
+wave_unit: Angstrom
+
+flux_unit : FLAM
+
+wave_column_name : WAVELENGTH
+
+flux_column_name : FLUX
+
+data_type: ascii
+
+file_extension: .dat
+
+templates:    # comments
+  ell        : null
+  bulge      : ends at 7545A
+  s0         : null
+  sa         : null
+  sb         : null
+  sc         : end at 7660A
+  sb1        : starburst with E(B-V)<0.1
+  sb2        : starburst with 0.11<E(B-V)<0.21
+  sb3        : starburst with 0.25<E(B-V)<0.35
+  sb4        : starburst with 0.39<E(B-V)<0.50
+  sb5        : starburst with 0.51<E(B-V)<0.60
+  sb6        : starburst with 0.61<E(B-V)<0.70
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
