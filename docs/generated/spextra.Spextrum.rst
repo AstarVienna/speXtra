@@ -24,12 +24,12 @@
       ~Spextrum.deredden
       ~Spextrum.download_all
       ~Spextrum.dump
+      ~Spextrum.emission_line_spectra
       ~Spextrum.flat_spectrum
       ~Spextrum.force_extrapolation
       ~Spextrum.from_arrays
       ~Spextrum.from_file
       ~Spextrum.from_spectrum1d
-      ~Spextrum.from_specutils
       ~Spextrum.from_vega
       ~Spextrum.get_flux
       ~Spextrum.get_magnitude
@@ -61,6 +61,8 @@
    
       ~Spextrum.model
       ~Spextrum.warnings
+      ~Spextrum.wave_max
+      ~Spextrum.wave_min
       ~Spextrum.waverange
       ~Spextrum.waveset
       ~Spextrum.z

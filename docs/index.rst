@@ -38,12 +38,18 @@ to commonly used spectral templates, extinction curves and filters.
 
    install
    starting
-   database
+   notebooks/Database.ipynb
    spectral_libraries
    extinction_curves
    filters
    package
 
+
+
+
+
+
+   
 
 
 

@@ -149,7 +149,7 @@ BOSZ Stellar Atmosphere Grid (subset) - High Resolution
 .. _bosz_mr:
 
 BOSZ Stellar Atmosphere Grid (subset) - Medium Resolution
---------------------------------------------------------
+---------------------------------------------------------
 
 .. literalinclude:: ../database/libraries/bosz/mr/index.yml
     :language: yaml
@@ -157,7 +157,7 @@ BOSZ Stellar Atmosphere Grid (subset) - Medium Resolution
 .. _bosz_lr:
 
 BOSZ Stellar Atmosphere Grid (subset) - Low Resolution
---------------------------------------------------------
+------------------------------------------------------
 
 .. literalinclude:: ../database/libraries/bosz/lr/index.yml
     :language: yaml
