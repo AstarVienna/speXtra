@@ -1,4 +1,4 @@
-database_url: https://homepage.univie.ac.at/miguel.verdugo/database/
+database_url: https://scopesim.univie.ac.at/spextra/database/
 data_dir: Null
 remote_timeout: 30.0
 default_data_dir: spextra      # this makes sure it falls back to .astropy/cache/spextra.
