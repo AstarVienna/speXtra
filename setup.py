@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-    Setup file for spextra.
+Setup file for spextra
+======================
+
+How to compile and put these on pip::
+
+    $ python setup.py sdist bdist_wheel
+    $ twine upload dist/*
+
 """
 import sys
 import setuptools
@@ -10,7 +17,7 @@ from datetime import datetime
 # Version number
 MAJOR = 0
 MINOR = 2
-ATTR = '4'
+ATTR = '5'
 
 VERSION = '%d.%d%s' % (MAJOR, MINOR, ATTR)
 
