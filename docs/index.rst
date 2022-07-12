@@ -32,6 +32,13 @@ treatment of astronomical spectra, including scaling, binning, smoothing, redshi
 to commonly used spectral templates, extinction curves and filters.
 
 
+.. warning:: July 2022: The downloadable content server was retired and the data migrated to a new server.
+
+   SpeXtra v0.25 and above have been redirected to a new server URL.
+
+   For older versions, please either upgrade to the latest version (``pip install --upgrade spextra``), or follow these `instructions to update the server URL <https://astarvienna.github.io/server_upgrade_instructions.html>`_ in the config file.
+
+
 .. toctree::
    :maxdepth: 1
 
