@@ -5,6 +5,7 @@ from contextlib import closing
 from urllib.request import urlopen, Request
 from urllib.error import URLError, HTTPError
 import socket
+from pathlib import Path
 
 from astropy.utils.console import ProgressBarOrSpinner
 from astropy.config import get_cache_dir
@@ -238,14 +239,20 @@ def download_svo_filter(filter_name):
 
     conf = Config()
     data_dir = conf.get_data_dir()
+    data_dir_package = Path(__file__).parent / "data" / "svo"
 
     origin = 'http://svo2.cab.inta-csic.es/'\
              'theory/fps3/fps.php?ID={}'.format(filter_name)
 
-    local_path = os.path.join(data_dir, "svo_filters", filter_name)
+    local_path_cache = os.path.join(data_dir, "svo_filters", filter_name)
+    local_path_package = os.path.join(data_dir_package, filter_name)
 
-    if os.path.exists(local_path) is False:
-        download_file(origin, local_path)
+    if os.path.exists(local_path_package):
+        local_path = local_path_package
+    else:
+        local_path = local_path_cache
+        if not os.path.exists(local_path):
+            download_file(origin, local_path)
 
     tbl = Table.read(local_path, format='votable')  # raises ValueError if table is malformed
                                                     # this can be used to catch problmes

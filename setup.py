@@ -17,7 +17,7 @@ from datetime import datetime
 # Version number
 MAJOR = 0
 MINOR = 3
-ATTR = '1'
+ATTR = '2'
 
 VERSION = '%d.%d%s' % (MAJOR, MINOR, ATTR)
 
@@ -51,7 +51,7 @@ def setup_sp():
         author="Miguel Verdugo",
         author_email="mverduol@gmail.com",
         license="MIT",
-        url="https://github.com/miguelverdugo/speXtra",
+        url="https://github.com/AstarVienna/speXtra",
         package_dir={'spextra': 'spextra'},
         packages=['spextra'],
         package_data={'spextra': ['spextra/data/*']},

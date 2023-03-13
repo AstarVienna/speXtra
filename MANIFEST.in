@@ -1,2 +1,2 @@
-include spextra/data/*
+recursive-include spextra/data *
 
