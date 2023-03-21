@@ -389,7 +389,13 @@ class Spextrum(SpectrumContainer, SourceSpectrum):
         if isinstance(amplitude, u.Quantity) is False:
             amplitude = amplitude*u.ABmag
 
-        if amplitude.unit is u.Unit("mag") or amplitude.unit is u.Unit("vegamag"):
+        # The if-statement below also allowed amplitude.unit to be
+        # u.Unit("vegamag"). Vegamag is removed from astropy, so the
+        # if-statement is removed too. This assertion is added as a sanity
+        # check ensure that any bugs introduced by changing the if-statement
+        # is explicitly raised here, instead of silently propagated.
+        assert not amplitude.unit.to_string() == "vegamag", "The use of vegamag is deprecated."
+        if amplitude.unit is u.Unit("mag"):
             spec = get_vega_spectrum()
             spec = spec * 10 ** (-0.4 * amplitude.value)
             system_name = amplitude.unit
