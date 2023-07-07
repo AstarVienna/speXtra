@@ -1,7 +1,61 @@
-[build-system]
-requires = [
-    "setuptools>=42",
-    "wheel"
+[project]
+name = "speXtra"
+version = "0.34-alpha"
+description = "Tool to manage and manipulate  astronomical spectra"
+readme = "README.md"
+requires-python = ">=3.8"
+# When updating the version, also update the versions in .github/workflows/*
+license = {text = "License :: OSI Approved :: MIT License"}
+authors = [
+    {name = "Miguel Verdugo", email="mverduol@gmail.com"},
 ]
-build-backend = "setuptools.build_meta"
+maintainers = [
+    {name = "Kieran Leschinski", email="kieran.leschinski@unive.ac.at"},
+    {name = "Hugo Buddelmeijer", email="hugo@buddelmeijer.nl"},
+]
+classifiers=[
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Astronomy",
+    "Topic :: Scientific/Engineering :: Astronomy",
+]
+dependencies = [
+    # Try to keep the dependencies on lower versions that have a wheel
+    # package on PyPI, for minimumdependencies.yml
+    "numpy>=1.18.0",
+    "astropy>=4.0",
+    "synphot>=1.1.0",
+    "pyyaml>5.2",
+    "scipy>=1.4.0",
+]
 
+[project.optional-dependencies]
+test = [
+    "pytest>=5.0.0",
+    "pytest-cov",
+    "matplotlib>=3.2.0",
+]
+docs = [
+    "sphinx>=4.3.0",
+    "sphinx-rtd-theme>=0.5.1",
+    "jupyter_sphinx==0.2.3",
+    "sphinxcontrib-apidoc",
+    "nbsphinx",
+    "numpydoc",
+]
+
+[project.urls]
+"Homepage" = "https://spextra.readthedocs.io/en/latest/"
+"Source" = "https://github.com/AstarVienna/speXtra"
+"Bug Reports" = "https://github.com/AstarVienna/speXtra/issues"
+
+[tool.setuptools]
+packages = ["spextra"]
+
+[tool.pytest.ini_options]
+addopts = "--strict-markers"
+markers = [
+    "webtest: marks tests as requiring network (deselect with '-m \"not webtest\"')",
+]
