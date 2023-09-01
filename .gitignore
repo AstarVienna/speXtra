@@ -58,3 +58,10 @@ MANIFEST
 
 # Per-project virtualenvs
 .venv*/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Pylint
+.pylint.d/
