@@ -39,8 +39,11 @@ class DataContainer:
         self.filename = filename
         with open(self.filename, encoding="utf-8") as file:
             self.meta = yaml.safe_load(file)
-        for key in self.meta:
-            setattr(self, key, self.meta[key])
+
+        # TODO: should this really be here (tests want it though...)
+        self.libraries = self.meta.get("libraries", None)
+        self.extinction_curves = self.meta.get("extinction_curves", None)
+        self.filter_systems = self.meta.get("filter_systems", None)
 
     def dump(self) -> None:
         """
@@ -179,9 +182,6 @@ class Library(DataContainer):
     """
     def __init__(self, library_name):
         self.name = library_name
-        self.title = "<untitled>"
-        self.wave_unit = None
-        self.file_extension = None
         self.items = []
 
         database = Database()
@@ -196,6 +196,11 @@ class Library(DataContainer):
         self.dir = database.abspath(self.relpath)
         self.url = urljoin(database.data_dir, self.relpath, self.ymlfile)
         super().__init__(filename=self.path)
+
+        self.title = self.meta.get("title", "<untitled>")
+        self.wave_unit = self.meta.get("wave_unit", None)
+        self.data_type = self.meta.get("data_type", None)
+        self.file_extension = self.meta.get("file_extension", None)
 
     def download_all(self) -> None:
         """Download the whole library."""
@@ -225,10 +230,15 @@ class Library(DataContainer):
 class SpecLibrary(Library):
 
     def __init__(self, library_name):
-        self.templates = {}
-        self.flux_unit = "<unknown>"
-        self.spectral_coverage = []
         super().__init__(library_name)
+        # For backwards compatibility...
+        self.library_name = self.name
+        self.templates = self.meta.get("templates", {})
+        self.spectral_coverage = self.meta.get("spectral_coverage", [])
+        self.flux_unit = self.meta.get("flux_unit", None)
+        self.wave_column_name = self.meta.get("wave_column_name", None)
+        self.flux_column_name = self.meta.get("flux_column_name", None)
+
 
         self.template_names = list(self.templates.keys())
         self.template_comments = list(self.templates.values())
@@ -249,9 +259,11 @@ class FilterSystem(Library):
     """Contains the information of a filter system."""
 
     def __init__(self, filter_system):
-        self.filters = {}
-        self.spectral_coverage = []
         super().__init__(filter_system)
+        # For backwards compatibility...
+        self.filter_system = self.name
+        self.filters = self.meta.get("filters", {})
+        self.spectral_coverage = self.meta.get("spectral_coverage", [])
 
         self.filter_names = list(self.filters.keys())
         self.filter_comments = list(self.filters.values())
@@ -272,8 +284,11 @@ class ExtCurvesLibrary(Library):
     """Contains the information of the a Extinction Curve Library."""
 
     def __init__(self, curve_library):
-        self.curves = {}
         super().__init__(curve_library)
+        self.curves = self.meta.get("curves", {})
+        self.extinction_unit = self.meta.get("extinction_unit", None)
+        self.wave_column = self.meta.get("wave_column", None)
+        self.extinction_column = self.meta.get("extinction_column", None)
 
         self.curve_names = list(self.curves.keys())
         self.curve_comments = list(self.curves.values())
@@ -309,14 +324,9 @@ class DBFile:
     def _update_attrs(self) -> None:
         """Delete unnecessary stuff."""
         self.meta.pop("summary", None)
-        self.__dict__.pop("summary", None)
-        self.__dict__.pop("ymlfile", None)
 
         if self._subclass_key is not None:
             self.meta.pop(f"{self._subclass_key}s", None)
-            self.__dict__.pop(f"{self._subclass_key}s", None)
-            self.__dict__.pop(f"{self._subclass_key}_names", None)
-            self.__dict__.pop(f"{self._subclass_key}_comments", None)
 
 
 class SpectrumContainer(SpecLibrary, DBFile):
