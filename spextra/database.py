@@ -1,42 +1,48 @@
 # -*- coding: utf-8 -*-
-"""
-Database for speXtra
-"""
-import os
-import inspect
+"""Database for speXtra."""
+
 import shutil
 from posixpath import join as urljoin
+from pathlib import Path
 
 import yaml
 
-from .utils import Config,  download_file, dict_generator
+from .utils import Config, download_file, dict_generator
 
 # Configurations
 
-__all__ = ["Database", "SpecLibrary", "SpectrumContainer", "ExtCurvesLibrary",
-           "ExtCurveContainer", "FilterSystem", "FilterContainer", "DefaultData"]
+__all__ = ["Database",
+           "SpecLibrary",
+           "SpectrumContainer",
+           "ExtCurvesLibrary",
+           "ExtCurveContainer",
+           "FilterSystem",
+           "FilterContainer",
+           "DefaultData"]
 
 # Tables are displayed with a jsviewer by default
 # Table.show_in_browser.__defaults__ = (5000, True, 'default', {'use_local_files': True},
 #                                              None, 'display compact', None, 'idx')
 
+CONF = Config()
+
 
 class DataContainer:
     """
-    Just a general container for the data
+    Just a general container for the data.
 
-    It reads a YAML file and creates attributes with the kyes of the dictionary.
+    Reads a YAML file and creates attributes with the kyes of the dictionary.
 
-    Additionally it contains methods for nicely displaying the contents on the screen.
+    Additionally contains methods for nicely displaying the contents on screen.
     """
     def __init__(self, filename):
         self.filename = filename
-        with open(self.filename) as f:
-            self.meta = yaml.safe_load(f)
+        with open(self.filename, encoding="utf-8") as file:
+            self.meta = yaml.safe_load(file)
         for key in self.meta:
             setattr(self, key, self.meta[key])
 
-    def dump(self):
+    def dump(self) -> None:
         """
         (Try to) nicely dump the contents of the library
 
@@ -44,14 +50,13 @@ class DataContainer:
         -------
 
         """
-        print(yaml.dump(self.meta,
-                        indent=4, sort_keys=False, default_flow_style=False))
+        print(yaml.dump(
+            self.meta, indent=4, sort_keys=False, default_flow_style=False))
 
 
 class Database(DataContainer):
     """
-    This class contains the database.
-
+    Contains the database.
 
     It also acts as a lazy fetcher for remote data.
     When asked for local absolute path to a file or directory, Database
@@ -77,83 +82,70 @@ class Database(DataContainer):
     """
 
     def __init__(self, silent=False):
-
-        conf = Config()
-        self.database_url = conf.get_database_url()
-
-        if not self.database_url.endswith('/'):
-            self.database_url = self.database_url + '/'
-
-        self.data_dir = conf.get_data_dir()
+        self.database_url = CONF.get_database_url()
+        self.data_dir = CONF.get_data_dir()
         self.ymlfile = "index.yml"
         self.path = self.abspath(self.ymlfile, silent=silent)
 
         super().__init__(filename=self.path)
 
-        self.liblist,  self.relpathlist = self._makelists()
+        self.liblist, self.relpathlist = self._makelists()
 
     def abspath(self, relpath, reload=False, silent=False):
         """
         Return absolute path to file or directory, ensuring that it exists.
-        If it doesn't exist it will download it from the remote host
 
-        Otherwise, just look for ``{relpath}``.
+        If it doesn't exist it will download it from the remote host.
+        Otherwise, just look for `relpath`.
         """
-
-        abspath = os.path.join(self.data_dir, relpath)
-        if (os.path.exists(abspath) is False) or (reload is True):
-            print("updating/loading '%s'" % relpath )
-            remote_path = relpath.split(os.sep)
-            url = urljoin(self.database_url, *remote_path)
-            download_file(url, abspath, silent=silent)
+        # TODO: The name of this method does not at all suggest it will
+        #       perform a download, which is non-trivial.
+        relpath = Path(relpath)
+        abspath = self.data_dir / relpath
+        if reload or not abspath.exists():
+            print(f"updating/loading '{relpath!s}'" )
+            url = urljoin(self.database_url, *relpath.parts)
+            download_file(url, str(abspath), silent=silent)
 
         return abspath
 
-    def remove_database(self):
-        """
-        Remove database and all files
-        """
+    def remove_database(self) -> None:
+        """Remove database and all files."""
         try:
             shutil.rmtree(self.data_dir)
-            print("database at %s removed" % self.data_dir)
+            print(f"database at {self.data_dir} removed")
         except FileNotFoundError:
-            print("database at %s doesn't exist" % self.data_dir)
+            print(f"database at {self.data_dir} doesn't exist")
             raise
 
-    def update(self):
-        """
-        Force an update of the cached database file
-        """
+    def update(self) -> None:
+        """Force an update of the cached database file."""
         self.abspath(self.ymlfile, reload=True,  silent=False)
 
     def _makelists(self):
-        """
-        just make lists of the libraries and paths in the database"
-        """
-        a = list(dict_generator(self.meta))
-        separator = '/'
-        libs = [e[1:] for e in a]
+        """Make lists of the libraries and paths in the database."""
+        meta_list = list(dict_generator(self.meta))
+        separator = "/"
+        libs = [e[1:] for e in meta_list]
         liblist = [separator.join(e) for e in libs]
-        relpathlist = [separator.join(e) for e in a]
+        relpathlist = [separator.join(e) for e in meta_list]
 
         return liblist, relpathlist
 
-    def __repr__(self):
-        description = "Database:"
-        remote = "url: " + self.database_url
-        local = "path: " + self.data_dir
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}()"
 
-        return ' %s \n %s \n %s ' % (description, remote, local)
-
-    def __dir__(self):
-        str = "Database of spextra"
-        return str
+    def __str__(self) -> str:
+        outstr = ("Database:\n"
+                  f"url: {self.database_url}\n"
+                  f"path: {self.data_dir}\n")
+        return outstr
 
 
 class DefaultData:
-    """
-    small class just to define defaults spectra and filters
-    """
+    """Small class just to define defaults spectra and filters."""
+    # TODO: where is this class used?? is it supposed to be inherited or smth?
+
     def __init__(self, **kwargs):
 
         database = Database()
@@ -170,377 +162,304 @@ class DefaultData:
         database = Database()
         path = database.abspath(ymlfile, **kwargs)
 
-        with open(path) as filename:
+        with open(path, encoding="utf-8") as filename:
             dictionary = yaml.safe_load(filename)
         return dictionary
 
     @staticmethod
-    def update():
+    def update() -> None:
         DefaultData(silent=False, reload=True)
 
 
 class Library(DataContainer):
     """
-    Class that contains the information of a Library, either spectral
-    of a filter system, extinction curves, etc
+    Class that contains the information of a Library.
+    
+    Either spectral of a filter system, extinction curves, etc.
     """
     def __init__(self, library_name):
         self.name = library_name
-        database = Database()
+        self.title = "<untitled>"
+        self.wave_unit = None
+        self.file_extension = None
+        self.items = []
 
+        database = Database()
         if library_name not in database.liblist:
-            raise ValueError("Library '%s' not in the database" % library_name)
-        else:
-            index = database.liblist.index(library_name)
-            self.relpath = database.relpathlist[index]
+            raise ValueError(f"Library '{library_name}' not in the database")
+
+        index = database.liblist.index(library_name)
+        self.relpath = database.relpathlist[index]
 
         self.ymlfile = "index.yml"
-        self.path = database.abspath(os.path.join(self.relpath, self.ymlfile))
+        self.path = database.abspath(Path(self.relpath, self.ymlfile))
         self.dir = database.abspath(self.relpath)
         self.url = urljoin(database.data_dir, self.relpath, self.ymlfile)
         super().__init__(filename=self.path)
 
-    def remove(self):
-        """
-        Remove library and all files.
-        """
+    def download_all(self) -> None:
+        """Download the whole library."""
+        database = Database()
+        for item in self.items:
+            database.abspath(Path(self.name, item))
+
+    def remove(self) -> None:
+        """Remove library and all files."""
         try:
             shutil.rmtree(self.dir)
-            print("library %s removed" % self.name)
+            print(f"library {self.name} removed")
         except FileNotFoundError:
-            print("library %s doesn't exist" % self.name)
+            print(f"library {self.name} doesn't exist")
             raise
 
-    def update(self):
-        """
-        Update the library file
-        """
+    def update(self) -> None:
+        """Update the library file."""
         database = Database()
-        database.abspath(os.path.join(self.relpath, self.ymlfile), reload=True, silent=False)
+        database.abspath(Path(self.relpath, self.ymlfile), reload=True,
+                         silent=False)
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.name!r})"
 
 
 class SpecLibrary(Library):
 
     def __init__(self, library_name):
-
+        self.templates = {}
+        self.flux_unit = "<unknown>"
+        self.spectral_coverage = []
         super().__init__(library_name)
 
         self.template_names = list(self.templates.keys())
         self.template_comments = list(self.templates.values())
         self.files = [t + self.file_extension for t in self.template_names]
 
-    def download_all(self):
-        """
-        Download the whole library
-        """
+        self.items = self.template_names
 
-        database = Database()
-        for template in self.template_names:
-            database.abspath(os.path.join(self.library_name, template))
-
-    def __repr__(self):
-        description = "Spectral Library: " + self.library_name + " " + self.title
-        spec_cov = "spectral coverage: " + str(self.spectral_coverage)
-        units = "wave_unit: " + self.wave_unit + "  flux_unit: " + self.flux_unit
-        templates = "Templates: " + str(self.template_names)
-
-        return ' %s \n %s \n %s \n %s' % (description, spec_cov, units, templates)
-
-    def __str__(self):
-        return self.library_name
+    def __str__(self) -> str:
+        outstr = (f"Spectral Library '{self.name}': {self.title}\n"
+                  f"spectral coverage: {', '.join(self.spectral_coverage)}\n"
+                  f"wave_unit: {self.wave_unit}\n"
+                  f"flux_unit: {self.flux_unit}\n"
+                  f"Templates: {', '.join(self.template_names)}")
+        return outstr
 
 
 class FilterSystem(Library):
-    """
-        This class contains the information of a filter system
-
-        """
+    """Contains the information of a filter system."""
 
     def __init__(self, filter_system):
-
+        self.filters = {}
+        self.spectral_coverage = []
         super().__init__(filter_system)
 
         self.filter_names = list(self.filters.keys())
         self.filter_comments = list(self.filters.values())
         self.files = [f + self.file_extension for f in self.filter_names]
 
-    def download_all(self):
-        """
-        Download the whole library
-        """
+        self.items = self.filter_names
 
-        database = Database()
-        for filt in self.filter_names:
-            database.abspath(os.path.join(self.filter_system, filt))
-
-    def __repr__(self):
-        description = "Filter system: " + self.filter_system + " " + self.title
-        spec_cov = "spectral coverage: " + str(self.spectral_coverage)
-        units = "wave_unit: " + self.wave_unit
-        filters = "filters: " + str([self.name + "/" + k for k in self.filters.keys()])
-
-        return ' %s \n %s \n %s \n %s' % (description, spec_cov, units, filters)
-
-    def __str__(self):
-        return self.filter_system
+    def __str__(self) -> str:
+        filters = [f"{self.name}/{key}" for key in self.filters]
+        outstr = (f"Filter system '{self.name}': {self.title}\n"
+                  f"spectral coverage: {', '.join(self.spectral_coverage)}\n"
+                  f"wave_unit: {self.wave_unit}\n"
+                  f"filters: {', '.join(filters)}")
+        return outstr
 
 
 class ExtCurvesLibrary(Library):
-    """
-    Class that contains the information of the a Extinction Curve Library
-    """
-    def __init__(self, curve_library):
+    """Contains the information of the a Extinction Curve Library."""
 
+    def __init__(self, curve_library):
+        self.curves = {}
         super().__init__(curve_library)
 
         self.curve_names = list(self.curves.keys())
         self.curve_comments = list(self.curves.values())
         self.files = [e + self.file_extension for e in self.curve_names]
 
-    def download_all(self):
-        """
-        Download the whole library
-        """
+        self.items = self.curve_names
 
-        database = Database()
-        for curve in self.curve_names:
-            database.abspath(os.path.join(self.curve_name, curve))
-
-    def __repr__(self):
-        description = "Extinction Curves: " + self.name + " " + self.title
-        units = "wave_unit: " + self.wave_unit + "  flux_unit: " + self.flux_unit
-        templates = "Templates: " + str(self.curves)
-
-        return ' %s \n %s \n %s \n %s' % (description, units, templates)
-
-    def __str__(self):
-        return self.curve_name
+    def __str__(self) -> str:
+        outstr = (f"Extinction Curves '{self.name}': {self.title}\n"
+                  f"wave_unit: {self.wave_unit}\n"
+                  f"Templates: {self.curves!s}")
+        return outstr
 
 
-class SpectrumContainer(SpecLibrary):
+class DBFile:
+    """Mixin base class for database files."""
+
+    _subclass_key = None
+
+    def __init__(self, path=None):
+        self.path = path
+        self.meta = {}
+
+    def remove(self) -> None:
+        """Remove the file."""
+        try:
+            shutil.rmtree(self.path)
+            print(f"library {self.path} removed")
+        except FileNotFoundError:
+            print(f"file {self.path} doesn't exist")
+            raise
+
+    def _update_attrs(self) -> None:
+        """Delete unnecessary stuff."""
+        self.meta.pop("summary", None)
+        self.__dict__.pop("summary", None)
+        self.__dict__.pop("ymlfile", None)
+
+        if self._subclass_key is not None:
+            self.meta.pop(f"{self._subclass_key}s", None)
+            self.__dict__.pop(f"{self._subclass_key}s", None)
+            self.__dict__.pop(f"{self._subclass_key}_names", None)
+            self.__dict__.pop(f"{self._subclass_key}_comments", None)
+
+
+class SpectrumContainer(SpecLibrary, DBFile):
     """
-    A holder of spectral template information, including template characteristics and location
+    Container of spectral template information.
+    
+    Including template characteristics and location.
     """
+
+    _subclass_key = "template"
 
     def __init__(self, template):
         self.template = template
-        self.template_name = os.path.basename(self.template)
-
-        library_name = os.path.dirname(self.template)
+        *library_name, self.template_name = self.template.split("/")
+        if isinstance(library_name, list):
+            library_name = "/".join(library_name)
         super().__init__(library_name=library_name)
 
         if self.template_name not in self.template_names:
-            raise ValueError("Template '%s' not in library" % self.template)
+            raise ValueError(f"Template '{self.template}' not in library")
 
         self.datafile = self.template_name + self.file_extension
 
         database = Database()
 
-        self.path = database.abspath(os.path.join(self.relpath, self.datafile))
+        self.path = database.abspath(Path(self.relpath, self.datafile))
         self.url = urljoin(database.database_url, self.relpath, self.datafile)
         self.template_comment = self.templates[self.template_name]
         self.filename = self.path
         self._update_attrs()
 
-    def remove(self):
-        """
-        remove the file
-        """
-        try:
-            shutil.rmtree(self.path)
-            print("library %s removed" % self.path)
-        except FileNotFoundError:
-            print("file %s doesn't exist" % self.path)
-            raise
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.template!r})"
 
-    def _update_attrs(self):
-        """
-        Here to just delete unnecessary stuff
-        Returns
-        -------
-        """
-        self.meta.pop("templates", None)
-        self.meta.pop("summary", None)
-        self.__dict__.pop("templates", None)
-        self.__dict__.pop("summary", None)
-        self.__dict__.pop("template_names", None)
-        self.__dict__.pop("template_comments", None)
-        self.__dict__.pop("ymlfile", None)
-
-    def __repr__(self):
-
-        s1 = "Spectral template: %s" % (self.template)
-
-        return s1
+    def __str__(self) -> str:
+        return f"Spectral template '{self.template}'"
 
 
-class FilterContainer(FilterSystem):
+class FilterContainer(FilterSystem, DBFile):
+
+    _subclass_key = "filter"
 
     def __init__(self, filter_name):
-
         self.filter_name = filter_name
-
-        self.basename = os.path.basename(self.filter_name)
-        filter_system = os.path.dirname(self.filter_name)
+        *filter_system, self.basename = filter_name.split("/")
+        if isinstance(filter_system, list):
+            filter_system = "/".join(filter_system)
 
         super().__init__(filter_system=filter_system)
         if self.basename not in self.filters:
-            raise ValueError("Filter %s not in library" % self.filter_name)
+            raise ValueError(f"Filter {self.filter_name} not in library")
 
         database = Database()
 
         self.datafile = self.basename + self.file_extension
-        self.path = database.abspath(os.path.join(self.relpath, self.datafile))
+        self.path = database.abspath(Path(self.relpath, self.datafile))
         self.url = urljoin(database.database_url, self.relpath, self.datafile)
         self.filter_comment = self.filters[self.basename]
         self.filename = self.path
 
         self._update_attrs()
 
-    def remove(self):
-        """
-        remove the file
-        """
-        try:
-            shutil.rmtree(self.path)
-            print("file %s removed" % self.path)
-        except FileNotFoundError:
-            print("file %s doesn't exist" % self.path)
-            raise
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.filter_name!r})"
 
-    def _update_attrs(self):
-        """
-        Here to just delete unnecessary stuff
-        """
-        self.meta.pop("filterrs", None)
-        self.meta.pop("summary", None)
-        self.__dict__.pop("filters", None)
-        self.__dict__.pop("summary", None)
-        self.__dict__.pop("filter_names", None)
-        self.__dict__.pop("filter_comments", None)
-        self.__dict__.pop("ymlfile", None)
-
-    def __repr__(self):
-        s = "Filter: " + self.filter_name
-        return s
+    def __str__(self) -> str:
+        return f"Filter '{self.filter_name}'"
 
 
-class ExtCurveContainer(ExtCurvesLibrary):
+class ExtCurveContainer(ExtCurvesLibrary, DBFile):
+
+    _subclass_key = "curve"
 
     def __init__(self, curve_name):
-
         self.curve_name = curve_name
-        self.basename = os.path.basename(self.curve_name)
-        curve_library = os.path.dirname(self.curve_name)
+        *curve_library, self.basename = curve_name.split("/")
+        if isinstance(curve_library, list):
+            curve_library = "/".join(curve_library)
 
         super().__init__(curve_library=curve_library)
 
         if self.basename not in self.curve_names:
-            raise ValueError("Extinction Curve '%s' not in library" % self.curve_name)
+            raise ValueError(f"Extinction Curve '{self.curve_name}' not in "
+                             "library")
 
         database = Database()
 
         self.datafile = self.basename + self.file_extension
-        self.path = database.abspath(os.path.join(self.relpath, self.datafile))
+        self.path = database.abspath(Path(self.relpath, self.datafile))
         self.url = urljoin(database.database_url, self.relpath, self.datafile)
         self.curve_comment = self.curves[self.basename]
         self.filename = self.path
 
         self._update_attrs()
 
-    def remove(self):
-        """
-        remove the file
-        """
-        try:
-            shutil.rmtree(self.path)
-            print("file %s removed" % self.path)
-        except FileNotFoundError:
-            print("file %s doesn't exist" % self.path)
-            raise
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.curve_name!r})"
 
-    def _update_attrs(self):
-        """
-        Here to just delete unnecessary stuff
-        """
-        self.meta.pop("curves", None)
-        self.meta.pop("summary", None)
-        self.__dict__.pop("curves", None)
-        self.__dict__.pop("summary", None)
-        self.__dict__.pop("curve_names", None)
-        self.__dict__.pop("curve_comments", None)
-        self.__dict__.pop("ymlfile", None)
-
-    def __repr__(self):
-        s = "Extinction curve: " + self.curve_name
-        return s
-
+    def __str__(self) -> str:
+        return f"Extinction curve '{self.curve_name}'"
 
 # TODO: functions
 
 
 def get_library(library_name):
-    """
-    Download library and all files
-    """
-    pass
+    """Download library and all files."""
+    raise NotImplementedError()
 
 
 def get_filter_system(filter_system):
-    """
-    download all filters of a system
-    """
-    pass
+    """Download all filters of a system."""
+    raise NotImplementedError()
 
 
 def get_extcurves(extinction_curves):
-    """
-    Download all extinction curves
-    """
-    pass
+    """Download all extinction curves."""
+    raise NotImplementedError()
 
 
 def download_database():
-    """
-    Download
-    """
-    pass
+    """Download."""
+    raise NotImplementedError()
 
 
 def set_root_dir(path):
     """
     Set the root dir where the files will be stored.
-    Probably best way is to write a small file in the data directory.
 
+    Probably best way is to write a small file in the data directory.
 
     Also get root dir should be also able to read from that file.
 
     Database should be get rid of initialiting parameters or use them
     to set new directories
     """
-    pass
+    raise NotImplementedError()
 
 
-#
 def database_as_table():
-    """
-    Show the contents of the database as table
-    Returns
-    -------
-
-    """
-
-    pass
+    """Show the contents of the database as table."""
+    raise NotImplementedError()
 
 
 def database_as_tree():
-    """
-    Show the contents od the database as a tree
-    Returns
-    -------
-
-    """
-    pass
-
-
-
+    """Show the contents od the database as a tree."""
+    raise NotImplementedError()

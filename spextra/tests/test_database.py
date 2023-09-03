@@ -6,10 +6,8 @@ import inspect
 import os
 import pytest
 
-import spextra
-from spextra.database import DataContainer, Database, SpecLibrary, FilterSystem, ExtCurvesLibrary
+from spextra.database import DataContainer, Database, SpecLibrary
 from spextra.utils import Config
-
 
 
 def mock_dir():
@@ -45,7 +43,8 @@ class TestSpecLibrary:
 
     database = Database()
     libraries = database.libraries
-    needed_attr = ["file_extension", "data_type"]   # list here the mandatory attributes TODO: Fill that
+    # list here the mandatory attributes TODO: Fill that
+    needed_attr = ["file_extension", "data_type"]
 
     @pytest.mark.parametrize("library_name", libraries)
     def test_name(self, library_name):
@@ -63,5 +62,3 @@ class TestSpecLibrary:
     def test_attr(self, library_name, attribute):
         lib = SpecLibrary(library_name)
         assert hasattr(lib, attribute)
-
-

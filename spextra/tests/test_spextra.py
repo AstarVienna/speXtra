@@ -10,7 +10,6 @@ import astropy.units as u
 from astropy.constants import c
 from synphot import SpectralElement, SourceSpectrum, units
 
-import spextra
 from spextra import Spextrum, Passband
 
 
@@ -26,13 +25,11 @@ MOCK_DIR = mock_dir()
 
 def test_make_passband_no_file():
     with pytest.raises(FileNotFoundError) as e_info:
-        pb = Passband.from_file(filename="blablabla")
+        _ = Passband.from_file(filename="blablabla")
         print(e_info)
 
 
-
 class TestPassbandInstances:
-
     def test_alias(self):
         passband = Passband("U")
         assert isinstance(passband, SpectralElement)
@@ -155,8 +152,8 @@ class TestSpextrumInstances:
 class TestSpextrum:
 
     def test_wrong_load(self):
-        with pytest.raises(ValueError) as e_info:
-            sp = Spextrum("kc96/wrong_name")
+        with pytest.raises(ValueError):
+            _ = Spextrum("kc96/wrong_name")
 
     @pytest.mark.parametrize("unit", [u.mag, u.STmag, u.ABmag])
     def test_ref_spectrum_is_right(self, unit):
@@ -178,8 +175,10 @@ class TestSpextrum:
 
     @pytest.mark.parametrize("unit", [u.mag, u.ABmag, u.STmag])
     def test_correct_scaling(self, unit):
-        sp1 = Spextrum("kc96/s0").scale_to_magnitude(amplitude=14*unit, filter_curve="SLOAN/SDSS.rprime_filter")
-        sp2 = Spextrum("kc96/s0").scale_to_magnitude(amplitude=15*unit, filter_curve="SLOAN/SDSS.rprime_filter")
+        sp1 = Spextrum("kc96/s0").scale_to_magnitude(
+            amplitude=14*unit, filter_curve="SLOAN/SDSS.rprime_filter")
+        sp2 = Spextrum("kc96/s0").scale_to_magnitude(
+            amplitude=15*unit, filter_curve="SLOAN/SDSS.rprime_filter")
 
         flux1 = sp1(sp1.waveset[(sp1.waveset.value > 6231 - 200) &
                                 (sp1.waveset.value < 6231 + 200)]).value
@@ -193,7 +192,8 @@ class TestSpextrum:
     def test_vega2ab(self, filt):
         """
         test if the convertion between AB and Vega is correct
-        conversions taken from:  http://www.astronomy.ohio-state.edu/~martini/usefuldata.html
+        conversions taken from:
+        http://www.astronomy.ohio-state.edu/~martini/usefuldata.html
 
         absolute tolerance set to 0.15 mag to account for filter differences
 
@@ -241,7 +241,7 @@ class TestSpextrum:
 
         sp = Spextrum.from_arrays(waves, flux)
 
-        inwaves  = c.value / waves.value
+        inwaves = c.value / waves.value
         outwaves = sp.waveset.to(u.m).value
 
         assert np.isclose(inwaves[::-1], outwaves).all()
@@ -251,8 +251,6 @@ class TestSpextrum:
         w1 = 3001*u.AA
         w2 = 4000*u.AA
         sp2 = sp.cut(w1, w2)
-        assert np.isclose(sp2.wave_min.value, w1.value, atol=np.abs(sp2.waveset[0].value - sp2.waveset[1].value))
-
-
-
-
+        assert np.isclose(sp2.wave_min.value, w1.value,
+                          atol=np.abs(sp2.waveset[0].value -
+                                      sp2.waveset[1].value))
