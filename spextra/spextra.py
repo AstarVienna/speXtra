@@ -276,7 +276,7 @@ class ExtinctionCurve(ReddeningLaw, ExtCurveContainer):
         return meta, lam, rvs
 
 
-class Spextrum(SpectrumContainer, SourceSpectrum):
+class Spextrum(SourceSpectrum, SpectrumContainer):
     """
     Class to handle spectra.
 
