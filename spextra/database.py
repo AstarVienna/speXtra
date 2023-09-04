@@ -4,6 +4,7 @@
 import shutil
 from posixpath import join as urljoin
 from pathlib import Path
+import warnings
 
 import yaml
 
@@ -192,15 +193,27 @@ class Library(DataContainer):
         self.relpath = database.relpathlist[index]
 
         self.ymlfile = "index.yml"
-        self.path = database.abspath(Path(self.relpath, self.ymlfile))
         self.dir = database.abspath(self.relpath)
-        self.url = urljoin(database.data_dir, self.relpath, self.ymlfile)
         super().__init__(filename=self.path)
 
         self.title = self.meta.get("title", "<untitled>")
         self.wave_unit = self.meta.get("wave_unit", None)
         self.data_type = self.meta.get("data_type", None)
         self.file_extension = self.meta.get("file_extension", None)
+
+    @property
+    def path(self):
+        database = Database()
+        return database.abspath(Path(self.relpath, self.ymlfile))
+
+    @property
+    def url(self):
+        database = Database()
+        return urljoin(database.data_dir, self.relpath, self.ymlfile)
+
+    @property
+    def files(self):
+        return [e + self.file_extension for e in self.items]
 
     def download_all(self) -> None:
         """Download the whole library."""
@@ -239,10 +252,8 @@ class SpecLibrary(Library):
         self.wave_column_name = self.meta.get("wave_column_name", None)
         self.flux_column_name = self.meta.get("flux_column_name", None)
 
-
         self.template_names = list(self.templates.keys())
         self.template_comments = list(self.templates.values())
-        self.files = [t + self.file_extension for t in self.template_names]
 
         self.items = self.template_names
 
@@ -267,7 +278,6 @@ class FilterSystem(Library):
 
         self.filter_names = list(self.filters.keys())
         self.filter_comments = list(self.filters.values())
-        self.files = [f + self.file_extension for f in self.filter_names]
 
         self.items = self.filter_names
 
@@ -292,7 +302,6 @@ class ExtCurvesLibrary(Library):
 
         self.curve_names = list(self.curves.keys())
         self.curve_comments = list(self.curves.values())
-        self.files = [e + self.file_extension for e in self.curve_names]
 
         self.items = self.curve_names
 
@@ -304,13 +313,49 @@ class ExtCurvesLibrary(Library):
 
 
 class DBFile:
-    """Mixin base class for database files."""
+    """Base class for database files."""
 
+    library = None  # necessary to avoid access before init ran
     _subclass_key = None
+    _subclass_library = Library
 
-    def __init__(self, path=None):
-        self.path = path
-        self.meta = {}
+    def __init__(self, library_name: str, basename: str):
+        self.basename = basename
+        self.library = self._subclass_library(library_name)
+
+    @property
+    def datafile(self):
+        return self.basename + self.library.file_extension
+
+    @property
+    def path(self):
+        database = Database()
+        return database.abspath(Path(self.library.relpath, self.datafile))
+
+    @property
+    def filename(self):
+        warnings.warn("The .filename property will be deprecated in v1.0. "
+                      "Please use the identical .path instead!",
+                      DeprecationWarning, 2)
+        return self.path
+
+    @property
+    def name(self):
+        warnings.warn("Accessing the library name directly via the .name "
+                      "property is ambiguous. In future versions, .name will "
+                      "refer to the current .basename attribute. "
+                      "Please use the more explicit .library.name instead!",
+                      DeprecationWarning, 2)
+        return self.library.name
+
+    @property
+    def url(self):
+        database = Database()
+        return urljoin(database.database_url, self.library.relpath, self.datafile)
+
+    @property
+    def comment(self):
+        return self.library.items[self.basename]
 
     def remove(self) -> None:
         """Remove the file."""
@@ -321,15 +366,12 @@ class DBFile:
             print(f"file {self.path} doesn't exist")
             raise
 
-    def _update_attrs(self) -> None:
-        """Delete unnecessary stuff."""
-        self.meta.pop("summary", None)
-
-        if self._subclass_key is not None:
-            self.meta.pop(f"{self._subclass_key}s", None)
+    def __getattr__(self, name):
+        """Allow (hacky) direct access to attributes of library."""
+        return getattr(self.library, name)
 
 
-class SpectrumContainer(SpecLibrary, DBFile):
+class SpectrumContainer(DBFile):
     """
     Container of spectral template information.
     
@@ -337,26 +379,26 @@ class SpectrumContainer(SpecLibrary, DBFile):
     """
 
     _subclass_key = "template"
+    _subclass_library = SpecLibrary
 
     def __init__(self, template):
         self.template = template
-        *library_name, self.template_name = self.template.split("/")
+        *library_name, basename = self.template.split("/")
+        self.template_name = basename
         if isinstance(library_name, list):
             library_name = "/".join(library_name)
-        super().__init__(library_name=library_name)
 
-        if self.template_name not in self.template_names:
+        super().__init__(library_name, basename)
+
+        if self.template_name not in self.library.items:
             raise ValueError(f"Template '{self.template}' not in library")
 
-        self.datafile = self.template_name + self.file_extension
-
-        database = Database()
-
-        self.path = database.abspath(Path(self.relpath, self.datafile))
-        self.url = urljoin(database.database_url, self.relpath, self.datafile)
-        self.template_comment = self.templates[self.template_name]
-        self.filename = self.path
-        self._update_attrs()
+    @property
+    def template_comment(self):
+        warnings.warn("The .template_comment property will be deprecated in "
+                      "v1.0. Please use the identical .comment instead!",
+                      DeprecationWarning, 2)
+        return self.comment
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.template!r})"
@@ -365,29 +407,28 @@ class SpectrumContainer(SpecLibrary, DBFile):
         return f"Spectral template '{self.template}'"
 
 
-class FilterContainer(FilterSystem, DBFile):
+class FilterContainer(DBFile):
 
     _subclass_key = "filter"
+    _subclass_library = FilterSystem
 
     def __init__(self, filter_name):
         self.filter_name = filter_name
-        *filter_system, self.basename = filter_name.split("/")
+        *filter_system, basename = filter_name.split("/")
         if isinstance(filter_system, list):
             filter_system = "/".join(filter_system)
 
-        super().__init__(filter_system=filter_system)
-        if self.basename not in self.filters:
+        super().__init__(filter_system, basename)
+
+        if self.basename not in self.library.items:
             raise ValueError(f"Filter {self.filter_name} not in library")
 
-        database = Database()
-
-        self.datafile = self.basename + self.file_extension
-        self.path = database.abspath(Path(self.relpath, self.datafile))
-        self.url = urljoin(database.database_url, self.relpath, self.datafile)
-        self.filter_comment = self.filters[self.basename]
-        self.filename = self.path
-
-        self._update_attrs()
+    @property
+    def filter_comment(self):
+        warnings.warn("The .filter_comment property will be deprecated in "
+                      "v1.0. Please use the identical .comment instead!",
+                      DeprecationWarning, 2)
+        return self.comment
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.filter_name!r})"
@@ -396,31 +437,29 @@ class FilterContainer(FilterSystem, DBFile):
         return f"Filter '{self.filter_name}'"
 
 
-class ExtCurveContainer(ExtCurvesLibrary, DBFile):
+class ExtCurveContainer(DBFile):
 
     _subclass_key = "curve"
+    _subclass_library = ExtCurvesLibrary
 
     def __init__(self, curve_name):
         self.curve_name = curve_name
-        *curve_library, self.basename = curve_name.split("/")
+        *curve_library, basename = curve_name.split("/")
         if isinstance(curve_library, list):
             curve_library = "/".join(curve_library)
 
-        super().__init__(curve_library=curve_library)
+        super().__init__(curve_library, basename)
 
-        if self.basename not in self.curve_names:
+        if self.basename not in self.library.items:
             raise ValueError(f"Extinction Curve '{self.curve_name}' not in "
                              "library")
 
-        database = Database()
-
-        self.datafile = self.basename + self.file_extension
-        self.path = database.abspath(Path(self.relpath, self.datafile))
-        self.url = urljoin(database.database_url, self.relpath, self.datafile)
-        self.curve_comment = self.curves[self.basename]
-        self.filename = self.path
-
-        self._update_attrs()
+    @property
+    def curve_comment(self):
+        warnings.warn("The .curve_comment property will be deprecated in "
+                      "v1.0. Please use the identical .comment instead!",
+                      DeprecationWarning, 2)
+        return self.comment
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.curve_name!r})"
