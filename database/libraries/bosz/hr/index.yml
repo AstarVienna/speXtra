@@ -66,8 +66,8 @@ templates:  # comments
   k0iii :    T=4750,     log(g)=2.00      
   k5iii :    T=4000,     log(g)=1.50      
   m0iii :    T=3750,     log(g)=1.50      
-  bOi   :    T=26000,    log(g)=3.00      
-  aOi   :    T=9750,     log(g)=2.00      
+  b0i   :    T=26000,    log(g)=3.00      
+  a0i   :    T=9750,     log(g)=2.00      
   a5i   :    T=8500,     log(g)=2.00      
   f0i   :    T=7750,     log(g)=1.50      
   f5i   :    T=7000,     log(g)=1.50      

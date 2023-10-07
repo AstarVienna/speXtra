@@ -110,7 +110,6 @@ templates:      # comments: star name, spec type
   G5V: HD165185    G5V
   G6.5V: HD115617    G6.5V
   G6IbH: delta1_HD161664_ext G6IbH
-  G6Ib-IIa: HD202314_ext.fit  G6Ib-IIaCa1Ba0.5
   G6IIb: HD58367  G6IIb
   G6III: HD27277  G6III
   G7.5IIIa: HD16139_ext  G7.5IIIa

@@ -11,7 +11,7 @@ source : Gordon et al. 2003, ApJ, 594, 279
 
 wave_unit : 1/um
 
-extinction_unit : Av/E(B-V)
+extinction_unit : mag
 
 wave_column : WAVELENGTH
 
@@ -25,4 +25,3 @@ curves: # comment
   lmc_30dor:  LMC Supershell 30Dor R_V = 2.76
   lmc_diffuse: LMC Average R_V = 3.41
   smc_bar: SMC Average R_V = 2.74
-
