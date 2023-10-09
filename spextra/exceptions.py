@@ -27,7 +27,7 @@ class ArgumentError(SpextraError, ValueError):
     """Error in passed arguments."""
 
 
-class CunstructorError(ArgumentError):
+class ConstructorError(ArgumentError):
     """Error in constructor arguments."""
 
 
