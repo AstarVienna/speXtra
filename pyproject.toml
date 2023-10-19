@@ -1,6 +1,6 @@
 [project]
 name = "speXtra"
-version = "0.34-alpha"
+version = "0.40a0"
 description = "Tool to manage and manipulate  astronomical spectra"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -12,13 +12,13 @@ authors = [
 maintainers = [
     {name = "Kieran Leschinski", email="kieran.leschinski@unive.ac.at"},
     {name = "Hugo Buddelmeijer", email="hugo@buddelmeijer.nl"},
+    {name = "Fabian Haberhauer", email="fabian.haberhauer@unive.ac.at"},
 ]
 classifiers=[
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Intended Audience :: Science/Research",
-    "Topic :: Scientific/Engineering :: Astronomy",
     "Topic :: Scientific/Engineering :: Astronomy",
 ]
 dependencies = [
