@@ -20,18 +20,14 @@ from synphot.models import (Empirical1D, GaussianFlux1D, Gaussian1D, Box1D,
 from synphot.specio import read_ascii_spec, read_fits_spec
 from synphot import exceptions
 
-from .database import SpectrumContainer, FilterContainer, ExtCurveContainer, \
-    DefaultData
-from .utils import download_svo_filter, SpextraError, \
-    _ensure_list, _angstrom_qty, _angstrom_value, _abmag_qty
+from .database import DEFAULT_DATA
+from .containers import SpectrumContainer, FilterContainer, ExtCurveContainer
+from .utils import _ensure_list, _angstrom_qty, _angstrom_value, _abmag_qty
+from .downloads import download_svo_filter
+from .exceptions import SpextraError, ArgumentError, ConstructorError
 
 
 __all__ = ["Spextrum", "Passband", "ExtinctionCurve",  "get_vega_spectrum"]
-
-
-DEFAULT_FILTERS = DefaultData().filters
-DEFAULT_SPECTRA = DefaultData().spectra
-DEFAULT_CURVES = DefaultData().extcurves
 
 
 class Passband(SpectralElement, FilterContainer):
@@ -42,32 +38,37 @@ class Passband(SpectralElement, FilterContainer):
 
     """
 
+    DEFAULT_FILTERS = DEFAULT_DATA.filters
+
     def __init__(self, filter_name=None, modelclass=None, **kwargs):
-
         if filter_name is not None:
-            if filter_name in DEFAULT_FILTERS:
-                filter_name = DEFAULT_FILTERS[filter_name]
-
-            try:
-                FilterContainer.__init__(self, filter_name)
-                meta, wave, trans = self._loader()
-                SpectralElement.__init__(self, Empirical1D, points=wave,
-                                         lookup_table=trans, meta=meta)
-            except ValueError:
-                try:  # try to download it from SVO
-                    meta, wave, trans = self._from_svo(filter_name)
-                    SpectralElement.__init__(self, Empirical1D, points=wave,
-                                             lookup_table=trans,
-                                             meta=meta)
-                except ValueError:
-                    raise SpextraError(f"Filter {filter_name} doesn't exist.")
-
+            self.from_filter_name(filter_name)
         elif modelclass is not None:
-            SpectralElement.__init__(self, modelclass, **kwargs)
+            self.from_modelclass(modelclass, **kwargs)
         else:
-            raise ValueError("please define a filter")
+            raise ConstructorError(
+                "Either filter_name or modelclass must be passed.")
 
-    def _loader(self):
+    # @classmethod
+    def from_filter_name(self, filter_name):
+        filter_name = self.DEFAULT_FILTERS.get(filter_name, filter_name)
+
+        FilterContainer.__init__(self, filter_name)
+
+        if self.is_in_library and self.library.is_in_database:
+            self._database_loader()
+        else:
+            try:  # try to download it from SVO
+                self._svo_loader(filter_name)
+            except ValueError:
+                raise SpextraError(f"Filter {filter_name} not found.")
+
+
+    # @classmethod
+    def from_modelclass(self, modelclass, **kwargs):
+        SpectralElement.__init__(self, modelclass, **kwargs)
+
+    def _database_loader(self):
         """
         Load a filter from the database.
 
@@ -77,22 +78,22 @@ class Passband(SpectralElement, FilterContainer):
         lam: wavelengths
         flux: flux
         """
+        meta, wave, flux = _read_spec(self.path, self.library.data_type,
+                                      **self.library.read_kwargs)
 
-        try:  # it should also try to read it from the file directly
-            self.wave_unit = units.validate_unit(self.wave_unit)
-        except exceptions.SynphotError:
-            self.wave_unit = u.AA
+        # TODO: why?
+        wave = wave.to(u.AA)
 
-        # FIXME: make try and except here to catch most problems
-        if self.data_type == "fits":
-            meta, lam, trans = read_fits_spec(self.filename, ext=1,
-                                              wave_unit=self.wave_unit)
-        elif self.data_type == "ascii":
-            meta, lam, trans = read_ascii_spec(self.filename,
-                                               wave_unit=self.wave_unit)
-        lam = lam.to(u.AA)
+        SpectralElement.__init__(self, Empirical1D, points=wave,
+                                 lookup_table=flux.value, meta=meta)
 
-        return meta, lam, trans.value
+    def _svo_loader(self, filter_name):
+        wave, trans = download_svo_filter(filter_name)
+        meta = {"filter_name": filter_name, "source": "SVO"}
+        self.library.read_kwargs["wave_unit"] = u.Unit(wave.unit)
+
+        SpectralElement.__init__(self, Empirical1D, points=wave,
+                                 lookup_table=trans, meta=meta)
 
     @classmethod
     def from_vectors(cls, waves, trans, meta=None, wave_unit=u.AA):
@@ -129,7 +130,11 @@ class Passband(SpectralElement, FilterContainer):
         -------
             New ``Passband`` instance.
         """
-        modelclass = SpectralElement.from_file(filename, **kwargs)
+        try:
+            modelclass = SpectralElement.from_file(str(filename), **kwargs)
+        except FileNotFoundError as err:
+            raise SpextraError(f"File {filename} not found.") from err
+
         return cls(modelclass=modelclass)
 
     @classmethod
@@ -186,14 +191,6 @@ class Passband(SpectralElement, FilterContainer):
                                      width=width)
         return cls(modelclass=modelclass)
 
-    def _from_svo(self, filter_name):
-        wave, trans = download_svo_filter(filter_name)
-        meta = {"filter_name": filter_name, "source": "SVO"}
-        self.filter_name = filter_name
-        self.wave_unit = u.AA
-
-        return meta, wave, trans
-
 
 class ExtinctionCurve(ReddeningLaw, ExtCurveContainer):
     """
@@ -202,20 +199,43 @@ class ExtinctionCurve(ReddeningLaw, ExtCurveContainer):
     TODO: Implement proper __add__, __sub__, __mul__, etc
 
     """
-    def __init__(self, curve_name=None, modelclass=None, **kwargs):
+
+    DEFAULT_CURVES = DEFAULT_DATA.extcurves
+
+    def __init__(self, curve_name=None, modelclass=None):
         if curve_name is not None:
-            if curve_name in DEFAULT_CURVES:
-                curve_name = DEFAULT_CURVES[curve_name]
-
-            ExtCurveContainer.__init__(self, curve_name)
-            meta, wave, rvs = self._loader()
-            ReddeningLaw.__init__(self, Empirical1D, points=wave,
-                                  lookup_table=rvs, meta=meta)
-
+            self.from_curve_name(curve_name)
         elif modelclass is not None:
-            ReddeningLaw.__init__(self, modelclass)
+            self.from_modelclass(modelclass)
         else:
-            raise ValueError("please define a filter")
+            raise ConstructorError(
+                "Either curve_name or modelclass must be passed.")
+
+    def from_curve_name(self, curve_name):
+        curve_name = self.DEFAULT_CURVES.get(curve_name, curve_name)
+
+        ExtCurveContainer.__init__(self, curve_name)
+        self._database_loader()
+
+
+    def from_modelclass(self, modelclass):
+        ReddeningLaw.__init__(self, modelclass)
+
+    def _database_loader(self):
+        """
+        Load a filter from the database
+
+        Returns
+        -------
+        meta: metadata of the spectra (header)
+        lam: wavelengths
+        flux: flux
+        """
+        meta, wave, flux = _read_spec(self.path, self.library.data_type,
+                                      **self.library.read_kwargs)
+
+        ReddeningLaw.__init__(self, Empirical1D, points=wave,
+                              lookup_table=flux, meta=meta)
 
     @classmethod
     def from_vectors(cls, waves, flux, meta=None, wave_unit=u.AA):
@@ -245,36 +265,6 @@ class ExtinctionCurve(ReddeningLaw, ExtCurveContainer):
         modelclass = ReddeningLaw.from_file(filename, **kwargs)
         return cls(modelclass=modelclass)
 
-    def _loader(self):
-        """
-        Load a filter from the database
-
-        Returns
-        -------
-        meta: metadata of the spectra (header)
-        lam: wavelengths
-        flux: flux
-        """
-        try:  # it should also try to read it from the file directly
-            self.wave_unit = units.validate_unit(self.wave_unit)
-        except exceptions.SynphotError:
-            self.wave_unit = u.AA
-
-        if self.data_type == "fits":
-            meta, lam, rvs = read_fits_spec(self.filename, ext=1,
-                                            wave_unit=self.wave_unit,
-                                            flux_unit=self.extinction_unit,
-                                            wave_col=self.wave_column,
-                                            flux_col=self.extinction_column)
-        elif self.data_type == "ascii":
-            meta, lam, rvs = read_ascii_spec(self.filename,
-                                             wave_unit=self.wave_unit,
-                                             flux_unit=self.extinction_unit,
-                                             wave_col=self.wave_column,
-                                             flux_col=self.extinction_column)
-
-        return meta, lam, rvs
-
 
 class Spextrum(SourceSpectrum, SpectrumContainer):
     """
@@ -294,26 +284,32 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
 
     """
 
+    DEFAULT_SPECTRA = DEFAULT_DATA.spectra
+
     def __init__(self, template_name=None, modelclass=None, **kwargs):
         if template_name is not None:
-            if template_name in DEFAULT_SPECTRA:
-                template_name = DEFAULT_SPECTRA[template_name]
-
-            SpectrumContainer.__init__(self, template_name)
-            meta, lam, flux = self._loader()
-            SourceSpectrum.__init__(self, Empirical1D, points=lam,
-                                    lookup_table=flux, meta=meta,  **kwargs)
-
-            self.repr = f"({self.template})"
-
+            self.from_template_name(template_name, **kwargs)
         elif modelclass is not None:
-            SourceSpectrum.__init__(self, modelclass=modelclass, **kwargs)
-            self.repr = None
-
+            self.from_modelclass(modelclass, **kwargs)
         else:
-            raise ValueError("please define a spectra")
+            raise ValueError(
+                "Either template_name or modelclass must be passed.")
 
-    def _loader(self):
+    def from_template_name(self, template_name, **kwargs):
+        template_name = self.DEFAULT_SPECTRA.get(template_name, template_name)
+
+        SpectrumContainer.__init__(self, template_name)
+        self._database_loader(**kwargs)
+        self.repr = f"({self.template})"
+
+    def from_modelclass(self, modelclass, **kwargs):
+        SourceSpectrum.__init__(self, modelclass=modelclass, **kwargs)
+        # FIXME: this None is problematic, as it's used for the repr, which
+        #        makes an instance of this look like None o.O
+        self.repr = None
+
+
+    def _database_loader(self, **kwargs):
         """
         Load a template from the database.
 
@@ -323,28 +319,11 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         lam: wavelengths
         flux: flux
         """
-        try:
-            self.wave_unit = units.validate_unit(self.wave_unit)
-            self.flux_unit = units.validate_unit(self.flux_unit)
-        except exceptions.SynphotError:   # Assumes angtroms and FLAM
-            self.wave_unit = u.AA
-            self.flux_unit = units.FLAM
+        meta, wave, flux = _read_spec(self.path, self.library.data_type,
+                                      **self.library.read_kwargs)
 
-        # self.resolution = self.resolution * self.wave_unit
-
-        # FIXME: make try and except here to catch most problems
-        if self.data_type == "fits":
-            meta, lam, flux = read_fits_spec(self.path, ext=1,
-                                             wave_unit=self.wave_unit,
-                                             flux_unit=self.flux_unit,
-                                             wave_col=self.wave_column_name,
-                                             flux_col=self.flux_column_name)
-        else:
-            meta, lam, flux = read_ascii_spec(self.path,
-                                              wave_unit=self.wave_unit,
-                                              flux_unit=self.flux_unit)
-
-        return meta, lam, flux
+        SourceSpectrum.__init__(self, Empirical1D, points=wave,
+                                lookup_table=flux, meta=meta, **kwargs)
 
     @classmethod
     def from_arrays(cls, waves, flux, meta=None, wave_unit=u.AA,
@@ -410,7 +389,7 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         amplitude: float, u.Quantity
             amplitude/magnitude of the reference spectrum, default=0
             default is u.ABmag
-            for vega use u.mag or ``synphot.units.VEGAMAG``
+            for vega use u.mag
 
         waves: The waveset of the reference spectrum if not Vega
            if not provided they will be created at a resolution of R~800
@@ -790,7 +769,7 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
                 filter_curve = SpectralElement(Box1D, amplitude=1,
                                                x_0=mid_point, width=width)
             except ValueError:
-                raise ValueError("Please specify wmin/wmax or a filter")
+                raise ArgumentError("Please specify wmin/wmax or a filter")
 
         elif Path(filter_curve).exists():
             filter_curve = Passband.from_file(filename=filter_curve)
@@ -836,7 +815,7 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
             try:
                 filter_curve = Passband.square(wmin=wmin, wmax=wmax)
             except ValueError:
-                raise ValueError("Please specify wmin/wmax or a filter")
+                raise ArgumentError("Please specify wmin/wmax or a filter")
         elif Path(filter_curve).exists():
             filter_curve = Passband.from_file(filename=filter_curve)
         elif not isinstance(filter_curve, (Passband, SpectralElement)):
@@ -929,8 +908,9 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
             line = GaussianFlux1D(mean=cent, total_flux=sign * flux,
                                   fwhm=fwh)
             lam = line.sampleset(factor_step=0.35)  # bit better than Nyquist
+            flux = line(lam).clip(min=0.0)
             g_abs = SourceSpectrum(Empirical1D, points=lam,
-                                   lookup_table=line(lam))
+                                   lookup_table=flux)
 
             self += g_abs
 
@@ -1073,7 +1053,8 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         step_size = np.median(vel_steps)
 
         if step_size > sigma:
-            warnings.warn("spectrum is undersampled for provided sigma value")
+            warnings.warn("Spectrum is undersampled for provided sigma value, "
+                          f"{step_size} > {sigma}.")
 
         conv_sigma = sigma / step_size
         smoothed_flux = gaussian_filter1d(flux, conv_sigma.value)
@@ -1199,3 +1180,13 @@ def _default_waves():
     waves, _ = utils.generate_wavelengths(minwave=100, maxwave=50000, num=5000,
                                           log=True, wave_unit=u.AA)
     return waves
+
+def _read_spec(fname, fmt, **kwargs):
+    if fmt == "fits":
+        return read_fits_spec(fname, ext=1, **kwargs)
+    elif fmt == "ascii":
+        kwargs = {key: kwargs[key]
+                  for key in kwargs.keys() & {"wave_unit", "flux_unit"}}
+        return read_ascii_spec(fname, **kwargs)
+    else:
+        raise SpextraError("invalid data type")
