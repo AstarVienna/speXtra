@@ -19,9 +19,9 @@ __all__ = ["SpecLibrary", "ExtCurvesLibrary", "FilterSystem"]
 class Library(Mapping):
     """
     Class that contains the information of a Library.
-    
+
     Either spectral of a filter system, extinction curves, etc.
-    
+
     Base class, not meant to be instantiated directly.
     """
 

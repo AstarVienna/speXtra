@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Holds the Config class and an instance to use as global configuration."""
 
-import warnings
 from pathlib import Path
 from dataclasses import dataclass, asdict
 import yaml
@@ -56,18 +55,12 @@ class Config:
             raise SpextraError("registry file not found")
 
         # TODO: dump back into config file
+        # TODO: add method to restore defaults
 
     @classmethod
     def from_yaml(cls, path: Path):
         with path.open(encoding="utf-8") as file:
             return cls(**yaml.safe_load(file))
-
-    # def _set_param(self, name, value) -> None:
-    #     dic = {name: value}
-    #     self.meta.update(dic)
-    #     self.__dict__.update(dic)
-    #     with self.config_file.open("w", encoding="utf-8") as file:
-    #         yaml.dump(self.meta, file, sort_keys=False)
 
     def __str__(self) -> str:
         sout = "SpeXtra Configuration:\n"

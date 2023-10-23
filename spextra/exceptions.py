@@ -7,7 +7,7 @@ __all__ = [
     "NotInDatabaseError",
     "NotInLibraryError",
     "ArgumentError",
-    "CunstructorError",
+    "ConstructorError",
     ]
 
 

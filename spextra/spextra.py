@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-"""
-speXtra: A python tool to manage and manipulate astronomical spectra
-"""
+"""speXtra: A python tool to manage and manipulate astronomical spectra."""
+
 import numbers
 import warnings
 from pathlib import Path
@@ -32,7 +31,7 @@ __all__ = ["Spextrum", "Passband", "ExtinctionCurve",  "get_vega_spectrum"]
 
 class Passband(SpectralElement, FilterContainer):
     """
-    Class to handle astronomical filters
+    Class to handle astronomical filters.
 
     TODO: Implement proper __add__, __sub__, __mul__, etc
 
@@ -62,7 +61,6 @@ class Passband(SpectralElement, FilterContainer):
                 self._svo_loader(filter_name)
             except ValueError:
                 raise SpextraError(f"Filter {filter_name} not found.")
-
 
     # @classmethod
     def from_modelclass(self, modelclass, **kwargs):
@@ -223,7 +221,7 @@ class ExtinctionCurve(ReddeningLaw, ExtCurveContainer):
 
     def _database_loader(self):
         """
-        Load a filter from the database
+        Load a filter from the database.
 
         Returns
         -------
@@ -307,7 +305,6 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         # FIXME: this None is problematic, as it's used for the repr, which
         #        makes an instance of this look like None o.O
         self.repr = None
-
 
     def _database_loader(self, **kwargs):
         """
@@ -426,7 +423,7 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
                             filter_curve=None, waves=None):
         """
         Produce a blackbody spectrum for a given temperature.
-        
+
         And scale it to a magnitude in a filter.
 
         Parameters
@@ -465,7 +462,7 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         spex = cls(modelclass=Empirical1D, points=waves,
                    lookup_table=blackbody(waves))
         spex = spex.scale_to_magnitude(amplitude=amplitude,
-                                   filter_curve=filter_curve)
+                                       filter_curve=filter_curve)
         spex.repr = (f".black_body_spectrum(amplitude={amplitude!r}, "
                      f"temperature={temperature!r}, "
                      f"filter_curve={filter_curve!r})")
@@ -577,7 +574,7 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         new_waves = self.waveset[(self.waveset >= wave_min) &
                                  (self.waveset <= wave_max)]
         spex = Spextrum(modelclass=Empirical1D, points=new_waves,
-                      lookup_table=self(new_waves), meta=self.meta)
+                        lookup_table=self(new_waves), meta=self.meta)
         spex = self._restore_attr(spex)
 
         return spex
@@ -659,7 +656,6 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         spectrum : a Spectrum
             Input spectrum scaled to the given amplitude in the given filter
         """
-
         if Path(filter_curve).exists():
             filter_curve = Passband.from_file(filename=filter_curve)
         elif not isinstance(filter_curve, (Passband, SpectralElement)):
@@ -684,7 +680,7 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
 
     def get_magnitude(self, filter_curve=None,  system_name="AB"):
         """
-        Obtain the magnitude in filter for a user specified photometric system
+        Obtain the magnitude in filter for a user specified photometric system.
 
         Parameters
         ----------
@@ -732,7 +728,7 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
                          filter_curve=None):
         """
         Return the number of photons between wave_min and wave_max.
-        
+
         Or within a bandpass (filter).
 
         Parameters
@@ -805,6 +801,7 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
 
         Returns
         -------
+        flux
 
         """
         wmin = _angstrom_value(wmin)
@@ -827,9 +824,9 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
 
     def add_emi_lines(self, center, fwhm, flux):
         """
-        Add emission lines to an `Spextrum`
+        Add emission lines to an `Spextrum`.
 
-        TODO: accept different profiles (Lorentz1D, Voigt1D, etc)\
+        TODO: accept different profiles (Lorentz1D, Voigt1D, etc)
 
         Parameters
         ----------
@@ -868,7 +865,7 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
     def add_abs_lines(self, center, ew, fwhm):
         """
         Add an absorption line to a spectrum.
-        
+
         With center, fwhm and equivalent width specified by the user.
         It also supports emission lines if `ew` is negative.
 
@@ -915,7 +912,8 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
             self += g_abs
 
             if (self(wavelengths).value < 0).any():
-                warnings.warn("Warning: Flux<0 for specified EW and FHWM, setting it to Zero")
+                warnings.warn("Warning: Flux<0 for specified EW and FHWM, "
+                              "setting it to Zero")
                 waves = self.waveset[self(self.waveset) < 0]
                 zero_sp = SourceSpectrum(Empirical1D, points=waves,
                                          lookup_table=-1 * self(waves).value)
@@ -955,7 +953,7 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
 
     def deredden(self, curve_name, Av=None, Ebv=0, Rv=3.1):
         """
-        This function de-reddens a spectrum.
+        De-redden a spectrum.
 
         Parameters
         ----------
@@ -1065,14 +1063,8 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         spex = self._restore_attr(Spextrum(modelclass=smoothed))
         return spex
 
-
     def add_noise(self, wmin, wmax):
-        """
-        Returns a spectra with a given S/N in the specified wavelength range
-        Returns
-        -------
-
-        """
+        """Return spectrum with given S/N in the specified wavelength range."""
         raise NotImplementedError()
 
     def _restore_attr(self, spextrum):
@@ -1163,7 +1155,7 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
 
 def get_vega_spectrum():
     """
-    Retrieve the Vega spectrum from the database
+    Retrieve the Vega spectrum from the database.
 
     Notes
     -----
@@ -1180,6 +1172,7 @@ def _default_waves():
     waves, _ = utils.generate_wavelengths(minwave=100, maxwave=50000, num=5000,
                                           log=True, wave_unit=u.AA)
     return waves
+
 
 def _read_spec(fname, fmt, **kwargs):
     if fmt == "fits":

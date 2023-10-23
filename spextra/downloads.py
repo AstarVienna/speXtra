@@ -32,7 +32,8 @@ def download_file(remote_url, local_name):
 
 def download_svo_filter(filter_name):
     """
-    Query the SVO service for the true transmittance for a given filter
+    Query the SVO service for the true transmittance for a given filter.
+
     Parameters
     ----------
     filter_name : str
@@ -51,7 +52,7 @@ def download_svo_filter(filter_name):
               f"fps.php?ID={filter_name}")
 
     local_path_cache = Path(data_dir, "svo_filters", filter_name)
-    local_path_package = config.cache_dir  / "svo" / filter_name
+    local_path_package = config.cache_dir / "svo" / filter_name
 
     if local_path_package.exists():
         local_path = local_path_package
