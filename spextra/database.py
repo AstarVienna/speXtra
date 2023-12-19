@@ -8,8 +8,7 @@ from dataclasses import dataclass
 
 import yaml
 
-# TODO: change this import once in astar_utils
-from scopesim.system_dict import SystemDict
+from astar_utils import NestedMapping
 
 from .downloads import retriever
 from .configuration import config
@@ -17,7 +16,7 @@ from .configuration import config
 __all__ = ["load_yamldict", "spextra_database", "DEFAULT_DATA"]
 
 
-class Database(SystemDict):
+class Database(NestedMapping):
     """Contains the database."""
 
     def __init__(self):
