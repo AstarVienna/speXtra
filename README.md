@@ -11,7 +11,7 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/speXtra)](https://pypi.org/project/speXtra/)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/speXtra)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/license/mit/)
 
 A python tool to manage and manipulate astronomical spectra
 
