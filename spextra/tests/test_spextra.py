@@ -1,43 +1,49 @@
-"""
-Tests for class Spextrum
-"""
+# -*- coding: utf-8 -*-
+"""Tests for class Spextrum."""
+
 import pytest
-import inspect
-import os
 
 import numpy as np
 import astropy.units as u
 from astropy.constants import c
 from synphot import SpectralElement, SourceSpectrum, units
 
-import spextra
 from spextra import Spextrum, Passband
+from spextra.utils import is_url
+from spextra.exceptions import SpextraError, NotInLibraryError
 
 
-# utility function
-def mock_dir():
-    cur_dirname = os.path.dirname(inspect.getfile(inspect.currentframe()))
-    rel_dirname = "mocks"
-    return os.path.abspath(os.path.join(cur_dirname, rel_dirname))
+# TODO: function scope might be better to isolate tests, but check performance
+# offline seems to be about a 50% increase in runtime for function scope
+@pytest.fixture(scope="class", name="spec")
+def simple_spectrum():
+    return Spextrum("kc96/s0")
 
 
-MOCK_DIR = mock_dir()
+# TODO: function scope might be better to isolate tests, but check performance
+# offline seems to be about a 50% increase in runtime for function scope
+@pytest.fixture(scope="class", name="bb_spec")
+def black_body_spectrum():
+    # Note: used to be Spextrum.black_body_spectrum(filter_curve="g") in a very
+    #       old version...
+    return Spextrum.black_body_spectrum(filter_curve="SLOAN/SDSS.z")
 
 
 def test_make_passband_no_file():
-    with pytest.raises(FileNotFoundError) as e_info:
-        pb = Passband.from_file(filename="blablabla")
+    with pytest.raises(SpextraError) as e_info:
+        _ = Passband.from_file(filename="blablabla")
         print(e_info)
 
 
-
 class TestPassbandInstances:
-
     def test_alias(self):
         passband = Passband("U")
         assert isinstance(passband, SpectralElement)
 
-    @pytest.mark.xfail(reason="SVO might be down.")
+    @pytest.mark.webtest
+    @pytest.mark.skipif(
+        not is_url("https://scopesim.univie.ac.at/spextra/database/"),
+        reason="No internet connection or SVO might be down.")
     def test_svo(self):
         """Test downloading from SVO."""
         # Use a file that is not stored in this repository.
@@ -49,13 +55,13 @@ class TestPassbandInstances:
         passband = Passband("elt/micado/Y")
         assert isinstance(passband, SpectralElement)
 
-    def test_filename(self):
-        filter_file = os.path.join(MOCK_DIR, 'Y.dat')
-
-        passband = Passband.from_file(filename=filter_file)
+    @pytest.mark.usefixtures("mock_dir")
+    def test_filename(self, mock_dir):
+        passband = Passband.from_file(filename=mock_dir / "Y.dat")
         assert isinstance(passband, SpectralElement)
 
 
+@pytest.mark.usefixtures("spec", "bb_spec")
 class TestSpextrumInstances:
     """
     This class tests whether each method return the correct instances
@@ -63,25 +69,22 @@ class TestSpextrumInstances:
     but it doesn't test for correct outputs see cls:TestSpextrum for that
     """
 
-    sp = Spextrum("kc96/s0")
-
-    def test_load(self, sp=sp):
-        assert isinstance(sp, Spextrum)
+    def test_load(self, spec):
+        assert isinstance(spec, Spextrum)
 
     def test_sub_class(self):
         assert issubclass(Spextrum, SourceSpectrum)
 
-    def test_redshift(self, sp=sp):
-
-        sp2 = sp.redshift(z=1)
+    def test_redshift(self, spec):
+        sp2 = spec.redshift(z=1)
         assert isinstance(sp2, Spextrum)
 
-    def test_add_emi_lines(self, sp=sp):
-        sp2 = sp.add_emi_lines([5000, 6000], [10, 20], [1e-15, 2e-15])
+    def test_add_emi_lines(self, spec):
+        sp2 = spec.add_emi_lines([5000, 6000], [10, 20], [1e-15, 2e-15])
         assert isinstance(sp2, Spextrum)
 
-    def test_add_abs_lines(self, sp=sp):
-        sp2 = sp.add_abs_lines([5000, 6000], [15, 20], [10, 12])
+    def test_add_abs_lines(self, spec):
+        sp2 = spec.add_abs_lines([5000, 6000], [15, 20], [10, 12])
         assert isinstance(sp2, Spextrum)
 
     @pytest.mark.parametrize("unit", [u.mag, u.STmag, u.ABmag])
@@ -89,25 +92,24 @@ class TestSpextrumInstances:
         sp = Spextrum.flat_spectrum(amplitude=10*unit)
         assert isinstance(sp, Spextrum)
 
-    def test_mul_with_scalar(self, sp=sp):
-        sp2 = sp * 2
+    def test_mul_with_scalar(self, spec):
+        sp2 = spec * 2
         assert isinstance(sp2, Spextrum)
 
-    def test_sum_spectra(self):
-        sp1 = Spextrum("kc96/s0")
+    def test_sum_spectra(self, spec):
         sp2 = Spextrum("pickles/a0v")
-        sp = sp1 + sp2
+        sp = spec + sp2
         assert isinstance(sp, Spextrum)
 
-    def test_scale_to_magnitude(self, sp=sp):
-        sp2 = sp.scale_to_magnitude(amplitude=15*u.ABmag, filter_curve="g")
+    def test_scale_to_magnitude(self, spec):
+        sp2 = spec.scale_to_magnitude(amplitude=15*u.ABmag, filter_curve="g")
         assert isinstance(sp2, Spextrum)
 
-    def test_rebin_spectra(self, sp=sp):
-        new_waves = np.linspace(np.min(sp.waveset),
-                                np.max(sp.waveset),
+    def test_rebin_spectra(self, spec):
+        new_waves = np.linspace(np.min(spec.waveset),
+                                np.max(spec.waveset),
                                 100)
-        sp2 = sp.rebin_spectra(new_waves=new_waves)
+        sp2 = spec.rebin_spectra(new_waves=new_waves)
         assert isinstance(sp2, Spextrum)
 
     def test_get_magnitude(self):
@@ -115,48 +117,43 @@ class TestSpextrumInstances:
         mag = sp.get_magnitude("elt/micado/Y", system_name="AB")
         assert isinstance(mag, u.Quantity)
 
-    def test_black_body_spectrum(self):
-        # sp = Spextrum.black_body_spectrum(filter_curve="g")
-        sp = Spextrum.black_body_spectrum(filter_curve="SLOAN/SDSS.z")
-        assert isinstance(sp, Spextrum)
+    def test_black_body_spectrum(self, bb_spec):
+        assert isinstance(bb_spec, Spextrum)
 
-    def test_photons_in_range(self):
-        # sp = Spextrum.black_body_spectrum(filter_curve="g")
-        sp = Spextrum.black_body_spectrum(filter_curve="SLOAN/SDSS.z")
-        counts = sp.photons_in_range(wmin=4000, wmax=5000)
+    def test_photons_in_range(self, bb_spec):
+        counts = bb_spec.photons_in_range(wmin=4000, wmax=5000)
         assert isinstance(counts, u.Quantity)
 
-    def test_smooth(self):
-        # sp = Spextrum.black_body_spectrum(filter_curve="g")
-        sp = Spextrum.black_body_spectrum(filter_curve="SLOAN/SDSS.z")
-        sp2 = sp.smooth(10*(u.m / u.s))
+    def test_smooth(self, bb_spec):
+        # Note: The previous value throws am undersampling warning. Since this
+        #       test is only about isinstance, just use a value that doesn't.
+        #       This could maybe also be solved by passing a custom waves
+        #       parameter to black_body_spectrum.
+        # sp2 = sp.smooth(10*(u.m / u.s))
+        sp2 = bb_spec.smooth(150*(u.km / u.s))
         assert isinstance(sp2, Spextrum)
 
-    def test_redden(self):
-        # sp = Spextrum.black_body_spectrum(filter_curve="r")
-        sp = Spextrum.black_body_spectrum(filter_curve="SLOAN/SDSS.z")
-        sp2 = sp.redden("calzetti/starburst", Ebv=0.1)
+    def test_redden(self, bb_spec):
+        sp2 = bb_spec.redden("calzetti/starburst", Ebv=0.1)
         assert isinstance(sp2, Spextrum)
 
-    def test_deredden(self):
-        # sp = Spextrum.black_body_spectrum(filter_curve="F110W")
-        sp = Spextrum.black_body_spectrum(filter_curve="SLOAN/SDSS.z")
-        sp2 = sp.redden("gordon/smc_bar", Ebv=0.1)
+    def test_deredden(self, bb_spec):
+        sp2 = bb_spec.redden("gordon/smc_bar", Ebv=0.1)
         assert isinstance(sp2, Spextrum)
 
-    def testing_nesting(self):
-
-        sp = Spextrum("kc96/s0").redshift(z=1).\
-            scale_to_magnitude(amplitude=15*u.ABmag, filter_curve="g").\
-            redden("calzetti/starburst", Ebv=0.1)
+    def testing_nesting(self, spec):
+        sp = spec.redshift(z=1).scale_to_magnitude(
+            amplitude=15*u.ABmag, filter_curve="g").redden(
+                "calzetti/starburst", Ebv=0.1)
         assert isinstance(sp, Spextrum)
 
 
+@pytest.mark.usefixtures("spec")
 class TestSpextrum:
 
     def test_wrong_load(self):
-        with pytest.raises(ValueError) as e_info:
-            sp = Spextrum("kc96/wrong_name")
+        with pytest.raises(NotInLibraryError):
+            _ = Spextrum("kc96/wrong_name")
 
     @pytest.mark.parametrize("unit", [u.mag, u.STmag, u.ABmag])
     def test_ref_spectrum_is_right(self, unit):
@@ -177,9 +174,11 @@ class TestSpextrum:
         assert np.isclose(mean, 10**0.4)
 
     @pytest.mark.parametrize("unit", [u.mag, u.ABmag, u.STmag])
-    def test_correct_scaling(self, unit):
-        sp1 = Spextrum("kc96/s0").scale_to_magnitude(amplitude=14*unit, filter_curve="SLOAN/SDSS.rprime_filter")
-        sp2 = Spextrum("kc96/s0").scale_to_magnitude(amplitude=15*unit, filter_curve="SLOAN/SDSS.rprime_filter")
+    def test_correct_scaling(self, unit, spec):
+        sp1 = spec.scale_to_magnitude(
+            amplitude=14*unit, filter_curve="SLOAN/SDSS.rprime_filter")
+        sp2 = spec.scale_to_magnitude(
+            amplitude=15*unit, filter_curve="SLOAN/SDSS.rprime_filter")
 
         flux1 = sp1(sp1.waveset[(sp1.waveset.value > 6231 - 200) &
                                 (sp1.waveset.value < 6231 + 200)]).value
@@ -193,7 +192,8 @@ class TestSpextrum:
     def test_vega2ab(self, filt):
         """
         test if the convertion between AB and Vega is correct
-        conversions taken from:  http://www.astronomy.ohio-state.edu/~martini/usefuldata.html
+        conversions taken from:
+        http://www.astronomy.ohio-state.edu/~martini/usefuldata.html
 
         absolute tolerance set to 0.15 mag to account for filter differences
 
@@ -241,18 +241,15 @@ class TestSpextrum:
 
         sp = Spextrum.from_arrays(waves, flux)
 
-        inwaves  = c.value / waves.value
+        inwaves = c.value / waves.value
         outwaves = sp.waveset.to(u.m).value
 
         assert np.isclose(inwaves[::-1], outwaves).all()
 
-    def test_spectrum_cut(self):
-        sp = Spextrum("kc96/s0")
+    def test_spectrum_cut(self, spec):
         w1 = 3001*u.AA
         w2 = 4000*u.AA
-        sp2 = sp.cut(w1, w2)
-        assert np.isclose(sp2.wave_min.value, w1.value, atol=np.abs(sp2.waveset[0].value - sp2.waveset[1].value))
-
-
-
-
+        sp2 = spec.cut(w1, w2)
+        assert np.isclose(sp2.wave_min.value, w1.value,
+                          atol=np.abs(sp2.waveset[0].value -
+                                      sp2.waveset[1].value))

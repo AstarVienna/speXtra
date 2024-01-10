@@ -11,7 +11,7 @@ source : Cardelli, Clayton, & Mathis 1989, ApJ, 345, 245
 
 wave_unit : 1/um
 
-extinction_unit : Av/E(B-V)
+extinction_unit : mag
 
 wave_column : WAVELENGTH
 
@@ -26,5 +26,3 @@ curves: # comment
   milkyway_diffuse : R_V = 3.1
   milkyway_rv21 :    R_V = 2.1
   milkyway_rv4 :     R_V = 4.0
-
-

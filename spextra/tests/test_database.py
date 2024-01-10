@@ -1,67 +1,69 @@
-"""
-Tests for spextra database
-"""
+# -*- coding: utf-8 -*-
+"""Tests for spextra database."""
+
 import urllib
-import inspect
-import os
 import pytest
+import yaml
 
-import spextra
-from spextra.database import DataContainer, Database, SpecLibrary, FilterSystem, ExtCurvesLibrary
-from spextra.utils import Config
-
-
-
-def mock_dir():
-    cur_dirname = os.path.dirname(inspect.getfile(inspect.currentframe()))
-    rel_dirname = "mocks"
-    return os.path.abspath(os.path.join(cur_dirname, rel_dirname))
+from spextra.database import Database
+from spextra.libraries import SpecLibrary
+from spextra.configuration import config
 
 
-MOCK_DIR = mock_dir()
+@pytest.fixture(scope="class", name="datacont")
+def simple_yamldict(mock_dir):
+    path = mock_dir / "index.yml"
+    with path.open(encoding="utf-8") as file:
+        return yaml.safe_load(file)
 
 
-def test_database_location():
-    """
-    test if a valid url
-    """
-    conf = Config()
-    url = conf.get_database_url()
-    result = urllib.parse.urlparse(url)
-    assert all([result.scheme, result.netloc, result.path])
+# @pytest.fixture(scope="module")
+def mock_database():
+    return Database()
 
 
-class TestDataContainer:
+# This doesn't work :(
+# @pytest.fixture(scope="class")
+# @pytest.mark.usefixtures("mock_database")
+# def libraries(mock_database):
+#     for library_name in mock_database.libraries:
+#         yield library_name, SpecLibrary(library_name)
 
-    def test_attr_creation(self):
-        dc = DataContainer(filename=os.path.join(MOCK_DIR, "index.yml"))
 
-        assert hasattr(dc, "libraries")
-        assert hasattr(dc, "extinction_curves")
-        assert hasattr(dc, "filter_systems")
+@pytest.fixture(scope="module")
+def url_result():
+    url = config.database_url
+    return urllib.parse.urlparse(url)
+
+
+@pytest.mark.parametrize("attribute", ["scheme", "netloc", "path"])
+def test_database_location(url_result, attribute):
+    """test if a valid url"""
+    assert getattr(url_result, attribute)
+
+
+class TestDatabase:
+    @pytest.mark.parametrize("key", ["libraries",
+                                     "extinction_curves",
+                                     "filter_systems"])
+    def test_keys(self, datacont, key):
+        assert key in datacont
+        assert len(datacont[key])
 
 
 class TestSpecLibrary:
-
-    database = Database()
-    libraries = database.libraries
-    needed_attr = ["file_extension", "data_type"]   # list here the mandatory attributes TODO: Fill that
-
-    @pytest.mark.parametrize("library_name", libraries)
+    @pytest.mark.parametrize("library_name", mock_database()["libraries"])
     def test_name(self, library_name):
-
         lib = SpecLibrary(library_name)
-        assert lib.library_name == library_name
+        assert lib.name == library_name
 
     def test_templates(self):
         name = "kc96"
         lib = SpecLibrary(name)
-        assert "bulge" in lib.template_names
+        assert "bulge" in lib.keys()
 
-    @pytest.mark.parametrize("library_name", libraries)
-    @pytest.mark.parametrize("attribute", needed_attr)
+    @pytest.mark.parametrize("library_name", mock_database()["libraries"])
+    @pytest.mark.parametrize("attribute", ["file_extension", "data_type"])
     def test_attr(self, library_name, attribute):
         lib = SpecLibrary(library_name)
         assert hasattr(lib, attribute)
-
-

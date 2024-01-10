@@ -23,6 +23,7 @@ __pycache__/*
 /database/**/*.sed
 /database/**/*.txt
 /database/**/*.vo
+/database/spextra_database/*
 
 # Project files
 .ropeproject
@@ -58,3 +59,10 @@ MANIFEST
 
 # Per-project virtualenvs
 .venv*/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Pylint
+.pylint.d/
