@@ -62,4 +62,4 @@ markers = [
 ]
 
 [tool.coverage.report]
-omit = ["skycalc_ipy/tests/*"]
+omit = ["spextra/tests/*"]
