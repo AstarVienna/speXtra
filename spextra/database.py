@@ -34,12 +34,10 @@ class Database(NestedMapping):
         Otherwise, just look for `relpath`.
         """
         filename = str(filename)
-        print(filename)
         abspath = self.data_dir / filename
 
         # don't download folder (.is_dir doesn't work here)
         if not abspath.suffix:
-            print(abspath, "dir")
             return abspath
 
         abspath = Path(retriever.fetch(filename, progressbar=True))
