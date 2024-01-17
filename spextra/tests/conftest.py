@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 """Pytest setup and global fixtures."""
 
-from pathlib import Path
-
 import pytest
 
+from . import PATH_HERE
 
 @pytest.fixture(scope="package")
 def mock_dir():
-    return Path(__file__).parent / "mocks"
+    return PATH_HERE / "mocks"
