@@ -601,7 +601,7 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         spex : Spextrum
             New ``Spextrum`` instance.
         """
-        if vel:
+        if vel != 0:
             vel <<= u.m / u.s  # assumed to be in m/s
 
             z = (vel / speed_of_light).value
