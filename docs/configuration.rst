@@ -18,13 +18,7 @@ This can be done by using the following commands
 
 .. code-block:: python
 
-   from spextra.utils import Conf
+   from spextra.configuration import config
 
-   conf = Conf(datadir="path/to/new/datadir")
-   print(conf.get_data_dir())
-
-   # To set it back to the default
-
-   Conf(datadir=conf.default_data_dir)
-
-
+   config.cache_dir = "path/to/new/datadir"
+   print(config)

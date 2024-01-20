@@ -36,20 +36,19 @@ programately
 
 .. jupyter-execute::
 
-    from spextra.database import Database
-    db = Database()
-    db.libraries
+    from spextra import spextra_database
+    spextra_database["libraries"]
 
 it will list the spectral libraries available
 
 
 .. jupyter-execute::
 
-    db.extinction_curves
+    spextra_database["extinction_curves"]
 
 .. jupyter-execute::
 
-    db.filter_systems
+    spextra_database["filter_systems"]
 
 will print the extinction curves and filter systems available
 
@@ -59,9 +58,9 @@ of each spectral library. To use it, simply call it like this
 
 .. jupyter-execute::
 
-    from spextra.database import SpecLibrary
+    from spextra import SpecLibrary
     lib = SpecLibrary("kc96")
-    lib.templates
+    list(lib)
 
 and it will list all templates available for that library.
 
@@ -80,9 +79,3 @@ Database contents
 
 .. literalinclude:: ../database/index.yml
     :language: yaml
-
-
-
-
-
-

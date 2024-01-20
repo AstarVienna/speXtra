@@ -13,19 +13,17 @@ To list the names of the libraries included in the database
 
 .. jupyter-execute::
 
-    from spextra import Database
-    db = Database()
-    db.libraries
+    from spextra import spextra_database
+    spextra_database["libraries"]
 
 
 To see which templates are available in each library
 
 .. jupyter-execute::
 
-    from spextra.database import SpecLibrary
-    name = "kc96"
-    lib = SpecLibrary(name)
-    lib.templates
+    from spextra import SpecLibrary
+    lib = SpecLibrary("kc96")
+    list(lib)
 
 
 Below you can find a detailed description of each library.
