@@ -4,8 +4,6 @@
 Installation
 ************
 
-``speXtra`` is written in Python 3.7 and should work with newer versions
-
 The preferred method to install  ``spextra`` is using ``pip``
 
 .. code-block:: bash
@@ -18,7 +16,7 @@ To install the development version, just clone the repository
 
 .. code-block:: bash
 
-    git clone https://github.com/miguelverdugo/speXtra
+    git clone https://github.com/AstarVienna/speXtra.git
     cd speXtra
     pip install -e .
 
@@ -40,4 +38,3 @@ Additionally, you may need the following libraries for specific purposes.
 
 - `matplotlib <http://www.matplotlib.org/>`_ for plotting
 - `specutils <specutils.readthedocs.io/>`_ optional for loading external spectra in other formats
-

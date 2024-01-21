@@ -25,22 +25,37 @@ speXtra Package
    :nosignatures:
    :toctree: generated/
 
-   spextra.database.Database
-   spextra.database.SpecLibrary
-   spextra.database.ExtCurvesLibrary
-   spextra.database.FilterSystem
-   spextra.database.SpectrumContainer
-   spextra.database.ExtCurveContainer
-   spextra.database.FilterContainer
+   spextra.database.spextra_database
+   spextra.database.DEFAULT_DATA
 
 
-``spextra.utils module``
+``spextra.libraries module``
 =========================
 
 .. autosummary::
    :nosignatures:
    :toctree: generated/
 
-   spextra.utils.Config
-   spextra.utils.download_file
-   spextra.utils.download_svo_filter
+   spextra.libraries.SpecLibrary
+   spextra.libraries.FilterSystem
+   spextra.libraries.ExtCurvesLibrary
+
+
+``spextra.configuration module``
+=========================
+
+.. autosummary::
+   :nosignatures:
+   :toctree: generated/
+
+   spextra.configuration.config
+
+
+``spextra.exceptions module``
+=========================
+
+.. autosummary::
+   :nosignatures:
+   :toctree: generated/
+
+   spextra.exceptions.SpextraError

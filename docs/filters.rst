@@ -12,9 +12,8 @@ To list the filter systems included in the database
 
 .. jupyter-execute::
 
-    from spextra import Database
-    db = Database()
-    db.filter_systems
+    from spextra import spextra_database
+    spextra_database["filter_systems"]
 
 The ::class::`Pasband` holds the information of an astronomical filter and can be called simply using:
 
@@ -31,8 +30,8 @@ Here is a list.
 
 .. jupyter-execute::
 
-    from spextra import DEFAULT_FILTERS
-    DEFAULT_FILTERS
+    from spextra import DEFAULT_DATA
+    DEFAULT_DATA.filters
 
 
 These filters can be used simply using the shortcut
@@ -86,4 +85,3 @@ ETC
 
 .. literalinclude:: ../database/filter_systems/etc/index.yml
     :language: yaml
-

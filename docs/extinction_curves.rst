@@ -13,9 +13,8 @@ To list the names of the extinction curves included in the database
 
 .. jupyter-execute::
 
-    from spextra import Database
-    db = Database()
-    db.extinction_curves
+    from spextra import spextra_database
+    spextra_database["extinction_curves"]
 
 --------------------------------------------------------------------
 
@@ -43,4 +42,3 @@ Calzetti
 
 .. literalinclude:: ../database/extinction_curves/calzetti/index.yml
     :language: yaml
-
