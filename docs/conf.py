@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 #
@@ -12,10 +13,9 @@
 # See astropy.sphinx.conf for which values are set there.
 
 import datetime
-#import sys
-#import os
+import sys
+import os
 
-import sphinx_rtd_theme
 
 #sys.path.insert(0, os.path.abspath("static"))
 
@@ -26,18 +26,24 @@ needs_sphinx = '1.3'
 
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
+#    'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
-    'sphinx.ext.inheritance_diagram',
+#    'sphinx.ext.inheritance_diagram',
     'sphinx.ext.mathjax',
     'sphinx.ext.extlinks',
 #    'sphinx.ext.linkcode',
-#    'jupyter_sphinx',
+#    'sphinx.ext.viewcode',
+#    'sphinx.ext.todo',
+    'sphinx.ext.coverage',
     'sphinx.ext.doctest',
     'numpydoc',
-    'nbsphinx',
+    'sphinxcontrib.apidoc',
+    'myst_nb',
 ]
 
+apidoc_module_dir = os.path.abspath('../')
+apidoc_output_dir = 'reference'
+apidoc_separate_modules = True
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
@@ -55,14 +61,14 @@ extlinks = {'python': ('https://docs.python.org/3/%s', None),
             }
 
 
-numpydoc_show_class_members = False
-autosummary_generate = True
-autoclass_content = "class"
-autodoc_default_flags = ["members", "inherited-members"]
-autodoc_docstring_signature = False
+# numpydoc_show_class_members = False
+# autosummary_generate = True
+# autoclass_content = "class"
+# autodoc_default_flags = ["members", "inherited-members"]
+# autodoc_docstring_signature = False
 
-source_suffix = '.rst'
-source_encoding = 'utf-8-sig'
+source_suffix = ['.rst', '.md']
+source_encoding = 'utf-8'
 
 master_doc = 'index'
 
@@ -97,14 +103,18 @@ pygments_style = 'default' #'sphinx'
 
 # -- Options for HTML output ---------------------------------------------------
 
-html_theme = "sphinx_rtd_theme"
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+html_theme = "sphinx_book_theme"
+html_theme_options = {
+    "repository_url": "https://github.com/AstarVienna/speXtra",
+    "use_repository_button": True,
+    "home_page_in_toc": True,
+}
+html_logo = "_static/images/speXtra_logo.png"
+html_title = "speXtra"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-# html_static_path = [sphinx_gallery.glr_path_static()]
-
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -112,7 +122,6 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-html_title = '{0} v{1}'.format(project, release)
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = project + 'doc'
@@ -122,6 +131,14 @@ htmlhelp_basename = project + 'doc'
 
 # Static files to copy after template files
 html_static_path = ['_static']
+html_sidebars = {
+    "**": [
+        "navbar-logo.html",
+        "search-field.html",
+        "sbt-sidebar-nav.html",
+    ]
+}
+
 
 
 # -- Options for LaTeX output --------------------------------------------------
