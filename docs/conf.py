@@ -30,7 +30,7 @@ extensions = [
     'sphinx.ext.intersphinx',
 #    'sphinx.ext.inheritance_diagram',
     'sphinx.ext.mathjax',
-    'sphinx.ext.extlinks',
+    # 'sphinx.ext.extlinks',
 #    'sphinx.ext.linkcode',
 #    'sphinx.ext.viewcode',
 #    'sphinx.ext.todo',
@@ -41,8 +41,9 @@ extensions = [
     'myst_nb',
 ]
 
-apidoc_module_dir = os.path.abspath('../')
+apidoc_module_dir = os.path.abspath('../spextra')
 apidoc_output_dir = 'reference'
+apidoc_excluded_paths = ['tests']
 apidoc_separate_modules = True
 
 intersphinx_mapping = {
@@ -53,12 +54,12 @@ intersphinx_mapping = {
     'synphot': ('https://synphot.readthedocs.io/en/latest/', None),
     }
 
-extlinks = {'python': ('https://docs.python.org/3/%s', None),
-            'numpy': ('https://docs.scipy.org/doc/numpy/', None),
-            'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
-            'astropy': ('http://docs.astropy.org/en/stable/', None),
-            'synphot': ('https://synphot.readthedocs.io/en/latest/', None),
-            }
+# extlinks = {'python': ('https://docs.python.org/3/%s', None),
+#             'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+#             'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
+#             'astropy': ('http://docs.astropy.org/en/stable/', None),
+#             'synphot': ('https://synphot.readthedocs.io/en/latest/', None),
+#             }
 
 
 # numpydoc_show_class_members = False
@@ -157,4 +158,3 @@ latex_documents = [('index', project + '.tex', project + u' Documentation',
 
 man_pages = [('index', project.lower(), project + u' Documentation',
               [author], 1)]
-
