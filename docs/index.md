@@ -25,6 +25,7 @@ For older versions, please either upgrade to the latest version (`pip install --
 install
 starting
 notebooks/Database.ipynb
+notebooks/speXtra_demo.ipynb
 spectral_libraries
 extinction_curves
 filters
