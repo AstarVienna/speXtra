@@ -24,10 +24,14 @@ For older versions, please either upgrade to the latest version (`pip install --
 
 install
 starting
+database
 notebooks/Database.ipynb
+spextra
 notebooks/speXtra_demo.ipynb
 spectral_libraries
 extinction_curves
 filters
+configuration
+changelog
 Reference API <reference/spextra>
 ```
