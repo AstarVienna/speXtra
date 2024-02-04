@@ -1,3 +1,17 @@
+---
+jupytext:
+  formats: ipynb,md:myst
+  text_representation:
+    extension: .md
+    format_name: myst
+    format_version: 0.12
+    jupytext_version: 1.8.2
+kernelspec:
+  display_name: Python 3
+  language: python
+  name: python3
+---
+
 # Getting Started
 
 ## Installation
@@ -52,7 +66,7 @@ sp.plot()
 
 The last statement will create a plot of the spectrum for a quick visualization
 
-All operations available in   {class}`synphot.SourceSpectrum` are possible:
+All operations available in {class}`synphot.SourceSpectrum` are possible:
 
 ```{code-cell} ipython3
 sp1 = Spextrum("kc96/s0")
@@ -65,6 +79,7 @@ The new spectrum will be the sum of the two components
 ### Scaling to a magnitude
 
 ```{code-cell} ipython3
+from astropy import units as u
 sp1 = Spextrum("kc96/s0")
 sp2 = sp1.scale_to_magnitude(amplitude=13 * u.ABmag, filter_curve="g")
 ```
@@ -82,9 +97,6 @@ It is possible to specify a redshift `z` ir a velocity `vel` (negative velocitie
 
 ```{code-cell} ipython3
 sp3 = sp2.redshift(z=1)
-
-import astropy.units as u
-
 vel = -1000 * u.km / u.s
 sp2 = sp1.redshift(vel=vel)
 ```

@@ -1,3 +1,17 @@
+---
+jupytext:
+  formats: ipynb,md:myst
+  text_representation:
+    extension: .md
+    format_name: myst
+    format_version: 0.12
+    jupytext_version: 1.8.2
+kernelspec:
+  display_name: Python 3
+  language: python
+  name: python3
+---
+
 # Spectral Libraries
 
 A number of spectral libraries have been include in `speXtra`.
@@ -6,18 +20,16 @@ See {ref}`database-contents` for a summary what is included in the database.
 To list the names of the libraries included in the database
 
 ```{code-cell} ipython3
-    from spextra import spextra_database
-    spextra_database["libraries"]
-
+from spextra import spextra_database
+spextra_database["libraries"]
 ```
 
 To see which templates are available in each library
 
 ```{code-cell} ipython3
-    from spextra import SpecLibrary
-    lib = SpecLibrary("kc96")
-    list(lib)
-
+from spextra import SpecLibrary
+lib = SpecLibrary("kc96")
+list(lib)
 ```
 
 Below you can find a detailed description of each library.

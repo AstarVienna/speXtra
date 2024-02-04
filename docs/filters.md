@@ -1,3 +1,17 @@
+---
+jupytext:
+  formats: ipynb,md:myst
+  text_representation:
+    extension: .md
+    format_name: myst
+    format_version: 0.12
+    jupytext_version: 1.8.2
+kernelspec:
+  display_name: Python 3
+  language: python
+  name: python3
+---
+
 # Filters
 
 Most of the filters available to `speXtra` are downloaded from
@@ -14,29 +28,26 @@ To list the filter systems included in the database
 The ::class::`Pasband` holds the information of an astronomical filter and can be called simply using:
 
 ```{code-cell} ipython3
-    from spextra import Passband
-    filt = Passband("elt/micado/Y")
-    filt.plot()
-
+from spextra import Passband
+filt = Passband("elt/micado/Y")
+filt.plot()
 ```
 
 Many standard filters have been defined using shortcuts for quicker access.
 Here is a list.
 
 ```{code-cell} ipython3
-    from spextra import DEFAULT_DATA
-    DEFAULT_DATA.filters
-
+from spextra import DEFAULT_DATA
+DEFAULT_DATA.filters
 ```
 
 These filters can be used simply using the shortcut
 
 ```{code-cell} ipython3
-    from spextra import Passband
+from spextra import Passband
 
-    filt = Passband("g")  # for sdss g-band filter
-    filt.plot()
-
+filt = Passband("g")  # for sdss g-band filter
+filt.plot()
 ```
 
 All methods in ::class::`Spextrum` that require to provide a filter name, can be used in either way,
