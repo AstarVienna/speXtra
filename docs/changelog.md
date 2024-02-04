@@ -1,5 +1,4 @@
-(changes)=
+# Changelog
 
-```{eval-rst}
-.. include:: ../CHANGELOG.md
+```{include} ../CHANGELOG.md
 ```
