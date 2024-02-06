@@ -49,7 +49,7 @@ The following dependencies are necessary to run `speXtra`
 Additionally, you may need the following libraries for specific purposes.
 
 - [matplotlib](http://www.matplotlib.org/) for plotting
-- [specutils](specutils.readthedocs.io/) optional for loading external spectra in other formats (not required for basic function)
+- [specutils](http://specutils.readthedocs.io/) optional for loading external spectra in other formats (not required for basic function)
 
 ## Basic functionality
 
