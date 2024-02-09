@@ -43,6 +43,7 @@ optional = true
 sphinx = "^6.0.0"
 sphinx-book-theme = "^1.1.0"
 sphinxcontrib-apidoc = "^0.4.0"
+sphinx-copybutton = "^0.5.2"
 myst-nb = "^1.0.0"
 numpydoc = "^1.6.0"
 matplotlib = "^3.7.2"
