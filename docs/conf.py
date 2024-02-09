@@ -38,6 +38,7 @@ extensions = [
     'sphinx.ext.doctest',
     'numpydoc',
     'sphinxcontrib.apidoc',
+    'sphinx_copybutton',
     'myst_nb',
 ]
 
