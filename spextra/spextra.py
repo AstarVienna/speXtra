@@ -396,7 +396,9 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         spex : Spextrum
             New ``Spextrum`` instance.
         """
-        waves = waves or _default_waves()
+        if waves is None:
+            waves = _default_waves()
+        waves = _angstrom_value(waves)
         amplitude = _abmag_qty(amplitude)
 
         # The if-statement below also allowed amplitude.unit to be
@@ -411,8 +413,8 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
             # system_name = amplitude.unit
         else:
             const = ConstFlux1D(amplitude=amplitude)
-            spex = cls(modelclass=Empirical1D, points=waves.value,
-                       lookup_table=const(waves.value))
+            spex = cls(modelclass=Empirical1D, points=waves,
+                       lookup_table=const(waves))
             # system_name = amplitude.unit
 
         spex.repr = f".flat_spectrum(amplitude={amplitude!r})"
@@ -514,8 +516,17 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         return spex
 
     @classmethod
-    def emission_line_spectra(cls, center, fwhm, flux, amplitude=40*u.ABmag,
-                              waves=None):
+    def emission_line_spectra(cls, *args, **kwargs):
+        warnings.warn(
+            "The 'emission_line_spectra' constructor is deprecated and will be"
+            " removed in a future version. Please use the identical "
+            "'emission_line_spectrum' instead.", DeprecationWarning,
+            stacklevel=2)
+        return cls.emission_line_spectrum(*args, **kwargs)
+
+    @classmethod
+    def emission_line_spectrum(cls, center, fwhm, flux, amplitude=40*u.ABmag,
+                               waves=None):
         """
         Create a emission line spextrum superimpossed to a faint continuum.
 
@@ -542,7 +553,7 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
             waves = np.arange(wmin, wmax, step) * u.AA
 
         spex = cls.flat_spectrum(amplitude=amplitude, waves=waves)
-        spex.add_emi_lines(center=center, fwhm=fwhm, flux=flux)
+        spex = spex.add_emi_lines(center=center, fwhm=fwhm, flux=flux)
 
         return spex
 
@@ -854,7 +865,8 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
 
         for cen, flx, fwh in zip(centers, fluxes, fwhms):
             line = GaussianFlux1D(mean=cen, total_flux=flx, fwhm=fwh)
-            lam = line.sampleset(factor_step=0.3)  # bit better than Nyquist
+            # lam = line.sampleset(factor_step=0.3)  # bit better than Nyquist
+            lam = self.waveset.to(u.AA).value
             g_em = SourceSpectrum(Empirical1D, points=lam,
                                   lookup_table=line(lam))
             self += g_em
