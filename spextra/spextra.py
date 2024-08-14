@@ -7,6 +7,7 @@ from pathlib import Path
 
 import numpy as np
 from scipy.ndimage import gaussian_filter1d
+from more_itertools import always_iterable
 
 import astropy.units as u
 from astropy.constants import c as speed_of_light
@@ -21,7 +22,7 @@ from synphot import exceptions
 
 from .database import DEFAULT_DATA
 from .containers import SpectrumContainer, FilterContainer, ExtCurveContainer
-from .utils import _ensure_list, _angstrom_qty, _angstrom_value, _abmag_qty
+from .utils import _angstrom_qty, _angstrom_value, _abmag_qty
 from .downloads import download_svo_filter
 from .exceptions import SpextraError, ArgumentError, ConstructorError
 
@@ -855,9 +856,9 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
 
         """
         # Converting flux is done by GaussianFlux1D anyway...
-        centers = _ensure_list(_angstrom_value(center))
-        fluxes = _ensure_list(flux)
-        fwhms = _ensure_list(_angstrom_value(fwhm))
+        centers = list(always_iterable(_angstrom_value(center)))
+        fluxes = list(always_iterable(flux))
+        fwhms = list(always_iterable(_angstrom_value(fwhm)))
 
         self.meta.update({"em_lines": {"center": centers,
                                        "flux": fluxes,
@@ -896,9 +897,9 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         -------
         Spextrum
         """
-        centers = _ensure_list(_angstrom_value(center))
-        eqws = _ensure_list(_angstrom_value(ew))
-        fwhms = _ensure_list(_angstrom_value(fwhm))
+        centers = list(always_iterable(_angstrom_value(center)))
+        eqws = list(always_iterable(_angstrom_value(ew)))
+        fwhms = list(always_iterable(_angstrom_value(fwhm)))
 
         self.meta.update({"em_lines": {"center": centers,
                                        "ew": eqws,
