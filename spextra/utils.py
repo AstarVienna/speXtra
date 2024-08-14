@@ -12,15 +12,8 @@ import astropy.units as u
 
 __all__ = ["is_url"]
 
-ARRAY_LIKE = (np.ndarray, list, tuple)
 
 __data_dir__ = Path(__file__).parent / "data"
-
-
-def _ensure_list(value):
-    if isinstance(value, ARRAY_LIKE):
-        return list(value)
-    return [value]
 
 
 def _angstrom_qty(value):
