@@ -30,7 +30,7 @@ pooch = "^1.7.0"
 tqdm = "^4.66.1"
 more-itertools = "^10.2.0"
 
-astar-utils = ">=0.2.0"
+astar-utils = ">=0.3.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.3"

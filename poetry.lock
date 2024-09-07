@@ -38,13 +38,13 @@ files = [
 
 [[package]]
 name = "astar-utils"
-version = "0.2.0"
+version = "0.3.0"
 description = "Contains commonly-used utilities for AstarVienna's projects."
 optional = false
-python-versions = ">=3.9,<4.0"
+python-versions = "<4.0,>=3.10"
 files = [
-    {file = "astar_utils-0.2.0-py3-none-any.whl", hash = "sha256:c3518c857ece09d86159e7ee91f3f7933759eb679ff618c69607d0d71f0cf2b5"},
-    {file = "astar_utils-0.2.0.tar.gz", hash = "sha256:d65cfd776df533710b46e256febe1b1b891f21827fd9dcf21867fdb7b0bc8e93"},
+    {file = "astar_utils-0.3.0-py3-none-any.whl", hash = "sha256:473d056c4c873fbf077fcc2249f8c3d5bfd37083d9289b13dc2fde7fb6eed872"},
+    {file = "astar_utils-0.3.0.tar.gz", hash = "sha256:c7102b4347c7e4463927e0d3066f03bc6a0d784af8252599e18277c0313a8912"},
 ]
 
 [package.dependencies]
@@ -2786,4 +2786,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "1cecb70bc8051f4a2ea60f5441a489892f840eb0fc57a0e8fcfe837685eea747"
+content-hash = "bd0059875afbf6c9ada9e591af4ba86c5be63d424986d63d6a5845f57291e667"
