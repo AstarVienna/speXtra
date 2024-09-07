@@ -100,7 +100,7 @@ class Passband(SpectralElement, FilterContainer):
             waves,
             trans,
             meta: dict | None = None,
-            wave_unit: u.Unie = u.AA):
+            wave_unit: u.Unit = u.AA):
         """
         Create a ``Passband`` directly from from array-like.
 
