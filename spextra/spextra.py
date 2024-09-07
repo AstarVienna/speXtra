@@ -27,7 +27,7 @@ from .downloads import download_svo_filter
 from .exceptions import SpextraError, ArgumentError, ConstructorError
 
 
-__all__ = ["Spextrum", "Passband", "ExtinctionCurve",  "get_vega_spectrum"]
+__all__ = ["Spextrum", "Passband", "ExtinctionCurve", "get_vega_spectrum"]
 
 
 class Passband(SpectralElement, FilterContainer):
@@ -47,7 +47,8 @@ class Passband(SpectralElement, FilterContainer):
             self.from_modelclass(modelclass, **kwargs)
         else:
             raise ConstructorError(
-                "Either filter_name or modelclass must be passed.")
+                "Either filter_name or modelclass must be passed."
+            )
 
     # @classmethod
     def from_filter_name(self, filter_name: str):
@@ -116,8 +117,9 @@ class Passband(SpectralElement, FilterContainer):
             New ``Passband`` instance.
         """
         waves <<= wave_unit
-        modelclass = SpectralElement(Empirical1D, points=waves,
-                                     lookup_table=trans, meta=meta)
+        modelclass = SpectralElement(
+            Empirical1D, points=waves, lookup_table=trans, meta=meta
+        )
         return cls(modelclass=modelclass)
 
     @classmethod
@@ -168,8 +170,12 @@ class Passband(SpectralElement, FilterContainer):
         sigma = fwhm.to(u.AA) / (2.0 * np.sqrt(2.0 * np.log(2.0)))
 
         modelclass = SpectralElement(
-            Gaussian1D, amplitude=peak, mean=center.to(u.AA), stddev=sigma,
-            **kwargs)
+            Gaussian1D,
+            amplitude=peak,
+            mean=center.to(u.AA),
+            stddev=sigma,
+            **kwargs,
+        )
         return cls(modelclass=modelclass)
 
     @classmethod
@@ -198,8 +204,11 @@ class Passband(SpectralElement, FilterContainer):
         center = (wmax + wmin) * 0.5
         width = wmax - wmin
         modelclass = SpectralElement(
-            Box1D, amplitude=transmission, x_0=center.to(u.AA),
-            width=width.to(u.AA))
+            Box1D,
+            amplitude=transmission,
+            x_0=center.to(u.AA),
+            width=width.to(u.AA),
+        )
         return cls(modelclass=modelclass)
 
 
@@ -220,14 +229,14 @@ class ExtinctionCurve(ReddeningLaw, ExtCurveContainer):
             self.from_modelclass(modelclass)
         else:
             raise ConstructorError(
-                "Either curve_name or modelclass must be passed.")
+                "Either curve_name or modelclass must be passed."
+            )
 
     def from_curve_name(self, curve_name: str):
         curve_name = self.DEFAULT_CURVES.get(curve_name, curve_name)
 
         ExtCurveContainer.__init__(self, curve_name)
         self._database_loader()
-
 
     def from_modelclass(self, modelclass):
         ReddeningLaw.__init__(self, modelclass)
@@ -272,8 +281,9 @@ class ExtinctionCurve(ReddeningLaw, ExtCurveContainer):
         """
         waves <<= wave_unit
 
-        modelclass = SpectralElement(Empirical1D, points=waves,
-                                     lookup_table=flux, meta=meta)
+        modelclass = SpectralElement(
+            Empirical1D, points=waves, lookup_table=flux, meta=meta
+        )
         return cls(modelclass=modelclass)
 
     @classmethod
@@ -309,7 +319,8 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
             self.from_modelclass(modelclass, **kwargs)
         else:
             raise ValueError(
-                "Either template_name or modelclass must be passed.")
+                "Either template_name or modelclass must be passed."
+            )
 
     def from_template_name(self, template_name: str, **kwargs):
         template_name = self.DEFAULT_SPECTRA.get(template_name, template_name)
@@ -334,20 +345,28 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         lam: wavelengths
         flux: flux
         """
-        meta, wave, flux = _read_spec(self.path, self.library.data_type,
-                                      **self.library.read_kwargs)
+        meta, wave, flux = _read_spec(
+            self.path, self.library.data_type, **self.library.read_kwargs
+        )
 
-        SourceSpectrum.__init__(self, Empirical1D, points=wave,
-                                lookup_table=flux, meta=meta, **kwargs)
+        SourceSpectrum.__init__(
+            self,
+            Empirical1D,
+            points=wave,
+            lookup_table=flux,
+            meta=meta,
+            **kwargs,
+        )
 
     @classmethod
     def from_arrays(
-            cls,
-            waves,
-            flux,
-            meta: dict | None = None,
-            wave_unit: u.Unit = u.AA,
-            flux_unit: u.Unit = units.FLAM):
+        cls,
+        waves,
+        flux,
+        meta: dict | None = None,
+        wave_unit: u.Unit = u.AA,
+        flux_unit: u.Unit = units.FLAM,
+    ):
         """
         Create a ``Passband`` directly from from an array-like.
 
@@ -369,8 +388,9 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
             waves = waves.to(wave_unit, equivalencies=u.spectral())
         flux <<= flux_unit
 
-        modelclass = SourceSpectrum(Empirical1D, points=waves,
-                                    lookup_table=flux, meta=meta)
+        modelclass = SourceSpectrum(
+            Empirical1D, points=waves, lookup_table=flux, meta=meta
+        )
 
         spex = cls(modelclass=modelclass)
         spex.repr = repr(spex.model)
@@ -400,9 +420,10 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
     @classmethod
     @u.quantity_input
     def flat_spectrum(
-            cls,
-            amplitude: u.Quantity[u.ABmag] = 0*u.ABmag,
-            waves: u.Quantity[u.AA] | None = None):
+        cls,
+        amplitude: u.Quantity[u.ABmag] = 0 * u.ABmag,
+        waves: u.Quantity[u.AA] | None = None,
+    ):
         """
         Create a flat spectrum in the preferred system scaled to a magnitude.
 
@@ -430,15 +451,18 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         # if-statement is removed too. This assertion is added as a sanity
         # check ensure that any bugs introduced by changing the if-statement
         # is explicitly raised here, instead of silently propagated.
-        assert not amplitude.unit.to_string() == "vegamag", "The use of vegamag is deprecated."
+        assert (
+            not amplitude.unit.to_string() == "vegamag"
+        ), "The use of vegamag is deprecated."
         if amplitude.unit is u.Unit("mag"):
             spex = get_vega_spectrum()
             spex *= 10 ** (-0.4 * amplitude.value)
             # system_name = amplitude.unit
         else:
             const = ConstFlux1D(amplitude=amplitude)
-            spex = cls(modelclass=Empirical1D, points=waves,
-                       lookup_table=const(waves))
+            spex = cls(
+                modelclass=Empirical1D, points=waves, lookup_table=const(waves)
+            )
             # system_name = amplitude.unit
 
         spex.repr = f".flat_spectrum(amplitude={amplitude!r})"
@@ -447,11 +471,12 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
     @classmethod
     @u.quantity_input
     def black_body_spectrum(
-            cls,
-            temperature: u.Quantity[u.K] = 9500*u.K,
-            amplitude: u.Quantity[u.ABmag] = 0*u.ABmag,
-            filter_curve: str | Passband | SpectralElement | None = None,
-            waves: u.Quantity[u.AA] | None = None):
+        cls,
+        temperature: u.Quantity[u.K] = 9500 * u.K,
+        amplitude: u.Quantity[u.ABmag] = 0 * u.ABmag,
+        filter_curve: str | Passband | SpectralElement | None = None,
+        waves: u.Quantity[u.AA] | None = None,
+    ):
         """
         Produce a blackbody spectrum for a given temperature.
 
@@ -500,12 +525,13 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
     @classmethod
     @u.quantity_input(equivalencies=u.spectral())
     def powerlaw(
-            cls,
-            alpha=1,
-            x_0: u.Quantity[u.AA] = 5000*u.AA,
-            amplitude: u.Quantity[u.ABmag] = 0*u.ABmag,
-            filter_curve: str | Passband | SpectralElement | None = None,
-            waves: u.Quantity[u.AA] | None = None):
+        cls,
+        alpha=1,
+        x_0: u.Quantity[u.AA] = 5000 * u.AA,
+        amplitude: u.Quantity[u.ABmag] = 0 * u.ABmag,
+        filter_curve: str | Passband | SpectralElement | None = None,
+        waves: u.Quantity[u.AA] | None = None,
+    ):
         """
         Return a power law spectrum.
 
@@ -558,12 +584,13 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
     @classmethod
     @u.quantity_input(equivalencies=u.spectral())
     def emission_line_spectrum(
-            cls,
-            center: u.Quantity[u.AA],
-            fwhm: u.Quantity[u.AA],
-            flux,
-            amplitude: u.Quantity[u.ABmag] = 40*u.ABmag,
-            waves: u.Quantity[u.AA] | None = None):
+        cls,
+        center: u.Quantity[u.AA],
+        fwhm: u.Quantity[u.AA],
+        flux,
+        amplitude: u.Quantity[u.ABmag] = 40 * u.ABmag,
+        waves: u.Quantity[u.AA] | None = None,
+    ):
         """
         Create a emission line spextrum superimpossed to a faint continuum.
 
@@ -583,7 +610,7 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         if waves is None:
             wmin = np.min(center.to(u.AA).value) - 2000
             wmax = np.max(center.to(u.AA).value) + 2000
-            step = np.min(fwhm.to(u.AA).value) / 3   # for Nyquist sampling
+            step = np.min(fwhm.to(u.AA).value) / 3  # for Nyquist sampling
             waves = np.arange(wmin, wmax, step) * u.AA
 
         spex = cls.flat_spectrum(amplitude=amplitude, waves=waves)
@@ -616,10 +643,15 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         wave_min <<= u.AA
         wave_max <<= u.AA
 
-        new_waves = self.waveset[(self.waveset >= wave_min) &
-                                 (self.waveset <= wave_max)]
-        spex = Spextrum(modelclass=Empirical1D, points=new_waves,
-                        lookup_table=self(new_waves), meta=self.meta)
+        new_waves = self.waveset[
+            (self.waveset >= wave_min) & (self.waveset <= wave_max)
+        ]
+        spex = Spextrum(
+            modelclass=Empirical1D,
+            points=new_waves,
+            lookup_table=self(new_waves),
+            meta=self.meta,
+        )
         spex = self._restore_attr(spex)
 
         return spex
@@ -657,16 +689,21 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         flux = self(self.waveset)
         self.meta.update({"redshift": z})
 
-        spex = Spextrum(modelclass=Empirical1D, points=lam, lookup_table=flux,
-                        meta=self.meta)
+        spex = Spextrum(
+            modelclass=Empirical1D,
+            points=lam,
+            lookup_table=flux,
+            meta=self.meta,
+        )
         spex = self._restore_attr(spex)
         return spex
 
     @u.quantity_input
     def scale_to_magnitude(
-            self,
-            amplitude: u.Quantity[u.ABmag],
-            filter_curve: str | Passband | SpectralElement | None = None):
+        self,
+        amplitude: u.Quantity[u.ABmag],
+        filter_curve: str | Passband | SpectralElement | None = None,
+    ):
         """
         Scale a Spectrum to a value in a filter.
 
@@ -726,9 +763,10 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         return spex
 
     def get_magnitude(
-            self,
-            filter_curve: str | Passband | SpectralElement | None = None,
-            system_name: str = "AB"):
+        self,
+        filter_curve: str | Passband | SpectralElement | None = None,
+        system_name: str = "AB",
+    ):
         """
         Obtain the magnitude in filter for a user specified photometric system.
 
@@ -764,22 +802,25 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         else:
             unit = u.ABmag
 
-        ref_spec = self.flat_spectrum(amplitude=0*unit)
-        ref_flux = Observation(ref_spec,
-                               filter_curve).effstim(flux_unit=units.PHOTLAM)
-        real_flux = Observation(self,
-                                filter_curve).effstim(flux_unit=units.PHOTLAM)
+        ref_spec = self.flat_spectrum(amplitude=0 * unit)
+        ref_flux = Observation(ref_spec, filter_curve).effstim(
+            flux_unit=units.PHOTLAM
+        )
+        real_flux = Observation(self, filter_curve).effstim(
+            flux_unit=units.PHOTLAM
+        )
 
-        mag = -2.5*np.log10(real_flux.value/ref_flux.value)
+        mag = -2.5 * np.log10(real_flux.value / ref_flux.value)
 
         return mag * unit
 
     def photons_in_range(
-            self,
-            wmin=None,
-            wmax=None,
-            area=1*u.cm**2,
-            filter_curve: str | Passband | SpectralElement | None = None):
+        self,
+        wmin=None,
+        wmax=None,
+        area=1 * u.cm**2,
+        filter_curve: str | Passband | SpectralElement | None = None,
+    ):
         """
         Return the number of photons between wave_min and wave_max.
 
@@ -807,7 +848,7 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         counts : u.Quantity array
 
         """
-        area <<= u.cm ** 2
+        area <<= u.cm**2
         wmin = _angstrom_value(wmin)
         wmax = _angstrom_value(wmax)
 
@@ -816,8 +857,9 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
             try:
                 mid_point = 0.5 * (wmin + wmax)
                 width = abs(wmax - wmin)
-                filter_curve = SpectralElement(Box1D, amplitude=1,
-                                               x_0=mid_point, width=width)
+                filter_curve = SpectralElement(
+                    Box1D, amplitude=1, x_0=mid_point, width=width
+                )
             except ValueError:
                 raise ArgumentError("Please specify wmin/wmax or a filter")
 
@@ -832,11 +874,12 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         return counts
 
     def get_flux(
-            self,
-            wmin=None,
-            wmax=None,
-            filter_curve: str | Passband | SpectralElement | None = None,
-            flux_unit: u.Unit = units.FLAM):
+        self,
+        wmin=None,
+        wmax=None,
+        filter_curve: str | Passband | SpectralElement | None = None,
+        flux_unit: u.Unit = units.FLAM,
+    ):
         """
         Return the flux within a passband.
 
@@ -989,11 +1032,12 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         return extcurve.extinction_curve(Ebv)
 
     def redden(
-            self,
-            curve_name: str,
-            Ebv: float = 0.,
-            Av: float | None = None,
-            Rv: float = 3.1):
+        self,
+        curve_name: str,
+        Ebv: float = 0.0,
+        Av: float | None = None,
+        Rv: float = 3.1,
+    ):
         """
         Attenuate a spectrum with a extinction curve normalized to a E(B-V).
 
@@ -1016,11 +1060,12 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         return spex
 
     def deredden(
-            self,
-            curve_name: str,
-            Av: float | None = None,
-            Ebv: float = 0.,
-            Rv: float = 3.1):
+        self,
+        curve_name: str,
+        Av: float | None = None,
+        Ebv: float = 0.0,
+        Rv: float = 3.1,
+    ):
         """
         De-redden a spectrum.
 
@@ -1062,13 +1107,14 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         """
         new_waves = new_waves.to(u.AA).value
 
-        waves = self.waveset.value   # else assumed to be angstroms
+        waves = self.waveset.value  # else assumed to be angstroms
         flux = np.ones_like(waves)
         filt = SpectralElement(Empirical1D, points=waves, lookup_table=flux)
         obs = Observation(self, filt, binset=new_waves, force="taper")
         newflux = obs.binflux
-        rebin_spec = Empirical1D(points=new_waves, lookup_table=newflux,
-                                 meta=self.meta)
+        rebin_spec = Empirical1D(
+            points=new_waves, lookup_table=newflux, meta=self.meta
+        )
         spex = Spextrum(modelclass=rebin_spec)
         spex = self._restore_attr(spex)
         spex.meta.update({"rebinned_spectra": True})
@@ -1135,11 +1181,13 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         just a hack to down stream important attributes in particular methods.
         there must be a better way
         """
-        temp_dict = {key: value for key, value in self.__dict__.items()
-                     if not key.startswith("_")}
+        temp_dict = {
+            key: value
+            for key, value in self.__dict__.items()
+            if not key.startswith("_")
+        }
         spextrum.__dict__.update(temp_dict)
         return spextrum
-
 
     # ------ Copied from synphot.SourceSpectrum so operations can also happen here --------
     # docstrings modified...
@@ -1168,7 +1216,8 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
             newcls = self.__class__(modelclass=self.model * other.model)
         else:  # Source spectrum
             raise exceptions.IncompatibleSources(
-                "Cannot multiply two source spectra together.")
+                "Cannot multiply two source spectra together."
+            )
 
         self._merge_meta(self, other, newcls)
         return newcls
@@ -1182,7 +1231,8 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         """
         if not isinstance(other, (self.__class__, SourceSpectrum)):
             raise exceptions.IncompatibleSources(
-                f"Can only operate on {self.__class__.__name__}.")
+                f"Can only operate on {self.__class__.__name__}."
+            )
 
     def _validate_other_mul_div(self, other):
         """
@@ -1192,28 +1242,42 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         with a ``SourceSpectrum``.
         """
 
-        if not isinstance(other, (u.Quantity, numbers.Number,
-                                  BaseUnitlessSpectrum, SourceSpectrum,
-                                  self.__class__)):
+        if not isinstance(
+            other,
+            (
+                u.Quantity,
+                numbers.Number,
+                BaseUnitlessSpectrum,
+                SourceSpectrum,
+                self.__class__,
+            ),
+        ):
             raise exceptions.IncompatibleSources(
-                "Can only operate on scalar number/Quantity or spectrum.")
-        if (isinstance(other, u.Quantity) and
-              (other.unit.decompose() != u.dimensionless_unscaled or
-               not np.isscalar(other.value) or
-               not isinstance(other.value, numbers.Real))):
+                "Can only operate on scalar number/Quantity or spectrum."
+            )
+        if isinstance(other, u.Quantity) and (
+            other.unit.decompose() != u.dimensionless_unscaled
+            or not np.isscalar(other.value)
+            or not isinstance(other.value, numbers.Real)
+        ):
             raise exceptions.IncompatibleSources(
-                "Can only operate on real scalar dimensionless Quantity.")
-        if (isinstance(other, numbers.Number) and
-              not (np.isscalar(other) and isinstance(other, numbers.Real))):
+                "Can only operate on real scalar dimensionless Quantity."
+            )
+        if isinstance(other, numbers.Number) and not (
+            np.isscalar(other) and isinstance(other, numbers.Real)
+        ):
             raise exceptions.IncompatibleSources(
-                "Can only operate on real scalar number.")
+                "Can only operate on real scalar number."
+            )
 
     def __str__(self):
         return self.__repr__()
 
     def __repr__(self):
         return f"{self.__class__.__name__}{self.repr}"
-#------------------------------ END    -------------------------------------------
+
+
+# ------------------------------ END    -------------------------------------------
 
 
 def get_vega_spectrum():
@@ -1233,7 +1297,8 @@ def get_vega_spectrum():
 def _default_waves():
     """Generate default waveset with R~805."""
     waves, _ = utils.generate_wavelengths(
-        minwave=100, maxwave=50000, num=5000, log=True, wave_unit=u.AA)
+        minwave=100, maxwave=50000, num=5000, log=True, wave_unit=u.AA
+    )
     return waves
 
 
@@ -1241,8 +1306,10 @@ def _read_spec(fname, fmt, **kwargs):
     if fmt == "fits":
         return read_fits_spec(fname, ext=1, **kwargs)
     elif fmt == "ascii":
-        kwargs = {key: kwargs[key]
-                  for key in kwargs.keys() & {"wave_unit", "flux_unit"}}
+        kwargs = {
+            key: kwargs[key]
+            for key in kwargs.keys() & {"wave_unit", "flux_unit"}
+        }
         return read_ascii_spec(fname, **kwargs)
     else:
         raise SpextraError("invalid data type")
