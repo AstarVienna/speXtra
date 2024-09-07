@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "speXtra"
-version = "0.40.1a1"
+version = "0.41.0a0"
 description = "Tool to manage and manipulate astronomical spectra."
 license = "MIT"
 authors = ["Miguel Verdugo <mverduol@gmail.com>"]
