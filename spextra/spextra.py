@@ -22,7 +22,6 @@ from synphot import exceptions
 
 from .database import DEFAULT_DATA
 from .containers import SpectrumContainer, FilterContainer, ExtCurveContainer
-from .utils import _angstrom_value
 from .downloads import download_svo_filter
 from .exceptions import SpextraError, ArgumentError, ConstructorError
 
@@ -1313,3 +1312,9 @@ def _read_spec(fname, fmt, **kwargs):
         return read_ascii_spec(fname, **kwargs)
     else:
         raise SpextraError("invalid data type")
+
+
+def _angstrom_value(value):
+    if isinstance(value, u.Quantity):
+        return value.to(u.AA, equivalencies=u.spectral()).value
+    return value
