@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "speXtra"
-version = "0.40.1a1"
+version = "0.41.0a0"
 description = "Tool to manage and manipulate astronomical spectra."
 license = "MIT"
 authors = ["Miguel Verdugo <mverduol@gmail.com>"]
@@ -19,7 +19,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 numpy = "^1.26.3"
 scipy = "^1.11.4"
 astropy = "^5.3.4"
@@ -30,7 +30,7 @@ pooch = "^1.7.0"
 tqdm = "^4.66.1"
 more-itertools = "^10.2.0"
 
-astar-utils = ">=0.2.0"
+astar-utils = ">=0.3.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.3"
