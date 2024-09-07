@@ -5,10 +5,10 @@ from pathlib import Path
 from dataclasses import dataclass, asdict
 import yaml
 
-from .utils import __data_dir__
 from .exceptions import SpextraError
 
 __all__ = ["config"]
+__data_dir__ = Path(__file__).parent / "data"
 __config_file__ = __data_dir__ / "config.yml"
 
 

@@ -3,17 +3,11 @@
 
 from urllib.request import urlopen, Request
 from urllib.error import URLError
-
-from pathlib import Path
-
 import numpy as np
 import astropy.units as u
 
 
 __all__ = ["is_url"]
-
-
-__data_dir__ = Path(__file__).parent / "data"
 
 
 def _angstrom_qty(value):
