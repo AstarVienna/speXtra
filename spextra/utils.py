@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
 """Utility functions for SpeXtra."""
 
-from urllib.request import urlopen, Request
-from urllib.error import URLError
 import numpy as np
 import astropy.units as u
 
-
-__all__ = ["is_url"]
 
 
 def _angstrom_qty(value):
@@ -27,15 +23,3 @@ def _abmag_qty(value):
         return value * u.ABmag
     return value
 
-
-def is_url(url: str) -> bool:
-    """Check if connection works."""
-    try:
-        request = Request(url)
-        request.get_method = lambda: "HEAD"
-        urlopen(request)
-    except URLError:
-        return False
-    except ValueError:
-        return False
-    return True

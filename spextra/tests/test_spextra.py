@@ -9,7 +9,6 @@ from astropy.constants import c
 from synphot import SpectralElement, SourceSpectrum, units
 
 from spextra import Spextrum, Passband
-from spextra.utils import is_url
 from spextra.exceptions import SpextraError, NotInLibraryError
 
 
@@ -41,9 +40,6 @@ class TestPassbandInstances:
         assert isinstance(passband, SpectralElement)
 
     @pytest.mark.webtest
-    @pytest.mark.skipif(
-        not is_url("https://scopesim.univie.ac.at/spextra/database/"),
-        reason="No internet connection or SVO might be down.")
     def test_svo(self):
         """Test downloading from SVO."""
         # Use a file that is not stored in this repository.
