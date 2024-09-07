@@ -13,14 +13,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
       - name: Set up Poetry
-        uses: abatilo/actions-poetry@v2
+        uses: abatilo/actions-poetry@v3
         with:
-          poetry-version: "1.7.1"
+          poetry-version: "1.8.3"
 
       - name: Create step summary
         run: echo "## Building $(poetry version)" >> $GITHUB_STEP_SUMMARY
@@ -29,7 +29,7 @@ jobs:
         run: poetry build >> $GITHUB_STEP_SUMMARY
 
       - name: Store distribution files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: distribution
           path: dist/
@@ -54,14 +54,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
       - name: Set up Poetry
-        uses: abatilo/actions-poetry@v2
+        uses: abatilo/actions-poetry@v3
         with:
-          poetry-version: "1.7.1"
+          poetry-version: "1.8.3"
 
       - name: Create step summary
         run: echo "## Publishing $(poetry version) to PyPI" >> $GITHUB_STEP_SUMMARY
