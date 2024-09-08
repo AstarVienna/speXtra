@@ -20,32 +20,10 @@ on:
         - prerelease
         - "prerelease --next-phase"
 
-  workflow_call:
-    inputs:
-      dry-run:
-        type: boolean
-        description: Only output new version number, no actual change.
-        required: false
-      rule:
-        type: string
-        description: Version bump level
-        required: true
-      branch:
-        type: string
-        description: Branch (ref) to checkout and push changes to
-        required: false
-        default: ${{ github.ref_name }}
-    outputs:
-      bumpmsg:
-        description: Message created by the version bump.
-        value: ${{ jobs.bump.outputs.bumpmsg }}
-
 jobs:
   bump:
-    name: Bump version number
     uses: AstarVienna/DevOps/.github/workflows/bump.yml@main
     secrets: inherit
     with:
       dry-run: ${{ inputs.dry-run }}
       rule: ${{ inputs.rule }}
-      branch: ${{ inputs.branch }}
