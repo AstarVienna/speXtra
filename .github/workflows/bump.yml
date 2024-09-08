@@ -21,7 +21,7 @@ on:
         - "prerelease --next-phase"
 
 jobs:
-  bump:
+  Bump:
     uses: AstarVienna/DevOps/.github/workflows/bump.yml@main
     secrets: inherit
     with:
