@@ -1,4 +1,4 @@
-<img src="./docs/_static/images/speXtra_logo.png" width="400pt">
+<img src="https://raw.githubusercontent.com/AstarVienna/spextra/main/docs/_static/images/speXtra_logo.png" width="400pt">
 
 # SpeXtra
 
@@ -29,8 +29,6 @@ To install ``spextra`` simply run:
 pip install spextra
 ```
 
-Soon a PyPi version will be available
-
 ## Functionalities
 
 ``speXtra`` is able to:
@@ -42,11 +40,10 @@ from spextra import Spextrum
 sp = Spextrum("kc96/s0")
 ```
 
-
 and it will load the S0 galaxy template of the Kinney-Calzetti spectral library. To quickly
 plot the resulting spectra, simply type
 
 ```python
 sp.plot()
 ```
-<img src="./docs/_static/images/kc96_S0.png" width="400pt">
+<img src="https://raw.githubusercontent.com/AstarVienna/spextra/main/docs/_static/images/kc96_S0.png" width="400pt">

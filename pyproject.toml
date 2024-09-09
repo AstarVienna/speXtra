@@ -17,9 +17,6 @@ classifiers = [
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering :: Astronomy",
 ]
-include = [
-    {path = "docs/_static/images", format = ["sdist", "wheel"]}
-]
 
 [tool.poetry.dependencies]
 python = "^3.10"
