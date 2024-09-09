@@ -77,6 +77,14 @@ jobs:
           POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
         run: poetry publish >> $GITHUB_STEP_SUMMARY
 
+      - name: Add to step summary
+        if: ${{ success() }}
+        run: |
+          echo "### Successfully published package on PyPI" >> $GITHUB_STEP_SUMMARY
+          PKGVER=$(poetry version)
+          SUBURL="${PKGVER// //}"
+          echo "https://pypi.org/project/$SUBURL/" >> $GITHUB_STEP_SUMMARY
+
   Bump:
     name: Bump to (next) dev version
     needs: publish
