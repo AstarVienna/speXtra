@@ -1,3 +1,17 @@
+# Version 0.41.1
+**2024-09-09**
+
+Hotfix for v0.41.0 to include images in README on PyPI plus some internal cleanup.
+
+## What's Changed
+### Documentation Improvements
+* Include static docs images in dist to fix readme by @teutoburg in https://github.com/AstarVienna/speXtra/pull/47
+### Other Changes
+* Remove two obsolete files by @teutoburg in https://github.com/AstarVienna/speXtra/pull/48
+* Improve publish workflow by @teutoburg in https://github.com/AstarVienna/speXtra/pull/50
+
+**Full Changelog**: https://github.com/AstarVienna/speXtra/compare/v0.41.0...v0.41.1
+
 # Version 0.41.0
 **2024-09-09**
 
