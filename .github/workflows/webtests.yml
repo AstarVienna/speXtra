@@ -1,0 +1,20 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  call-webtests:
+    name: Network tests
+    uses: AstarVienna/DevOps/.github/workflows/webtests.yml@main
+    with:
+      poetry: True
+    secrets: inherit

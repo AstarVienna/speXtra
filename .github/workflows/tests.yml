@@ -22,13 +22,6 @@ jobs:
       poetry: True
     secrets: inherit
 
-  call-webtests:
-    name: Network tests
-    uses: AstarVienna/DevOps/.github/workflows/webtests.yml@main
-    with:
-      poetry: True
-    secrets: inherit
-
   call-updated-tests:
     name: Tests with updated dependencies
     uses: AstarVienna/DevOps/.github/workflows/updated_tests.yml@main
