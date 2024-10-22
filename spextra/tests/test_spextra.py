@@ -51,6 +51,14 @@ class TestPassbandInstances:
         passband = Passband("elt/micado/Y")
         assert isinstance(passband, SpectralElement)
 
+    def test_database_dash(self):
+        passband = Passband("elt/micado/I-long")
+        assert isinstance(passband, SpectralElement)
+
+    def test_database_underscore(self):
+        passband = Passband("elt/micado/H2_1-0S1")
+        assert isinstance(passband, SpectralElement)
+
     @pytest.mark.usefixtures("mock_dir")
     def test_filename(self, mock_dir):
         passband = Passband.from_file(filename=mock_dir / "Y.dat")
