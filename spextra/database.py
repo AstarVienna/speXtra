@@ -40,6 +40,9 @@ class Database(NestedMapping):
         if not abspath.suffix:
             return abspath
 
+        if abspath.exists():
+            return abspath
+
         abspath = Path(retriever.fetch(filename, progressbar=True))
         return abspath
 
@@ -79,7 +82,12 @@ class DefaultData:
         yamlfiles = ["default_filters.yml",
                      "default_spectra.yml",
                      "default_curves.yml"]
-        paths = (Path(retriever.fetch(fname)) for fname in yamlfiles)
+        paths = (
+            path_local
+            if (path_local := Path(__file__).parent.parent / "database" / fname).exists()
+            else Path(retriever.fetch(fname))
+            for fname in yamlfiles
+        )
         yamls = dict_from_yamls(*paths)
 
         return cls(yamls["default_filters"],
@@ -89,7 +97,11 @@ class DefaultData:
 
 def load_yamldict(filename: str) -> dict:
     """Fetch YAML file from database and load contents into dict."""
-    filepath = retriever.fetch(filename, progressbar=True)
+    filepath_local = Path(__file__).parent.parent / "database" / filename
+    if filepath_local.exists():
+        filepath = filepath_local
+    else:
+        filepath = retriever.fetch(filename, progressbar=True)
     with open(filepath, encoding="utf-8") as file:
         yamldict = yaml.safe_load(file)
     return yamldict
