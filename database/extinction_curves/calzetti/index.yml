@@ -15,7 +15,7 @@ source : Calzetti et al. 2000. ApJ, 533, 682
 
 wave_unit : Angstrom
 
-extinction_unit : mag
+extinction_unit : Av/E(B-V)
 
 wave_column : WAVELENGTH
 
