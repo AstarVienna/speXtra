@@ -12,7 +12,7 @@ from .libraries import Library, SpecLibrary, FilterSystem, ExtCurvesLibrary
 
 __all__ = ["SpectrumContainer", "ExtCurveContainer", "FilterContainer"]
 
-NAME_REGEX = re.compile(r"^(?P<libname>\w+(/\w+)*)/(?P<basename>[\w\.]+)$")
+NAME_REGEX = re.compile(r"^(?P<libname>\w+(/\w+)*)/(?P<basename>[\w\.\-]+)$")
 
 
 class DBFile:

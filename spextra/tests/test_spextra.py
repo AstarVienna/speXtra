@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for class Spextrum."""
+from pathlib import Path
 
 import pytest
 
@@ -8,9 +9,11 @@ import astropy.units as u
 from astropy.constants import c
 from synphot import SpectralElement, SourceSpectrum, units
 
-from spextra import Spextrum, Passband
+from spextra import Spextrum, Passband, spextra_database
 from spextra.exceptions import SpextraError, NotInLibraryError
 
+spextra_database.data_dir = Path(__file__).parent.parent.parent / 'database'
+assert spextra_database.data_dir.exists()
 
 # TODO: function scope might be better to isolate tests, but check performance
 # offline seems to be about a 50% increase in runtime for function scope
@@ -51,12 +54,21 @@ class TestPassbandInstances:
         passband = Passband("elt/micado/Y")
         assert isinstance(passband, SpectralElement)
 
+    def test_database_dash(self):
+        passband = Passband("elt/micado/I-long")
+        assert isinstance(passband, SpectralElement)
+
+    def test_database_underscore(self):
+        passband = Passband("elt/micado/H2_1-0S1")
+        assert isinstance(passband, SpectralElement)
+
     @pytest.mark.usefixtures("mock_dir")
     def test_filename(self, mock_dir):
         passband = Passband.from_file(filename=mock_dir / "Y.dat")
         assert isinstance(passband, SpectralElement)
 
 
+@pytest.mark.webtest
 @pytest.mark.usefixtures("spec", "bb_spec")
 class TestSpextrumInstances:
     """
@@ -113,13 +125,16 @@ class TestSpextrumInstances:
         mag = sp.get_magnitude("elt/micado/Y", system_name="AB")
         assert isinstance(mag, u.Quantity)
 
+    @pytest.mark.webtest
     def test_black_body_spectrum(self, bb_spec):
         assert isinstance(bb_spec, Spextrum)
 
+    @pytest.mark.webtest
     def test_photons_in_range(self, bb_spec):
         counts = bb_spec.photons_in_range(wmin=4000, wmax=5000)
         assert isinstance(counts, u.Quantity)
 
+    @pytest.mark.webtest
     def test_smooth(self, bb_spec):
         # Note: The previous value throws am undersampling warning. Since this
         #       test is only about isinstance, just use a value that doesn't.
@@ -129,6 +144,7 @@ class TestSpextrumInstances:
         sp2 = bb_spec.smooth(150*(u.km / u.s))
         assert isinstance(sp2, Spextrum)
 
+    @pytest.mark.webtest
     def test_redden(self, bb_spec):
         sp2 = bb_spec.redden("calzetti/starburst", Ebv=0.1)
         assert isinstance(sp2, Spextrum)
@@ -169,6 +185,7 @@ class TestSpextrum:
         mean = np.mean(flux1 / flux2)
         assert np.isclose(mean, 10**0.4)
 
+    @pytest.mark.webtest
     @pytest.mark.parametrize("unit", [u.mag, u.ABmag, u.STmag])
     def test_correct_scaling(self, unit, spec):
         sp1 = spec.scale_to_magnitude(
@@ -184,6 +201,7 @@ class TestSpextrum:
         mean = np.mean(flux1 / flux2)
         assert np.isclose(mean, 10**0.4)
 
+    @pytest.mark.webtest
     @pytest.mark.parametrize("filt", ["U", "B", "V", "R", "I", "J", "H", "Ks"])
     def test_vega2ab(self, filt):
         """
@@ -216,6 +234,7 @@ class TestSpextrum:
 
         assert np.isclose(diff, ab2vega[filt], atol=0.15)
 
+    @pytest.mark.webtest
     @pytest.mark.parametrize("spec_name", ["vega", "sun", "brown/NGC5992"])
     @pytest.mark.parametrize("filters", [["2MASS/2MASS.Ks", "elt/micado/Ks"],
                                          ["J", "elt/micado/J"],
