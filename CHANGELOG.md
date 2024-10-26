@@ -1,3 +1,17 @@
+# Version 0.41.2
+**2024-10-26**
+
+## What's Changed
+### Dependency Changes
+* Update to astropy 6.0.1 by @hugobuddel in https://github.com/AstarVienna/speXtra/pull/54
+### Other Changes
+* Allow dashes in filter names by @hugobuddel in https://github.com/AstarVienna/speXtra/pull/52
+* Fix webtests by @hugobuddel in https://github.com/AstarVienna/speXtra/pull/55
+* Run jobs nightly by @hugobuddel in https://github.com/AstarVienna/speXtra/pull/53
+
+**Full Changelog**: https://github.com/AstarVienna/speXtra/compare/v0.41.1...v0.41.2
+
+
 # Version 0.41.1
 **2024-09-09**
 
