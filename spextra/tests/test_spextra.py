@@ -96,8 +96,12 @@ class TestSpextrumInstances:
         assert isinstance(sp2, Spextrum)
 
     @pytest.mark.parametrize("unit", [u.mag, u.STmag, u.ABmag])
-    def test_flat_spectrum(self, unit):
-        sp = Spextrum.flat_spectrum(amplitude=10*unit)
+    @pytest.mark.parametrize("waves", [np.arange(1e4, 2.7e4, 100) * u.AA, None])
+    def test_flat_spectrum(self, unit, waves):
+        sp = Spextrum.flat_spectrum(
+            waves=waves,
+            amplitude=10*unit,
+        )
         assert isinstance(sp, Spextrum)
 
     def test_mul_with_scalar(self, spec):
@@ -128,6 +132,40 @@ class TestSpextrumInstances:
     @pytest.mark.webtest
     def test_black_body_spectrum(self, bb_spec):
         assert isinstance(bb_spec, Spextrum)
+
+    @pytest.mark.webtest
+    def test_black_body_spectrum_units(self):
+        bb = Spextrum.black_body_spectrum(
+                temperature=9500 * u.K,
+                amplitude=0*u.ABmag,
+                filter_curve="V",
+                waves=np.arange(3e3, 8e3, 100)*u.AA,
+        )
+        assert isinstance(bb, Spextrum)
+        bb = Spextrum.black_body_spectrum(
+                temperature=9500*u.K,
+                amplitude=0*u.ABmag,
+                filter_curve="V",
+                waves=None,
+        )
+        assert isinstance(bb, Spextrum)
+
+    @pytest.mark.webtest
+    def test_powerlaw_units(self):
+        spec = Spextrum.powerlaw(
+                x_0=9500*u.AA,
+                amplitude=0*u.ABmag,
+                filter_curve="V",
+                waves=np.arange(3e3, 8e3, 100)*u.AA,
+        )
+        assert isinstance(spec, Spextrum)
+        spec = Spextrum.powerlaw(
+                x_0=9500*u.AA,
+                amplitude=0*u.ABmag,
+                filter_curve="V",
+                waves=None,
+        )
+        assert isinstance(spec, Spextrum)
 
     @pytest.mark.webtest
     def test_photons_in_range(self, bb_spec):
