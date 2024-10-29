@@ -443,7 +443,9 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         spex : Spextrum
             New ``Spextrum`` instance.
         """
-        waves = (waves or _default_waves()).to(u.AA).value
+        if waves is None:
+            waves = _default_waves()
+        waves = waves.to(u.AA).value
 
         # The if-statement below also allowed amplitude.unit to be
         # u.Unit("vegamag"). Vegamag is removed from astropy, so the
@@ -509,7 +511,9 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         -------
         a scaled black-body spectrum
         """
-        waves = (waves or _default_waves()).to(u.AA)
+        if waves is None:
+            waves = _default_waves()
+        waves = waves.to(u.AA)
         blackbody = BlackBody1D(temperature=temperature.to(u.K).value)
 
         spex = cls(modelclass=Empirical1D, points=waves,
@@ -558,7 +562,9 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         spex : Spextrum
             New ``Spextrum`` instance.
         """
-        waves = (waves or _default_waves()).to(u.AA)
+        if waves is None:
+            waves = _default_waves()
+        waves = waves.to(u.AA)
         power = SourceSpectrum(
             PowerLawFlux1D, amplitude=1, x_0=x_0, alpha=alpha)
         spex = cls(modelclass=Empirical1D, points=waves,
