@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "speXtra"
-version = "0.41.3a0"
+version = "0.41.3b0"
 description = "Tool to manage and manipulate astronomical spectra."
 license = "MIT"
 authors = ["Miguel Verdugo <mverduol@gmail.com>"]
@@ -23,10 +23,10 @@ python = "^3.10"
 numpy = "^1.26.3"
 scipy = "^1.14.1"
 astropy = "^6.0.1"
-synphot = "^1.2.1"
+synphot = "^1.4.0"
 
 pyyaml = "^6.0.1"
-pooch = "^1.7.0"
+pooch = "^1.8.2"
 tqdm = "^4.66.1"
 more-itertools = "^10.2.0"
 
@@ -35,7 +35,7 @@ astar-utils = ">=0.3.0"
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.3"
 pytest-cov = "^4.1.0"
-matplotlib = "^3.7.2"
+matplotlib = "^3.8.2"
 
 [tool.poetry.group.docs]
 optional = true
@@ -47,7 +47,7 @@ sphinxcontrib-apidoc = "^0.4.0"
 sphinx-copybutton = "^0.5.2"
 myst-nb = "^1.0.0"
 numpydoc = "^1.6.0"
-matplotlib = "^3.7.2"
+matplotlib = "^3.8.2"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/AstarVienna/speXtra/issues"
