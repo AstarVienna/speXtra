@@ -1,3 +1,18 @@
+# Version 0.41.3
+**2024-11-01**
+
+Hotfix to solve some combatibility issues.
+
+## What's Changed
+### Dependency Changes
+* Bump some dependencies to match ScopeSim by @teutoburg in https://github.com/AstarVienna/speXtra/pull/58
+### Other Changes
+* Fix waves check by @hugobuddel in https://github.com/AstarVienna/speXtra/pull/57
+* Add doctests to workflow by @teutoburg in https://github.com/AstarVienna/speXtra/pull/59
+
+**Full Changelog**: https://github.com/AstarVienna/speXtra/compare/v0.41.2...v0.41.3
+
+
 # Version 0.41.2
 **2024-10-26**
 
