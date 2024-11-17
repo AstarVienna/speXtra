@@ -61,6 +61,20 @@ addopts = "--strict-markers"
 markers = [
     "webtest: marks tests as requiring network (deselect with '-m \"not webtest\"')",
 ]
+filterwarnings = [
+    "error",
+    # Should certainly be fixed:
+
+    # https://github.com/AstarVienna/speXtra/issues/61
+    "ignore:The 'name plus file extension' property*:PendingDeprecationWarning",
+
+    # https://github.com/AstarVienna/speXtra/issues/62
+    'default:"wave_unit" was deprecated in version 1.4 and will be removed in a future version.:astropy.utils.exceptions.AstropyDeprecationWarning',
+    'default:"flux_unit" was deprecated in version 1.4 and will be removed in a future version.:astropy.utils.exceptions.AstropyDeprecationWarning',
+
+    # Should probably be fixed:
+    "default:unclosed file <_io.BufferedReader name=:ResourceWarning",
+]
 
 [tool.coverage.report]
 omit = ["spextra/tests/*"]
