@@ -800,6 +800,10 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
             filter_curve = Passband(filter_curve)
 
         ref_spec = self.flat_spectrum(amplitude=amplitude)
+        # If no overlap (Error further down), retry with filter's waves
+        if filter_curve.check_overlap(ref_spec) == "none":
+            ref_spec = self.flat_spectrum(amplitude=amplitude,
+                                          waves=filter_curve.waveset)
 
         ref_flux = Observation(ref_spec,
                                filter_curve).effstim(flux_unit=units.PHOTLAM)
