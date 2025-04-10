@@ -312,6 +312,7 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
     DEFAULT_SPECTRA = DEFAULT_DATA.spectra
 
     def __init__(self, template_name=None, modelclass=None, **kwargs):
+        self.repr = "Uninitialized"
         if template_name is not None:
             self.from_template_name(template_name, **kwargs)
         elif modelclass is not None:
