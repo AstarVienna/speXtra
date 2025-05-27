@@ -1,3 +1,32 @@
+# Version 0.41.4
+**2025-05-27**
+
+Hotfix to solve some unit issues.
+
+## What's Changed
+### Bugs fixed
+* Catch dimensionless quantities in wave and flux by @teutoburg in https://github.com/AstarVienna/speXtra/pull/78
+### Dependency Changes
+* Bump tornado from 6.4.1 to 6.4.2 by @dependabot in https://github.com/AstarVienna/speXtra/pull/65
+* Bump actions/download-artifact from 4.1.7 to 4.1.8 by @dependabot in https://github.com/AstarVienna/speXtra/pull/68
+* Bump abatilo/actions-poetry from 3 to 4 by @dependabot in https://github.com/AstarVienna/speXtra/pull/69
+* Bump actions/download-artifact from 4.1.8 to 4.1.9 by @dependabot in https://github.com/AstarVienna/speXtra/pull/70
+* Bump jinja2 from 3.1.5 to 3.1.6 by @dependabot in https://github.com/AstarVienna/speXtra/pull/71
+* Bump actions/download-artifact from 4.1.9 to 4.2.0 by @dependabot in https://github.com/AstarVienna/speXtra/pull/72
+* Bump actions/download-artifact from 4.2.0 to 4.2.1 by @dependabot in https://github.com/AstarVienna/speXtra/pull/73
+* Bump pytest and pytest-cov to match ScopeSim by @teutoburg in https://github.com/AstarVienna/speXtra/pull/74
+* Bump actions/download-artifact from 4.2.1 to 4.3.0 by @dependabot in https://github.com/AstarVienna/speXtra/pull/76
+* Bump tornado to 6.5 to solve security alert by @teutoburg in https://github.com/AstarVienna/speXtra/pull/77
+### Other Changes
+* Treat warnings as errors in testing by @hugobuddel in https://github.com/AstarVienna/speXtra/pull/63
+* Ignore our own DeprecationWarnings by @hugobuddel in https://github.com/AstarVienna/speXtra/pull/64
+* Bump jinja2 by @hugobuddel in https://github.com/AstarVienna/speXtra/pull/67
+* Add dependabot configuration by @hugobuddel in https://github.com/AstarVienna/speXtra/pull/66
+* Initialize self.repr to aid debugging by @hugobuddel in https://github.com/AstarVienna/speXtra/pull/75
+
+**Full Changelog**: https://github.com/AstarVienna/speXtra/compare/v0.41.3...v0.41.4
+
+
 # Version 0.41.3
 **2024-11-01**
 
