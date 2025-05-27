@@ -349,10 +349,20 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
             self.path, self.library.data_type, **self.library.read_kwargs
         )
 
+        # Catch dimensionless unit. Yes it's silly.
+        if isinstance(wave, u.Quantity) and wave.unit == "":
+            wave *= self.library.read_kwargs.get("wave_unit", u.AA)
+        else:
+            wave <<= u.AA
+        if isinstance(flux, u.Quantity) and flux.unit == "":
+            flux *= self.library.read_kwargs.get("flux_unit", u.Unit("photlam"))
+        elif not isinstance(flux, u.Quantity):
+            flux <<= u.Unit("photlam")
+
         SourceSpectrum.__init__(
             self,
             Empirical1D,
-            points=wave,
+            points=wave.to_value(u.AA),
             lookup_table=flux,
             meta=meta,
             **kwargs,
