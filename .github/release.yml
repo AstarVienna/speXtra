@@ -6,6 +6,9 @@ changelog:
     - title: API Changes
       labels:
         - API
+    - title: Bugs fixed
+      labels:
+        - bugfix
     - title: New Features or Improvements
       labels:
         - enhancement
@@ -18,4 +21,3 @@ changelog:
     - title: Other Changes
       labels:
         - "*"
-        
