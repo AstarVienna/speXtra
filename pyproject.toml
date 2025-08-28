@@ -1,59 +1,62 @@
-[tool.poetry]
+[project]
 name = "speXtra"
-version = "0.41.5a0"
+version = "0.41.5a1"
 description = "Tool to manage and manipulate astronomical spectra."
-license = "MIT"
-authors = ["Miguel Verdugo <mverduol@gmail.com>"]
+license = {text = "MIT"}
+authors = [
+    {name = "Miguel Verdugo", email = "mverduol@gmail.com"}
+]
 maintainers = [
-    "Kieran Leschinski <kieran.leschinski@unive.ac.at>",
-    "Hugo Buddelmeijer <hugo@buddelmeijer.nl>",
-    "Fabian Haberhauer <fabian.haberhauer@univie.ac.at>",
+    { name = "Kieran Leschinski", email = "kieran.leschinski@unive.ac.at" },
+    { name = "Hugo Buddelmeijer", email = "hugo@buddelmeijer.nl" },
+    { name = "Fabian Haberhauer", email = "fabian.haberhauer@univie.ac.at" },
 ]
 readme = "README.md"
-repository = "https://github.com/AstarVienna/speXtra"
-documentation = "https://spextra.readthedocs.io/en/latest/"
+keywords = [ "astronomy" ]
 classifiers = [
     "Intended Audience :: Science/Research",
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering :: Astronomy",
 ]
+requires-python = ">=3.10, <3.13"
+dependencies = [
+    "numpy (>=1.26.4,<2.3.0)",
+    "scipy (>=1.14.1,<2.0.0)",
+    "astropy (>=6.1.5,<7.0.0)",
+    "synphot (>=1.5.0,<2.0.0)",
 
-[tool.poetry.dependencies]
-python = "^3.10"
-numpy = "^1.26.3"
-scipy = "^1.14.1"
-astropy = "^6.0.1"
-synphot = "^1.4.0"
+    "pyyaml (>=6.0.2,<7.0.0)",
+    "pooch (>=1.8.2,<2.0.0)",
+    "tqdm (>=4.66.3,<5.0.0)",
+    "more-itertools (>=10.2.0,<11.0.0)",
 
-pyyaml = "^6.0.1"
-pooch = "^1.8.2"
-tqdm = "^4.66.1"
-more-itertools = "^10.2.0"
+    "astar-utils (>=0.3.3,<1.0)"
+]
 
-astar-utils = ">=0.3.0"
+[project.urls]
+repository = "https://github.com/AstarVienna/speXtra"
+documentation = "https://spextra.readthedocs.io/en/stable/"
+"Bug Tracker" = "https://github.com/AstarVienna/speXtra/issues"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.5"
-pytest-cov = "^6.0.0"
-matplotlib = "^3.8.2"
+pytest-cov = "^6.1.1"
+matplotlib = "^3.10.1"
 
 [tool.poetry.group.docs]
 optional = true
 
 [tool.poetry.group.docs.dependencies]
-sphinx = "^6.0.0"
-sphinx-book-theme = "^1.1.0"
-sphinxcontrib-apidoc = "^0.4.0"
-sphinx-copybutton = "^0.5.2"
-myst-nb = "^1.0.0"
+sphinx = "^7.3.7"
+sphinx-book-theme = "^1.1.3"
+sphinxcontrib-apidoc = ">=0.6.0,<1.0"
+sphinx-copybutton = ">=0.5.2,<1.0"
+myst-nb = "^1.2.0"
 numpydoc = "^1.6.0"
-matplotlib = "^3.8.2"
-
-[tool.poetry.urls]
-"Bug Tracker" = "https://github.com/AstarVienna/speXtra/issues"
+matplotlib = "^3.10.1"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
