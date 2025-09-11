@@ -13,11 +13,7 @@ maintainers = [
 ]
 readme = "README.md"
 keywords = [ "astronomy" ]
-classifiers = [
-    "Intended Audience :: Science/Research",
-    "Operating System :: OS Independent",
-    "Topic :: Scientific/Engineering :: Astronomy",
-]
+dynamic = [ "classifiers" ]
 requires-python = ">=3.10, <3.13"
 dependencies = [
     "numpy (>=1.26.4,<2.3.0)",
@@ -34,9 +30,18 @@ dependencies = [
 ]
 
 [project.urls]
-repository = "https://github.com/AstarVienna/speXtra"
-documentation = "https://spextra.readthedocs.io/en/stable/"
+Repository = "https://github.com/AstarVienna/speXtra"
+Documentation = "https://spextra.readthedocs.io/en/stable/"
 "Bug Tracker" = "https://github.com/AstarVienna/speXtra/issues"
+Changelog = "https://github.com/AstarVienna/speXtra/blob/main/CHANGELOG.md"
+
+
+[tool.poetry]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Astronomy",
+]
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.5"
