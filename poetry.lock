@@ -42,20 +42,20 @@ files = [
 
 [[package]]
 name = "astar-utils"
-version = "0.3.3"
+version = "0.4.0"
 description = "Contains commonly-used utilities for AstarVienna's projects."
 optional = false
-python-versions = "<4.0,>=3.10"
+python-versions = "<3.14,>=3.10"
 groups = ["main"]
 files = [
-    {file = "astar_utils-0.3.3-py3-none-any.whl", hash = "sha256:b1abb5fb9a20b73f796d204b3e054ddcb29c27c26a6d01eb6943abd671a248a8"},
-    {file = "astar_utils-0.3.3.tar.gz", hash = "sha256:14efaf744f13a695498170ceadbf979c8d71c3c06b204c8bbce1db468f3cccc4"},
+    {file = "astar_utils-0.4.0-py3-none-any.whl", hash = "sha256:81b9614c548f36614709c2c490220e3e76ec9d823dec66ef357e7ffa6735e797"},
+    {file = "astar_utils-0.4.0.tar.gz", hash = "sha256:8effb9fd001f5d0980f7bf9ea3ebd69ef415f949741f78d0afbe0eafa25302c1"},
 ]
 
 [package.dependencies]
-colorama = ">=0.4.6,<0.5.0"
-more-itertools = ">=10.1.0,<11.0.0"
-pyyaml = ">=6.0.1,<7.0.0"
+colorama = ">=0.4.6,<1.0"
+more-itertools = ">=10.2.0,<11.0.0"
+pyyaml = ">=6.0.2,<7.0.0"
 
 [[package]]
 name = "astropy"
@@ -3237,4 +3237,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.14"
-content-hash = "fc7a917bf9417ec09400390ee6330d13fb604db8c0559c9098704337ad50cfaf"
+content-hash = "0088a4a06cf48c0a48add8612a3475ddeb39cedf42f742a4b8e5795abd867907"
