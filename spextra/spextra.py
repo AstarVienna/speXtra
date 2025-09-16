@@ -7,6 +7,7 @@ from pathlib import Path
 
 import numpy as np
 from scipy.ndimage import gaussian_filter1d
+from scipy import integrate
 from more_itertools import always_iterable
 
 import astropy.units as u
@@ -1019,7 +1020,12 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
             fluxes = units.convert_flux(wavelengths=wavelengths,
                                         fluxes=self(wavelengths),
                                         out_flux_unit=units.FLAM)
-            flux = np.trapz(fluxes.value, wavelengths.value)
+            # TODO: Consider using quad instead and directly supply function,
+            #       i.e. self, to avoid having to create temp fluxes. But need
+            #       to check that whole convert flux thing. Can't that use smth
+            #       better entirely, like snyphot observation or some astropy
+            #       modeling stuff??
+            flux = integrate.trapezoid(fluxes.value, x=wavelengths.value)
             line = GaussianFlux1D(mean=cent, total_flux=sign * flux,
                                   fwhm=fwh)
             lam = line.sampleset(factor_step=0.35)  # bit better than Nyquist
@@ -1144,7 +1150,7 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         -------
         a Spextrum with a log rebinned in wavelength
         """
-        nbins = int(self.waveset.ptp() / np.diff(self.waveset).min())
+        nbins = int(np.ptp(self.waveset) / np.diff(self.waveset).min())
         logwaves = np.geomspace(self.wave_min, self.wave_max, nbins)
         return self.rebin_spectra(logwaves)
 
