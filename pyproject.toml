@@ -16,7 +16,7 @@ keywords = [ "astronomy" ]
 dynamic = [ "classifiers" ]
 requires-python = ">=3.10,<3.14"
 dependencies = [
-    "numpy (>=1.26.4,<2.3.0) ; python_version >= '3.10' and python_version < '3.12'",
+    "numpy (>=1.26.4,<2.3.0) ; python_version >= '3.10' and python_version < '3.13'",
     "numpy (>=2.2.6,<3.0.0) ; python_version >= '3.13'",
 
     "scipy (>=1.15.3,<2.0.0)",

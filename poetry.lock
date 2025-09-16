@@ -434,7 +434,7 @@ description = "Python library for calculating contours of 2D quadrilateral grids
 optional = false
 python-versions = ">=3.9"
 groups = ["docs", "test"]
-markers = "python_version < \"3.12\""
+markers = "python_version < \"3.13\""
 files = [
     {file = "contourpy-1.2.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:0274c1cb63625972c0c007ab14dd9ba9e199c36ae1a231ce45d725cbcbfd10a8"},
     {file = "contourpy-1.2.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:ab459a1cbbf18e8698399c595a01f6dcc5c138220ca3ea9e7e6126232d102bb4"},
@@ -499,7 +499,7 @@ description = "Python library for calculating contours of 2D quadrilateral grids
 optional = false
 python-versions = ">=3.11"
 groups = ["docs", "test"]
-markers = "python_version >= \"3.12\""
+markers = "python_version >= \"3.13\""
 files = [
     {file = "contourpy-1.3.3-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:709a48ef9a690e1343202916450bc48b9e51c049b089c7f79a267b46cffcdaa1"},
     {file = "contourpy-1.3.3-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:23416f38bfd74d5d28ab8429cc4d63fa67d5068bd711a85edb1c3fb0c3e2f381"},
@@ -1658,7 +1658,7 @@ description = "Fundamental package for array computing in Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main", "docs", "test"]
-markers = "python_version < \"3.12\""
+markers = "python_version < \"3.13\""
 files = [
     {file = "numpy-1.26.4-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:9ff0f4f29c51e2803569d7a51c2304de5554655a60c5d776e35b4a41413830d0"},
     {file = "numpy-1.26.4-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:2e4ee3380d6de9c9ec04745830fd9e2eccb3e6cf790d39d7b98ffd19b0dd754a"},
@@ -1705,7 +1705,7 @@ description = "Fundamental package for array computing in Python"
 optional = false
 python-versions = ">=3.11"
 groups = ["main", "docs", "test"]
-markers = "python_version >= \"3.12\""
+markers = "python_version >= \"3.13\""
 files = [
     {file = "numpy-2.3.3-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:0ffc4f5caba7dfcbe944ed674b7eef683c7e94874046454bb79ed7ee0236f59d"},
     {file = "numpy-2.3.3-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:e7e946c7170858a0295f79a60214424caac2ffdb0063d4d79cb681f9aa0aa569"},
@@ -2588,7 +2588,7 @@ description = "Fundamental algorithms for scientific computing in Python"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
-markers = "python_version < \"3.12\""
+markers = "python_version < \"3.13\""
 files = [
     {file = "scipy-1.15.3-cp310-cp310-macosx_10_13_x86_64.whl", hash = "sha256:a345928c86d535060c9c2b25e71e87c39ab2f22fc96e9636bd74d1dbf9de448c"},
     {file = "scipy-1.15.3-cp310-cp310-macosx_12_0_arm64.whl", hash = "sha256:ad3432cb0f9ed87477a8d97f03b763fd1d57709f1bbde3c9369b1dff5503b253"},
@@ -2653,7 +2653,7 @@ description = "Fundamental algorithms for scientific computing in Python"
 optional = false
 python-versions = ">=3.11"
 groups = ["main"]
-markers = "python_version >= \"3.12\""
+markers = "python_version >= \"3.13\""
 files = [
     {file = "scipy-1.16.1-cp311-cp311-macosx_10_14_x86_64.whl", hash = "sha256:c033fa32bab91dc98ca59d0cf23bb876454e2bb02cbe592d5023138778f70030"},
     {file = "scipy-1.16.1-cp311-cp311-macosx_12_0_arm64.whl", hash = "sha256:6e5c2f74e5df33479b5cd4e97a9104c511518fbd979aa9b8f6aec18b2e9ecae7"},
@@ -3237,4 +3237,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.14"
-content-hash = "0088a4a06cf48c0a48add8612a3475ddeb39cedf42f742a4b8e5795abd867907"
+content-hash = "57b91ad70a90f80569717858d3c02800fd13220014f98c290011dc272c924e6c"
