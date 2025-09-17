@@ -1,3 +1,25 @@
+# Version 0.42.0
+**2025-09-17**
+
+Add support for Python 3.13 and Numpy 2, solve some other dependency issues.
+
+## What's Changed
+### Dependency Changes
+* Bump requests from 2.32.2 to 2.32.4 by @dependabot[bot] in https://github.com/AstarVienna/speXtra/pull/79
+* Bump urllib3 from 2.2.2 to 2.5.0 by @dependabot[bot] in https://github.com/AstarVienna/speXtra/pull/80
+* Bump actions/checkout from 4 to 5 by @dependabot[bot] in https://github.com/AstarVienna/speXtra/pull/85
+* Bump actions/download-artifact from 4.3.0 to 5.0.0 by @dependabot[bot] in https://github.com/AstarVienna/speXtra/pull/84
+* Migrate to Poetry 2, allow numpy 2.x by @teutoburg in https://github.com/AstarVienna/speXtra/pull/87
+* Bump actions/setup-python from 5 to 6 by @dependabot[bot] in https://github.com/AstarVienna/speXtra/pull/89
+* Add support for Python 3.13 by @teutoburg in https://github.com/AstarVienna/speXtra/pull/92
+### Documentation Improvements
+* Fix readme and toml by @teutoburg in https://github.com/AstarVienna/speXtra/pull/91
+### Other Changes
+* Fix CI comment by @hugobuddel in https://github.com/AstarVienna/speXtra/pull/83
+
+**Full Changelog**: https://github.com/AstarVienna/speXtra/compare/v0.41.4...v0.42.0
+
+
 # Version 0.41.4
 **2025-05-27**
 
