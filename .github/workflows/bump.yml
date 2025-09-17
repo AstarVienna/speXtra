@@ -11,14 +11,14 @@ on:
         description: Version bump level
         required: true
         options:
-        - major
-        - minor
-        - patch
-        - premajor
-        - preminor
-        - prepatch
         - prerelease
         - "prerelease --next-phase"
+        - prepatch
+        - preminor
+        - premajor
+        - patch
+        - minor
+        - major
 
 jobs:
   Bump:
