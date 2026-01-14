@@ -54,18 +54,20 @@ class TestDefaultData:
 
 
 class TestSpecLibrary:
-    @pytest.mark.parametrize("library_name", datacont["libraries"])
-    def test_name(self, library_name):
-        lib = SpecLibrary(library_name)
-        assert lib.name == library_name
+    def test_name(self, subtests):
+        for library_name in datacont["libraries"]:
+            with subtests.test(library=library_name):
+                lib = SpecLibrary(library_name)
+                assert lib.name == library_name
 
     def test_templates(self):
         name = "kc96"
         lib = SpecLibrary(name)
         assert "bulge" in lib.keys()
 
-    @pytest.mark.parametrize("library_name", datacont["libraries"])
     @pytest.mark.parametrize("attribute", ["file_extension", "data_type"])
-    def test_attr(self, library_name, attribute):
-        lib = SpecLibrary(library_name)
-        assert hasattr(lib, attribute)
+    def test_attr(self, subtests, attribute):
+        for library_name in datacont["libraries"]:
+            with subtests.test(library=library_name):
+                lib = SpecLibrary(library_name)
+                assert hasattr(lib, attribute)
