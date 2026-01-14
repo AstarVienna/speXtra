@@ -5,7 +5,7 @@ import urllib
 import pytest
 import yaml
 
-from spextra.database import Database, DefaultData
+from spextra.database import DefaultData
 from spextra.libraries import SpecLibrary
 from spextra.configuration import config
 
@@ -39,9 +39,9 @@ def test_database_url(url_result, attribute):
 
 
 class TestDatabase:
-    @pytest.mark.parametrize("key", ["libraries",
-                                     "extinction_curves",
-                                     "filter_systems"])
+    @pytest.mark.parametrize(
+        "key", ["libraries", "extinction_curves", "filter_systems"]
+    )
     def test_keys(self, key, mock_database):
         assert key in mock_database
         assert len(mock_database[key])

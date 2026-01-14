@@ -12,8 +12,9 @@ from synphot import SpectralElement, SourceSpectrum, units
 from spextra import Spextrum, Passband, spextra_database
 from spextra.exceptions import SpextraError, NotInLibraryError
 
-spextra_database.data_dir = Path(__file__).parent.parent.parent / 'database'
+spextra_database.data_dir = Path(__file__).parent.parent.parent / "database"
 assert spextra_database.data_dir.exists()
+
 
 # TODO: function scope might be better to isolate tests, but check performance
 # offline seems to be about a 50% increase in runtime for function scope
@@ -62,14 +63,12 @@ class TestPassbandInstances:
         passband = Passband("elt/micado/H2_1-0S1")
         assert isinstance(passband, SpectralElement)
 
-    @pytest.mark.usefixtures("mock_dir")
     def test_filename(self, mock_dir):
         passband = Passband.from_file(filename=mock_dir / "Y.dat")
         assert isinstance(passband, SpectralElement)
 
 
 @pytest.mark.webtest
-@pytest.mark.usefixtures("spec", "bb_spec")
 class TestSpextrumInstances:
     """
     This class tests whether each method return the correct instances
@@ -136,34 +135,34 @@ class TestSpextrumInstances:
     @pytest.mark.webtest
     def test_black_body_spectrum_units(self):
         bb = Spextrum.black_body_spectrum(
-                temperature=9500 * u.K,
-                amplitude=0*u.ABmag,
-                filter_curve="V",
-                waves=np.arange(3e3, 8e3, 100)*u.AA,
+            temperature=9500*u.K,
+            amplitude=0*u.ABmag,
+            filter_curve="V",
+            waves=np.arange(3e3, 8e3, 100) * u.AA,
         )
         assert isinstance(bb, Spextrum)
         bb = Spextrum.black_body_spectrum(
-                temperature=9500*u.K,
-                amplitude=0*u.ABmag,
-                filter_curve="V",
-                waves=None,
+            temperature=9500*u.K,
+            amplitude=0*u.ABmag,
+            filter_curve="V",
+            waves=None,
         )
         assert isinstance(bb, Spextrum)
 
     @pytest.mark.webtest
     def test_powerlaw_units(self):
         spec = Spextrum.powerlaw(
-                x_0=9500*u.AA,
-                amplitude=0*u.ABmag,
-                filter_curve="V",
-                waves=np.arange(3e3, 8e3, 100)*u.AA,
+            x_0=9500*u.AA,
+            amplitude=0*u.ABmag,
+            filter_curve="V",
+            waves=np.arange(3e3, 8e3, 100) * u.AA,
         )
         assert isinstance(spec, Spextrum)
         spec = Spextrum.powerlaw(
-                x_0=9500*u.AA,
-                amplitude=0*u.ABmag,
-                filter_curve="V",
-                waves=None,
+            x_0=9500*u.AA,
+            amplitude=0*u.ABmag,
+            filter_curve="V",
+            waves=None,
         )
         assert isinstance(spec, Spextrum)
 
@@ -192,13 +191,14 @@ class TestSpextrumInstances:
         assert isinstance(sp2, Spextrum)
 
     def testing_nesting(self, spec):
-        sp = spec.redshift(z=1).scale_to_magnitude(
-            amplitude=15*u.ABmag, filter_curve="g").redden(
-                "calzetti/starburst", Ebv=0.1)
+        sp = (
+            spec.redshift(z=1)
+            .scale_to_magnitude(amplitude=15*u.ABmag, filter_curve="g")
+            .redden("calzetti/starburst", Ebv=0.1)
+        )
         assert isinstance(sp, Spextrum)
 
 
-@pytest.mark.usefixtures("spec")
 class TestSpextrum:
 
     def test_wrong_load(self):
@@ -254,30 +254,36 @@ class TestSpextrum:
         filt: str
             name of the filter
         """
-        ab2vega = {"U":  0.79,   # magAB - magVega taken from
-                   "B": -0.09,   #
-                   "V":  0.02,
-                   "R":  0.21,
-                   "I":  0.45,
-                   "J":  0.91,
-                   "H":  1.39,
-                   "Ks": 1.85}
+        ab2vega = {
+            "U": 0.79,  # magAB - magVega taken from
+            "B": -0.09,  #
+            "V": 0.02,
+            "R": 0.21,
+            "I": 0.45,
+            "J": 0.91,
+            "H": 1.39,
+            "Ks": 1.85,
+        }
 
         sp = Spextrum.flat_spectrum(amplitude=0*u.ABmag)
 
         magAB = sp.get_magnitude(filt, system_name="AB")
         magVega = sp.get_magnitude(filt, system_name="vega")
 
-        diff = (magAB.value - magVega.value)
+        diff = magAB.value - magVega.value
 
         assert np.isclose(diff, ab2vega[filt], atol=0.15)
 
     @pytest.mark.webtest
     @pytest.mark.parametrize("spec_name", ["vega", "sun", "brown/NGC5992"])
-    @pytest.mark.parametrize("filters", [["2MASS/2MASS.Ks", "elt/micado/Ks"],
-                                         ["J", "elt/micado/J"],
-                                         # ["Generic/Bessell.B", "B"],
-                                         ])
+    @pytest.mark.parametrize(
+        "filters",
+        [
+            ["2MASS/2MASS.Ks", "elt/micado/Ks"],
+            ["J", "elt/micado/J"],
+            # ["Generic/Bessell.B", "B"],
+        ],
+    )
     def test_magnitudes(self, spec_name, filters):
         sp = Spextrum(spec_name)
         filter1 = filters[0]
@@ -303,6 +309,8 @@ class TestSpextrum:
         w1 = 3001*u.AA
         w2 = 4000*u.AA
         sp2 = spec.cut(w1, w2)
-        assert np.isclose(sp2.wave_min.value, w1.value,
-                          atol=np.abs(sp2.waveset[0].value -
-                                      sp2.waveset[1].value))
+        assert np.isclose(
+            sp2.wave_min.value,
+            w1.value,
+            atol=np.abs(sp2.waveset[0].value - sp2.waveset[1].value),
+        )
