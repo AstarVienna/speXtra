@@ -5,7 +5,7 @@ import urllib
 import pytest
 import yaml
 
-from spextra.database import Database, DefaultData
+from spextra.database import DefaultData
 from spextra.libraries import SpecLibrary
 from spextra.configuration import config
 
@@ -39,9 +39,9 @@ def test_database_url(url_result, attribute):
 
 
 class TestDatabase:
-    @pytest.mark.parametrize("key", ["libraries",
-                                     "extinction_curves",
-                                     "filter_systems"])
+    @pytest.mark.parametrize(
+        "key", ["libraries", "extinction_curves", "filter_systems"]
+    )
     def test_keys(self, key, mock_database):
         assert key in mock_database
         assert len(mock_database[key])
@@ -54,18 +54,20 @@ class TestDefaultData:
 
 
 class TestSpecLibrary:
-    @pytest.mark.parametrize("library_name", datacont["libraries"])
-    def test_name(self, library_name):
-        lib = SpecLibrary(library_name)
-        assert lib.name == library_name
+    def test_name(self, subtests):
+        for library_name in datacont["libraries"]:
+            with subtests.test(library=library_name):
+                lib = SpecLibrary(library_name)
+                assert lib.name == library_name
 
     def test_templates(self):
         name = "kc96"
         lib = SpecLibrary(name)
         assert "bulge" in lib.keys()
 
-    @pytest.mark.parametrize("library_name", datacont["libraries"])
     @pytest.mark.parametrize("attribute", ["file_extension", "data_type"])
-    def test_attr(self, library_name, attribute):
-        lib = SpecLibrary(library_name)
-        assert hasattr(lib, attribute)
+    def test_attr(self, subtests, attribute):
+        for library_name in datacont["libraries"]:
+            with subtests.test(library=library_name):
+                lib = SpecLibrary(library_name)
+                assert hasattr(lib, attribute)
