@@ -1,3 +1,23 @@
+# Version 0.43.0
+**2026-01-16**
+
+Add support for Python 3.14, minor bugfixes.
+
+## What's Changed
+### Bugs fixed
+* Don't include "*_unit" keywords for FITS spectra by @teutoburg in https://github.com/AstarVienna/speXtra/pull/97
+### Dependency Changes
+* Bump fonttools from 4.47.2 to 4.61.0 by @dependabot[bot] in https://github.com/AstarVienna/speXtra/pull/95
+* Bump urllib3 from 2.5.0 to 2.6.0 by @dependabot[bot] in https://github.com/AstarVienna/speXtra/pull/96
+* Bump urllib3 from 2.6.0 to 2.6.3 by @dependabot[bot] in https://github.com/AstarVienna/speXtra/pull/98
+* Allow Python 3.14, sync dependencies by @teutoburg in https://github.com/AstarVienna/speXtra/pull/99
+### Other Changes
+* Minor cleanup in tests by @teutoburg in https://github.com/AstarVienna/speXtra/pull/100
+* Turn `DeprecationWarning`s into `FutureWarning`s, specify version by @teutoburg in https://github.com/AstarVienna/speXtra/pull/101
+
+**Full Changelog**: https://github.com/AstarVienna/speXtra/compare/v0.42.0...v0.43.0
+
+
 # Version 0.42.0
 **2025-09-17**
 
