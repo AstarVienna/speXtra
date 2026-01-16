@@ -45,9 +45,9 @@ class DBFile:
     def datafile(self):
         """Name and extension of the file."""
         warnings.warn("The 'name plus file extension' property will be moved "
-                      "to .filename in the next minor pre-release, making "
+                      "to .filename in version 0.44.0, making "
                       ".datafile deprecated.",
-                      PendingDeprecationWarning, 2)
+                      FutureWarning, 2)
         return self.basename + self.library.file_extension
 
     @property
@@ -62,19 +62,19 @@ class DBFile:
     def filename(self):
         """Deprecated feature."""
         warnings.warn("The .filename property is deprecated and will refer to "
-                      "the full name incl. file extension in future versions. "
+                      "the full name incl. file extension in version 0.44.0. "
                       "For the absolute file path, please use .path instead!",
-                      DeprecationWarning, 2)
+                      FutureWarning, 2)
         return self.path
 
     @property
     def name(self):
         """Deprecated feature."""
         warnings.warn("Accessing the library name directly via the .name "
-                      "property is ambiguous. In future versions, .name will "
+                      "property is ambiguous. From v0.44.0 onwards, .name will "
                       "refer to the .basename attribute + library_name. "
                       "Please use the more explicit .library.name instead!",
-                      DeprecationWarning, 2)
+                      FutureWarning, 2)
         return self.library.name
 
     @property
@@ -97,8 +97,8 @@ class DBFile:
         if not key.startswith("__") and hasattr(self.library, key):
             warnings.warn(f"Accessing library attributes like '{key}' "
                           "directly is deprecated and will raise an error in "
-                          "future versions. Please use the more explicit "
-                          f".library.{key} instead!", DeprecationWarning, 2)
+                          "version 0.44.0. Please use the more explicit "
+                          f".library.{key} instead!", FutureWarning, 2)
         return getattr(self.library, key)
 
 
@@ -118,7 +118,7 @@ class SpectrumContainer(DBFile):
         """Deprecated feature."""
         warnings.warn("The .template_name property is deprecated and will be "
                       "removed in v1.0. Please use the identical .basename "
-                      "instead!", DeprecationWarning, 2)
+                      "instead!", FutureWarning, 2)
         return self.basename
 
     @property
@@ -126,7 +126,7 @@ class SpectrumContainer(DBFile):
         """Deprecated feature."""
         warnings.warn("The .template_comment property is deprecated and will be "
                       "removed in v1.0. Please use the identical .description "
-                      "instead!", DeprecationWarning, 2)
+                      "instead!", FutureWarning, 2)
         return self.description
 
 
@@ -146,7 +146,7 @@ class FilterContainer(DBFile):
         """Deprecated feature."""
         warnings.warn("The .filter_comment property is deprecated and will be "
                       "removed in v1.0. Please use the identical .description "
-                      "instead!", DeprecationWarning, 2)
+                      "instead!", FutureWarning, 2)
         return self.description
 
 
@@ -166,5 +166,5 @@ class ExtCurveContainer(DBFile):
         """Deprecated feature."""
         warnings.warn("The .curve_comment property is deprecated and will be "
                       "removed in v1.0. Please use the identical .description "
-                      "instead!", DeprecationWarning, 2)
+                      "instead!", FutureWarning, 2)
         return self.description

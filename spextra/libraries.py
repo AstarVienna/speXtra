@@ -149,7 +149,7 @@ class SpecLibrary(Library):
             warnings.warn("Constructing using the 'library_name' argument is "
                           "deprecated and will raise an error in v1.0. Please "
                           "use the more general 'name' argument.",
-                          DeprecationWarning, 2)
+                          FutureWarning, 2)
             name = library_name
         if name is None and library_name is None:
             raise ConstructorError("name must be passed to constructor")
@@ -161,7 +161,7 @@ class SpecLibrary(Library):
         """Deprecated feature."""
         warnings.warn("The alias .library_name is deprecated and will be "
                       "removed in v1.0. Please use .name instead!",
-                      DeprecationWarning, 2)
+                      FutureWarning, 2)
         return self.name
 
     @property
@@ -169,7 +169,7 @@ class SpecLibrary(Library):
         """Deprecated feature."""
         warnings.warn("The alias .templates is deprecated and will be "
                       "removed in v1.0. Please use .items() instead!",
-                      DeprecationWarning, 2)
+                      FutureWarning, 2)
         return list(self.items())
 
     @property
@@ -177,14 +177,14 @@ class SpecLibrary(Library):
         """Deprecated feature."""
         warnings.warn("The alias .template_names is deprecated and will be "
                       "removed in v1.0. Please use the  more general "
-                      ".keys() instead!", DeprecationWarning, 2)
+                      ".keys() instead!", FutureWarning, 2)
         return list(self.keys())
 
     @property
     def template_comments(self):
         """Deprecated feature."""
         warnings.warn("The properts .template_comments is deprecated and will "
-                      "be removed in v1.0.", DeprecationWarning, 2)
+                      "be removed in v1.0.", FutureWarning, 2)
         return list(self.values())
 
     def __str__(self) -> str:
@@ -212,7 +212,7 @@ class FilterSystem(Library):
             warnings.warn("Constructing using the 'filter_system' argument is "
                           "deprecated and will raise an error in v1.0. Please "
                           "use the more general 'name' argument.",
-                          DeprecationWarning, 2)
+                          FutureWarning, 2)
             name = filter_system
         if name is None and filter_system is None:
             raise ConstructorError("name must be passed to constructor")
@@ -224,7 +224,7 @@ class FilterSystem(Library):
         """Deprecated feature."""
         warnings.warn("The alias .filter_system is deprecated and will be "
                       "removed in v1.0. Please use .name instead!",
-                      DeprecationWarning, 2)
+                      FutureWarning, 2)
         return self.name
 
     @property
@@ -232,7 +232,7 @@ class FilterSystem(Library):
         """Deprecated feature."""
         warnings.warn("The alias .filters is deprecated and will be "
                       "removed in v1.0. Please use .items() instead!",
-                      DeprecationWarning, 2)
+                      FutureWarning, 2)
         return list(self.items())
 
     @property
@@ -240,14 +240,14 @@ class FilterSystem(Library):
         """Deprecated feature."""
         warnings.warn("The alias .filter_names is deprecated and will be "
                       "removed in v1.0. Please use the  more general "
-                      ".keys() instead!", DeprecationWarning, 2)
+                      ".keys() instead!", FutureWarning, 2)
         return list(self.keys())
 
     @property
     def filter_comments(self):
         """Deprecated feature."""
         warnings.warn("The properts .filter_comments is deprecated and will "
-                      "be removed in v1.0.", DeprecationWarning, 2)
+                      "be removed in v1.0.", FutureWarning, 2)
         return list(self.values())
 
     def __str__(self) -> str:
@@ -275,7 +275,7 @@ class ExtCurvesLibrary(Library):
             warnings.warn("Constructing using the 'curve_library' argument is "
                           "deprecated and will raise an error in v1.0. Please "
                           "use the more general 'name' argument.",
-                          DeprecationWarning, 2)
+                          FutureWarning, 2)
             name = curve_library
         if name is None and curve_library is None:
             raise ConstructorError("name must be passed to constructor")
@@ -287,7 +287,7 @@ class ExtCurvesLibrary(Library):
         """Deprecated feature."""
         warnings.warn("The alias .curves is deprecated and will be "
                       "removed in v1.0. Please use .items() instead!",
-                      DeprecationWarning, 2)
+                      FutureWarning, 2)
         return list(self.items())
 
     @property
@@ -295,14 +295,14 @@ class ExtCurvesLibrary(Library):
         """Deprecated feature."""
         warnings.warn("The alias .curve_names is deprecated and will be "
                       "removed in v1.0. Please use the  more general "
-                      ".keys() instead!", DeprecationWarning, 2)
+                      ".keys() instead!", FutureWarning, 2)
         return list(self.keys())
 
     @property
     def curve_comments(self):
         """Deprecated feature."""
         warnings.warn("The properts .curve_comments is deprecated and will be "
-                      "removed in v1.0.", DeprecationWarning, 2)
+                      "removed in v1.0.", FutureWarning, 2)
         return list(self.values())
 
     def __str__(self) -> str:

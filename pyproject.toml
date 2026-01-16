@@ -79,14 +79,14 @@ filterwarnings = [
     # Should certainly be fixed:
 
     # https://github.com/AstarVienna/speXtra/issues/61
-    "ignore:The 'name plus file extension' property*:PendingDeprecationWarning",
+    "ignore:The 'name plus file extension' property*:FutureWarning",
 
     # Should probably be fixed:
     "default:unclosed file <_io.BufferedReader name=:ResourceWarning",
 
     # Internal deprecation warning; the function should be tested as long
     # as it is in the codebase.
-    "default:The download_file function is deprecated and will be removed in v1.0. Please use retriever.fetch instead.:DeprecationWarning"
+    "ignore:The download_file function is deprecated and will be removed in v1.0. Please use retriever.fetch instead.:FutureWarning"
 ]
 
 [tool.coverage.report]

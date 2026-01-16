@@ -593,8 +593,8 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
     def emission_line_spectra(cls, *args, **kwargs):
         warnings.warn(
             "The 'emission_line_spectra' constructor is deprecated and will be"
-            " removed in a future version. Please use the identical "
-            "'emission_line_spectrum' instead.", DeprecationWarning,
+            " removed in version 0.44.0. Please use the identical "
+            "'emission_line_spectrum' instead.", FutureWarning,
             stacklevel=2)
         return cls.emission_line_spectrum(*args, **kwargs)
 

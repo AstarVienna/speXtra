@@ -24,7 +24,7 @@ def download_file(remote_url, local_name):
     """For backwards compatibility only."""
     warnings.warn("The download_file function is deprecated and will be "
                   "removed in v1.0. Please use retriever.fetch instead.",
-                  DeprecationWarning, stacklevel=2)
+                  FutureWarning, stacklevel=2)
     file = pooch.retrieve(remote_url, known_hash=None,
                           fname=local_name.name, path=local_name.parent)
     return file
