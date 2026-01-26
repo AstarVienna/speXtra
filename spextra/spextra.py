@@ -14,10 +14,24 @@ import astropy.units as u
 from astropy.constants import c as speed_of_light
 from astropy.modeling.models import Scale
 
-from synphot import (units, SourceSpectrum, SpectralElement, Observation,
-                     BaseUnitlessSpectrum, ReddeningLaw, utils)
-from synphot.models import (Empirical1D, GaussianFlux1D, Gaussian1D, Box1D,
-                            ConstFlux1D, BlackBody1D, PowerLawFlux1D)
+from synphot import (
+    SourceSpectrum,
+    SpectralElement,
+    Observation,
+    BaseUnitlessSpectrum,
+    ReddeningLaw,
+    units,
+    utils,
+)
+from synphot.models import (
+    Empirical1D,
+    Gaussian1D,
+    GaussianFlux1D,
+    Box1D,
+    ConstFlux1D,
+    BlackBody1D,
+    PowerLawFlux1D,
+)
 from synphot.specio import read_ascii_spec, read_fits_spec
 from synphot import exceptions
 
