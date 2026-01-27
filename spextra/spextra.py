@@ -14,10 +14,24 @@ import astropy.units as u
 from astropy.constants import c as speed_of_light
 from astropy.modeling.models import Scale
 
-from synphot import (units, SourceSpectrum, SpectralElement, Observation,
-                     BaseUnitlessSpectrum, ReddeningLaw, utils)
-from synphot.models import (Empirical1D, GaussianFlux1D, Gaussian1D, Box1D,
-                            ConstFlux1D, BlackBody1D, PowerLawFlux1D)
+from synphot import (
+    SourceSpectrum,
+    SpectralElement,
+    Observation,
+    BaseUnitlessSpectrum,
+    ReddeningLaw,
+    units,
+    utils,
+)
+from synphot.models import (
+    Empirical1D,
+    Gaussian1D,
+    GaussianFlux1D,
+    Box1D,
+    ConstFlux1D,
+    BlackBody1D,
+    PowerLawFlux1D,
+)
 from synphot.specio import read_ascii_spec, read_fits_spec
 from synphot import exceptions
 
@@ -84,16 +98,28 @@ class Passband(SpectralElement, FilterContainer):
         # TODO: why?
         wave = wave.to(u.AA)
 
-        SpectralElement.__init__(self, Empirical1D, points=wave,
-                                 lookup_table=flux.value, meta=meta)
+        SpectralElement.__init__(
+            self,
+            Empirical1D,
+            points=wave,
+            lookup_table=flux.value,
+            meta=meta,
+            fill_value=0,
+        )
 
     def _svo_loader(self, filter_name):
         wave, trans = download_svo_filter(filter_name)
         meta = {"filter_name": filter_name, "source": "SVO"}
         self.library.read_kwargs["wave_unit"] = u.Unit(wave.unit)
 
-        SpectralElement.__init__(self, Empirical1D, points=wave,
-                                 lookup_table=trans, meta=meta)
+        SpectralElement.__init__(
+            self,
+            Empirical1D,
+            points=wave,
+            lookup_table=trans,
+            meta=meta,
+            fill_value=0.,
+        )
 
     @classmethod
     def from_vectors(
@@ -118,7 +144,10 @@ class Passband(SpectralElement, FilterContainer):
         """
         waves <<= wave_unit
         modelclass = SpectralElement(
-            Empirical1D, points=waves, lookup_table=trans, meta=meta
+            Empirical1D,
+            points=waves,
+            lookup_table=trans,
+            meta=meta,
         )
         return cls(modelclass=modelclass)
 
@@ -174,6 +203,7 @@ class Passband(SpectralElement, FilterContainer):
             amplitude=peak,
             mean=center.to(u.AA),
             stddev=sigma,
+            fill_value=0.,
             **kwargs,
         )
         return cls(modelclass=modelclass)
@@ -208,6 +238,7 @@ class Passband(SpectralElement, FilterContainer):
             amplitude=transmission,
             x_0=center.to(u.AA),
             width=width.to(u.AA),
+            fill_value=0.,
         )
         return cls(modelclass=modelclass)
 
@@ -282,7 +313,11 @@ class ExtinctionCurve(ReddeningLaw, ExtCurveContainer):
         waves <<= wave_unit
 
         modelclass = SpectralElement(
-            Empirical1D, points=waves, lookup_table=flux, meta=meta
+            Empirical1D,
+            points=waves,
+            lookup_table=flux,
+            meta=meta,
+            fill_value=0.,
         )
         return cls(modelclass=modelclass)
 
@@ -875,7 +910,10 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
                 mid_point = 0.5 * (wmin + wmax)
                 width = abs(wmax - wmin)
                 filter_curve = SpectralElement(
-                    Box1D, amplitude=1, x_0=mid_point, width=width
+                    Box1D,
+                    amplitude=1,
+                    x_0=mid_point,
+                    width=width,
                 )
             except ValueError:
                 raise ArgumentError("Please specify wmin/wmax or a filter")
@@ -1131,7 +1169,12 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
 
         waves = self.waveset.value  # else assumed to be angstroms
         flux = np.ones_like(waves)
-        filt = SpectralElement(Empirical1D, points=waves, lookup_table=flux)
+        filt = SpectralElement(
+            Empirical1D,
+            points=waves,
+            lookup_table=flux,
+            fill_value=0.,
+        )
         obs = Observation(self, filt, binset=new_waves, force="taper")
         newflux = obs.binflux
         rebin_spec = Empirical1D(

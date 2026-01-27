@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 import numpy as np
+from numpy import testing as npt
 import astropy.units as u
 from astropy.constants import c
 from synphot import SpectralElement, SourceSpectrum, units
@@ -220,8 +221,7 @@ class TestSpextrum:
             flux1 = sp1(waves)
             flux2 = sp2(waves)
 
-        mean = np.mean(flux1 / flux2)
-        assert np.isclose(mean, 10**0.4)
+        npt.assert_allclose(np.mean(flux1 / flux2), 10**0.4)
 
     @pytest.mark.webtest
     @pytest.mark.parametrize("unit", [u.mag, u.ABmag, u.STmag])
@@ -236,8 +236,7 @@ class TestSpextrum:
         flux2 = sp2(sp2.waveset[(sp2.waveset.value > 6231 - 200) &
                                 (sp2.waveset.value < 6231 + 200)]).value
 
-        mean = np.mean(flux1 / flux2)
-        assert np.isclose(mean, 10**0.4)
+        npt.assert_allclose(np.mean(flux1 / flux2), 10**0.4)
 
     @pytest.mark.webtest
     @pytest.mark.parametrize("filt", ["U", "B", "V", "R", "I", "J", "H", "Ks"])
@@ -272,7 +271,7 @@ class TestSpextrum:
 
         diff = magAB.value - magVega.value
 
-        assert np.isclose(diff, ab2vega[filt], atol=0.15)
+        npt.assert_allclose(diff, ab2vega[filt], atol=0.15)
 
     @pytest.mark.webtest
     @pytest.mark.parametrize("spec_name", ["vega", "sun", "brown/NGC5992"])
@@ -291,7 +290,7 @@ class TestSpextrum:
         mag1 = sp.get_magnitude(filter_curve=filter1)
         mag2 = sp.get_magnitude(filter_curve=filter2)
 
-        assert np.isclose(mag1.value, mag2.value, atol=0.3)
+        npt.assert_allclose(mag1.value, mag2.value, atol=0.3)
 
     def test_hz2angstrom(self):
 
@@ -303,13 +302,13 @@ class TestSpextrum:
         inwaves = c.value / waves.value
         outwaves = sp.waveset.to(u.m).value
 
-        assert np.isclose(inwaves[::-1], outwaves).all()
+        npt.assert_allclose(inwaves[::-1], outwaves)
 
     def test_spectrum_cut(self, spec):
         w1 = 3001*u.AA
         w2 = 4000*u.AA
         sp2 = spec.cut(w1, w2)
-        assert np.isclose(
+        npt.assert_allclose(
             sp2.wave_min.value,
             w1.value,
             atol=np.abs(sp2.waveset[0].value - sp2.waveset[1].value),
