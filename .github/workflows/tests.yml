@@ -21,7 +21,6 @@ jobs:
     secrets: inherit
 
   call-webtests:
-    if: ${{github.event_name == 'workflow_dispatch'}}
     name: Network tests
     uses: AstarVienna/DevOps/.github/workflows/webtests.yml@main
     secrets: inherit
