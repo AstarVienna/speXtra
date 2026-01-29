@@ -1,3 +1,18 @@
+# Version 0.43.1
+**2026-01-29**
+
+## What's Changed
+### Bugs fixed
+* Set `fill_value=0.0` by @teutoburg in https://github.com/AstarVienna/speXtra/pull/105
+* Fix waves overlap by @teutoburg in https://github.com/AstarVienna/speXtra/pull/106
+* Run webtests on PRs by @teutoburg in https://github.com/AstarVienna/speXtra/pull/107
+### Dependency Changes
+* Bump pillow from 11.0.0 to 12.1.0 by @teutoburg in https://github.com/AstarVienna/speXtra/pull/104
+* Update various dependencies by @teutoburg in https://github.com/AstarVienna/speXtra/pull/108
+
+**Full Changelog**: https://github.com/AstarVienna/speXtra/compare/v0.43.0...v0.43.1
+
+
 # Version 0.43.0
 **2026-01-16**
 
