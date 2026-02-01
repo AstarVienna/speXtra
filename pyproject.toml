@@ -1,6 +1,6 @@
 [project]
 name = "speXtra"
-version = "0.43.2a0"
+version = "0.43.2a1"
 description = "Tool to manage and manipulate astronomical spectra."
 license = {text = "MIT"}
 authors = [
