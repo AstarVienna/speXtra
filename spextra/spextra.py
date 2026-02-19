@@ -522,7 +522,7 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         cls,
         temperature: u.Quantity[u.K] = 9500 * u.K,
         amplitude: u.Quantity[u.ABmag] = 0 * u.ABmag,
-        filter_curve: str | Passband | SpectralElement | None = None,
+        filter_curve: str | Passband | SpectralElement = "V",
         waves: u.Quantity[u.AA] | None = None,
     ):
         """
@@ -579,7 +579,7 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
         alpha=1,
         x_0: u.Quantity[u.AA] = 5000 * u.AA,
         amplitude: u.Quantity[u.ABmag] = 0 * u.ABmag,
-        filter_curve: str | Passband | SpectralElement | None = None,
+        filter_curve: str | Passband | SpectralElement = "V",
         waves: u.Quantity[u.AA] | None = None,
     ):
         """
@@ -754,7 +754,7 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
     def scale_to_magnitude(
         self,
         amplitude: u.Quantity[u.ABmag],
-        filter_curve: str | Passband | SpectralElement | None = None,
+        filter_curve: str | Passband | SpectralElement,
     ):
         """
         Scale a Spectrum to a value in a filter.
@@ -820,7 +820,7 @@ class Spextrum(SourceSpectrum, SpectrumContainer):
 
     def get_magnitude(
         self,
-        filter_curve: str | Passband | SpectralElement | None = None,
+        filter_curve: str | Passband | SpectralElement,
         system_name: str = "AB",
     ):
         """
