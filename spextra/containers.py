@@ -56,7 +56,9 @@ class DBFile:
         if not self.is_in_library:
             raise NotInLibraryError(f"{self._subclass_str} '{self.basename}' "
                                     "not in library")
-        return spextra_database.fetch(f"{self.library.path}/{self.datafile}")
+        # TODO: Use self.filename once that recursion has been resolved.
+        filename = self.basename + self.library.file_extension
+        return spextra_database.fetch(f"{self.library.path}/{filename}")
 
     @property
     def filename(self):
