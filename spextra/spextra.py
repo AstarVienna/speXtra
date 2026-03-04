@@ -1373,13 +1373,19 @@ def _default_waves():
 
 def _read_spec(fname, fmt, **kwargs):
     if fmt == "fits":
-        return read_fits_spec(fname, ext=1, **kwargs)
+        # Needs str() aroudn fname because synphot doesn't close the file unless
+        # it's a str, meaning pathlib objects work, but result in an unclosed
+        # resource warning.
+        return read_fits_spec(str(fname), ext=1, **kwargs)
     elif fmt == "ascii":
         kwargs = {
             key: kwargs[key]
             for key in kwargs.keys() & {"wave_unit", "flux_unit"}
         }
-        return read_ascii_spec(fname, **kwargs)
+        # Note sure if str() is also required here like above, because synphot
+        # delegates ascii file reading to astropy directly, and their code is
+        # rather unübersichtlich there. But it doesn't hurt to have the str().
+        return read_ascii_spec(str(fname), **kwargs)
     else:
         raise SpextraError("invalid data type")
 
