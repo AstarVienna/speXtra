@@ -31,7 +31,7 @@ class Library(Mapping):
         "wave_col": "wave_col",
         "flux_col": "flux_col",
         "flux_unit": "flux_unit",
-        }
+    }
 
     def __init__(self, name):
         self.name = name
@@ -142,7 +142,7 @@ class SpecLibrary(Library):
         "wave_col": "wave_column_name",
         "flux_col": "flux_column_name",
         "flux_unit": "flux_unit",
-        }
+    }
 
     def __init__(self, name=None, library_name=None):
         if library_name is not None:
@@ -188,11 +188,14 @@ class SpecLibrary(Library):
         return list(self.values())
 
     def __str__(self) -> str:
-        outstr = (f"Spectral Library '{self.name}': {self.title}\n"
-                  f"  spectral coverage: {', '.join(self.spectral_coverage)}\n"
-                  f"  wave_unit: {self.read_kwargs['wave_unit']}\n"
-                  f"  flux_unit: {self.read_kwargs['flux_unit']}\n"
-                  f"  Templates: {', '.join(self.keys())}")
+        """Return str(self)."""
+        outstr = (
+            f"Spectral Library '{self.name}': {self.title}\n"
+            f"  spectral coverage: {', '.join(self.spectral_coverage)}\n"
+            f"  wave_unit: {self.read_kwargs['wave_unit']}\n"
+            f"  flux_unit: {self.read_kwargs['flux_unit']}\n"
+            f"  Templates: {', '.join(self.keys())}"
+        )
         return outstr
 
 
@@ -205,7 +208,7 @@ class FilterSystem(Library):
         "wave_col": "wave_col",
         "flux_col": "flux_col",
         "flux_unit": "flux_unit",
-        }
+    }
 
     def __init__(self, name=None, filter_system=None):
         if filter_system is not None:
@@ -251,11 +254,14 @@ class FilterSystem(Library):
         return list(self.values())
 
     def __str__(self) -> str:
+        """Return str(self)."""
         filters = [f"{self.name}/{key}" for key in self]
-        outstr = (f"Filter system '{self.name}': {self.title}\n"
-                  f"  spectral coverage: {', '.join(self.spectral_coverage)}\n"
-                  f"  wave_unit: {self.read_kwargs['wave_unit']}\n"
-                  f"  filters: {', '.join(filters)}")
+        outstr = (
+            f"Filter system '{self.name}': {self.title}\n"
+            f"  spectral coverage: {', '.join(self.spectral_coverage)}\n"
+            f"  wave_unit: {self.read_kwargs['wave_unit']}\n"
+            f"  filters: {', '.join(filters)}"
+        )
         return outstr
 
 
@@ -268,7 +274,7 @@ class ExtCurvesLibrary(Library):
         "wave_col": "wave_column",
         "flux_col": "extinction_column",
         "flux_unit": "extinction_unit",
-        }
+    }
 
     def __init__(self, name=None, curve_library=None):
         if curve_library is not None:
@@ -306,7 +312,10 @@ class ExtCurvesLibrary(Library):
         return list(self.values())
 
     def __str__(self) -> str:
-        outstr = (f"Extinction Curves '{self.name}': {self.title}\n"
-                  f"  wave_unit: {self.read_kwargs['wave_unit']}\n"
-                  f"  Templates: {self._items!s}")
+        """Return str(self)."""
+        outstr = (
+            f"Extinction Curves '{self.name}': {self.title}\n"
+            f"  wave_unit: {self.read_kwargs['wave_unit']}\n"
+            f"  Templates: {self._items!s}"
+        )
         return outstr
