@@ -21,7 +21,6 @@ libraries:
   etc/marcs/p: ESO ETC subset of the MARCS Stellar Models with Plane Parallel Geometry
   etc/marcs/s: ESO ETC subset of the MARCS Stellar Models with Spherical Geometry
   etc/misc: Other templates, nubulae and qso
-  etc/pickles: ESO ETC subset of the Pickles stellar library
 
 extinction_curves:
   gordon: LMC and SMC extinction laws
