@@ -1,45 +1,37 @@
-# 
-library_name : madden
+name: madden
+type: planetary
+title: High-Resolution Spectra of Habitable Zone Planets
+abstract: |
+  Simulated high-resolution spectra of habitable planets covering a wide
+  parameter space are essential in training retrieval tools, optimizing
+  observing strategies, and interpreting upcoming observations. Ground-based
+  extremely large telescopes like ELT, GMT, and TMT; and future space-based
+  mission concepts like Origins, HabEx, and LUVOIR are designed to have the
+  capability of characterizing a variety of potentially habitable worlds. Some
+  of these telescopes will use high precision radial velocity techniques to
+  obtain the required high-resolution spectra (R~100,000) needed to characterize
+  potentially habitable exoplanets. Here we present a database of
+  high-resolution (0.01 cm−1) reflection and emission spectra for simulated
+  exoplanets with a wide range of surfaces, receiving similar irradiation as
+  Earth around 12 different host stars from F0 to K7.
 
-type : planets
+reference:  Madden and Kaltenegger 2020, MNRAS 495, 1
+url: https://zenodo.org/record/3930900
 
-title : High-Resolution Spectra of Habitable Zone Planets
+spectral_coverage:
+  - VIS
+  - NIR
+  - MIR
 
-summary : |
-  Simulated high-resolution spectra of habitable planets covering a wide parameter space are essential in 
-  training retrieval tools, optimizing observing strategies, and interpreting upcoming observations. 
-  Ground-based extremely large telescopes like ELT, GMT, and TMT; and future space-based mission concepts 
-  like Origins, HabEx, and LUVOIR are designed to have the capability of characterizing a variety of potentially 
-  habitable worlds. Some of these telescopes will use high precision radial velocity techniques to obtain the required 
-  high-resolution spectra (R≈100,000) needed to characterize potentially habitable exoplanets. 
-  Here we present a database of high-resolution (0.01 cm−1) reflection and emission spectra for simulated 
-  exoplanets with a wide range of surfaces, receiving similar irradiation as Earth around 12 different host stars 
-  from F0 to K7
+parameters:
+  resolution: 1.56e-7  # [um]
 
-
-reference :  Madden and Kaltenegger 2020, MNRAS 495, 1
-
-link : https://zenodo.org/record/3930900
-
-spectral_coverage :
-  - vis
-  - nir
-  - mir
-
-resolution : 1.56e-7
-
-wave_unit: um
-
-flux_unit : W/m2/um
-
-wave_column_name : wavelength
-
-flux_column_name : flux
-
-data_type: fits
-
+# wave_unit: um  # TODO: double check with FITS header
+# flux_unit: W/m2/um  # TODO: double check with FITS header
+wave_col: wavelength
+flux_col: flux
 file_extension: .fits
 
-templates:      # comments
-  example    :  sample spectrum 
-
+items:
+  example: sample spectrum
+  # to be expanded...

@@ -1,52 +1,26 @@
-# Nebulae 
+name: etc/misc
+type: other
+title: Miscellaneous spectra for the ESO ETC
+abstract: Collection of miscellaneus spectra for the ESO ETC calculations.
 
-library_name : etc/misc
+reference: ""
+url: ""
 
-type : misc
+spectral_coverage:
+  - UV
+  - VIS
+  - NIR
 
-title : Miscellaneous spectra for the ESO ETC
-
-summary : |
-  This is a collection of miscellaneus spectra for the ESO ETC calculations 
-
-reference : TBD
-
-link : TBD
-
-spectral_coverage :
-  - uv
-  - vis
-  - nir
-
-resolution : 0.25
+parameters:
+  resolution: 0.25  # [??]
 
 wave_unit: nm
-
-flux_unit : FLAM
-
-wave_column_name : Wavelength
-
-flux_column_name : Flux
-
-data_type: ascii
-
+flux_unit: FLAM
+wave_col: Wavelength
+flux_col: Flux
 file_extension: .dat
 
-templates:    # comments
-  orion :    Orion
-  pn :       Planetary Nebula
-  qso :      QSO
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
+items:
+  orion: Orion
+  pn: Planetary Nebula
+  qso: QSO

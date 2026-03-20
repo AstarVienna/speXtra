@@ -1,53 +1,39 @@
-# Supernova Spectra 
+name: sne
+type: supernova
+title: Supernova spectral library
+abstract: |
+  A collection of supernova spectra obtained with the sncosmo
+  package https://sncosmo.readthedocs.io/en/v2.0.x/index.html.
+  Please see there for the appropiated references.
 
-library_name : sne
-
-type : supernova
-
-title : Supernova spectral library
-
-summary : |
-  A collection of supernova spectra obtained with the sncosmo 
-  package https://sncosmo.readthedocs.io/en/v2.0.x/index.html. 
-  Please see there for the appropiated references. 
-
-  Spectra are normalized to the maximum flux. 
-  Most spectra are only for phase 0, time of maximum brightness, 
+  Spectra are normalized to the maximum flux.
+  Most spectra are only for phase 0, time of maximum brightness,
   unless otherwise noted
 
+reference: "http://sncosmo.github.io/"
+url: "https://sncosmo.readthedocs.io/en/v2.0.x/about.html"
 
-reference : http://sncosmo.github.io/
+spectral_coverage:
+  - UV
+  - VIS
+  - NIR
 
-link : https://sncosmo.readthedocs.io/en/v2.0.x/about.html
-
-spectral_coverage :
-  - uv
-  - vis
-  - nir
-
-resolution : 5
+parameters:
+  resolution: 5  # [??]
 
 wave_unit: Angstrom
-
-flux_unit : FLAM
-
-wave_column_name : WAVELENGTH
-
-flux_column_name : FLUX
-
-data_type: ascii
-
+flux_unit: FLAM
+wave_col: WAVELENGTH
+flux_col: FLUX
 file_extension: .dat
 
-templates:    # comments
-  sn1a: SALT2-extended SNIa, phase 0
-  sn1b: SN1b s11-2005hl   
-  sn1c: SNIc s11-2006fo
-  sn2l: SNIIL s11-2004hx
-  sn2p: SNIIP s11-2005lc
-  sn2n: SNIIn snana-2006ez
-  hyper: nugent hyper-SN SNIb/c phase 5
-  pop3_3d: whalen-z25g PopIII, phase 3
-  pop3_15d: whalen-z15g PopIII, phase 15
-
-
+items:
+  sn1a: [SALT2-extended, SNIa, phase 0]
+  sn1b: [SN1b, s11-2005hl]
+  sn1c: [SNIc, s11-2006fo]
+  sn2l: [SNIIL, s11-2004hx]
+  sn2p: [SNIIP, s11-2005lc]
+  sn2n: [SNIIn, snana-2006ez]
+  hyper: [nugent hyper-SN, SNIb/c, phase 5]
+  pop3_3d: [whalen-z25g, PopIII, phase 3]
+  pop3_15d: [whalen-z15g, PopIII, phase 15]

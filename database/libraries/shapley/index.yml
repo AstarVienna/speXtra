@@ -1,51 +1,25 @@
-# Nebulae 
+name: shapley
+type: extragalactic
+title: Rest-Frame Ultraviolet Spectra of z~3 Lyman Break Galaxies
+abstract: Composite spectrum of 1000 LBG at z~3
 
-library_name : shapley
+reference: Shapley and Steidel 2003
+bibcode: "2003ApJ...588...65S"
+adsurl: "https://ui.adsabs.harvard.edu/abs/2003ApJ...588...65S"
+doi: "10.1086/373922"
+url: "https://iopscience.iop.org/article/10.1086/373922/fulltext/"
 
-type : galaxies
+spectral_coverage:
+  - UV
 
-title : Rest-Frame Ultraviolet Spectra of z ∼ 3 Lyman Break Galaxies
-
-summary : |
-  Composite spectrum of 1000 LBG at z~3
-
-
-reference : Shapley and Steidel 2003, Apj 588, 65
-
-link : https://iopscience.iop.org/article/10.1086/373922/fulltext/
-
-spectral_coverage :
-  - uv
-
-resolution : 10
+parameters:
+  resolution: 10  # [??]
 
 wave_unit: Angstrom
-
-flux_unit : FNU
-
-wave_column_name : WAVELENGTH
-
-flux_column_name : FLUX
-
-data_type: ascii
-
+flux_unit: FNU
+wave_col: WAVELENGTH
+flux_col: FLUX
 file_extension: .dat
 
-templates:    # comments
-  lyb : composite spectrum
-
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
+items:
+  lyb: composite spectrum
