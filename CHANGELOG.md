@@ -1,3 +1,23 @@
+# Version 0.43.2
+**2026-03-23**
+
+Quick patch to fix updated file hashes on the server, plus some dependency housekeeping.
+
+## What's Changed
+### Bugs fixed
+* No longer use deprecated `.datafile` attribute by @teutoburg in https://github.com/AstarVienna/speXtra/pull/116
+* Make sure synphot closes our files by @teutoburg in https://github.com/AstarVienna/speXtra/pull/117
+### Dependency Changes
+* Bump pooch from 1.8.2 to 1.9.0 by @teutoburg in https://github.com/AstarVienna/speXtra/pull/114
+* Bump pillow from 12.1.0 to 12.1.1 by @dependabot[bot] in https://github.com/AstarVienna/speXtra/pull/115
+* Use NumPy 2.3.5 for Python 3.13+ by @teutoburg in https://github.com/AstarVienna/speXtra/pull/119
+* Bump tornado from 6.5 to 6.5.5 by @dependabot[bot] in https://github.com/AstarVienna/speXtra/pull/121
+### Documentation Improvements
+* Remove duplicate and outdated parts of database by @teutoburg in https://github.com/AstarVienna/speXtra/pull/124
+
+**Full Changelog**: https://github.com/AstarVienna/speXtra/compare/v0.43.1...v0.43.2
+
+
 # Version 0.43.1
 **2026-01-29**
 
