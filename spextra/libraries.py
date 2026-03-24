@@ -137,12 +137,6 @@ class SpecLibrary(Library):
     """Library of spectral templates."""
 
     db_dir = "libraries"
-    aliases = {
-        "items": "templates",
-        "wave_col": "wave_column_name",
-        "flux_col": "flux_column_name",
-        "flux_unit": "flux_unit",
-    }
 
     def __init__(self, name=None, library_name=None):
         if library_name is not None:
