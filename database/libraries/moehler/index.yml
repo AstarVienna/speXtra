@@ -1,56 +1,49 @@
-# 
-library_name : moehler
+name : moehler
+type: stellar
+title: Flux calibration of medium-resolution spectra from 300 nm to 2500 nm
+abstract: |
+   We will provide standard star reference data that allow users to derive
+   response curves from 300 nm to 2500 nm for spectroscopic data of medium to
+   high resolution, including those taken with echelle spectrographs. In
+   addition we describe a method to correct for moderate telluric absorption
+   without the need of observing telluric standard stars. As reference data for
+   the flux standard stars we use theoretical spectra derived from stellar model
+   atmospheres. We verify that they provide an appropriate description of the
+   observed standard star spectra by checking for residuals in line cores and
+   line overlap regions in the ratios of observed (X-shooter) spectra to model
+   spectra. The finally selected model spectra are then corrected for remaining
+   mismatches and photometrically calibrated using independent observations. The
+   correction of telluric absorption is performed with the help of telluric
+   model spectra. We provide new, finely sampled reference spectra without
+   telluric absorption for six southern flux standard stars that allow the users
+   to flux calibrate their data from 300 nm to 2500 nm, and a method to correct
+   for telluric absorption using atmospheric models.
 
-type : stars
+reference: Moehler et al. 2014
+bibcode: "2014A&A...568A...9M"
+adsurl: "https://ui.adsabs.harvard.edu/abs/2014A&A...568A...9M"
+doi: "10.1051/0004-6361/201423790"
+url: ""
 
-title : Flux calibration of medium-resolution spectra from 300 nm to 2500 nm
+spectral_coverage:
+  - UV
+  - VIS
+  - NIR
 
-summary : |
-   We will provide standard star reference data that allow users to derive response curves
-   from 300nm to 2500nm for spectroscopic data of medium to high resolution, including
-   those taken with echelle spectrographs. In addition we describe a method to correct for
-   moderate telluric absorption without the need of observing telluric standard stars. As
-   reference data for the flux standard stars we use theoretical spectra derived from
-   stellar model atmospheres. We verify that they provide an appropriate description of
-   the observed standard star spectra by checking for residuals in line cores and line
-   overlap regions in the ratios of observed (X-shooter) spectra to model spectra. The
-   finally selected model spectra are then corrected for remaining mismatches and
-   photometrically calibrated using independent observations. The correction of telluric
-   absorption is performed with the help of telluric model spectra. We provide new, finely
-   sampled reference spectra without telluric absorption for six southern flux standard
-   stars that allow the users to flux calibrate their data from 300nm to 2500nm, and a
-   method to correct for telluric absorption using atmospheric models.
+parameters:
+  resolution: 0.1  # [nm]
 
-
-reference : Moehler et al. 2014, A&A 568, A9
-
-link : TB
-
-spectral_coverage :
-  - uv
-  - vis
-  - nir
-
-resolution : 0.1
-
-wave_unit: nm
-
-flux_unit : 10mW/m2/nm
-
-wave_column_name : lambda
-
-flux_column_name : flux
-
-data_type: fits
-
+# wave_unit: nm  # TODO: double check with FITS header
+# flux_unit: 10mW/m2/nm  # TODO: double check with FITS header
+wave_col: lambda
+flux_col: flux
 file_extension: .fits
 
-templates:      # comments
-  eg274      : EG274,    Te=25985,  logg=7.96, DA
-  feige110   : Feige110, Te=45250,  logg=5.80, sdO
-  gd153      : GD153,    Te=40320,  logg=7.93, DA
-  gd71       : GD71,     Te=33590,  logg=7.93, DA
-  l97-3      : L97-3,    Te=10917,  logg=8.15, DC
-  ltt3218    : LTT3218,  Te=9081,   logg=7.71, DA
-  ltt7987    : LTT7987,  Te=16147,  logg=7.98, DA
-
+items:  # teff, logg, spectral_type
+  EG274: [25985, 7.96, DA]
+  Feige110: [45250, 5.80, sdO]
+  GD153: [40320, 7.93, DA]
+  GD71: [33590, 7.93, DA]
+  L97-3: [10917, 8.15, DC]
+  LTT3218: [9081, 7.71, DA]
+  LTT7987: [16147, 7.98, DA]

@@ -1,56 +1,27 @@
-# A library with reference stars
+name: ref
+type: stellar
+title: Reference library
+summary: ""
 
-library_name : ref
+reference: ""
+url: "https://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/calspec"
 
-type : stars
+spectral_coverage:
+  - UV
+  - VIS
+  - NIR
+  - MIR
 
-title : Reference library for objects
+parameters:
+  resolution: 10  # [??]
 
-summary : |
-  This library collects few objects than an be used as reference for calculations
-
-reference : see CALSPEC
-
-link : https://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/calspec
-
-spectral_coverage :
-  - uv
-  - vis
-  - nir
-  - mir
-
-resolution : 10
-
-wave_unit: Angstrom
-
-flux_unit : FLAM
-
-wave_column_name : WAVELENGTH
-
-flux_column_name : FLUX
-
-data_type: fits
-
+wave_col: WAVELENGTH
+flux_col: FLUX
 file_extension: .fits
 
-templates:    # comments
-  vega   : Vega spectrum, 900A to 300um
-  vegaLR : Vega LR spectrum, 1148A to 2.6um
-  sirius : Sirius spectrum, 900A to 300um
-  sun    : Solar spectrum,  1195A to 2.7um
-  sunHR  : Solar HR spectrum, 1500A to 300um
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+items:
+  vega: {waverange: [900 AA, 300 um]}
+  vegaLR: {waverange: [1148 AA, 2.6 um]}
+  sirius: {waverange: [900 AA, 300 um]}
+  sun: {waverange: [1195 AA, 2.7 um]}
+  sunHR: {waverange: [1500 AA, 300 um]}
