@@ -1,3 +1,11 @@
+# Version 0.43.4
+**2026-03-24**
+
+Hotfix to update index file hashes.
+
+**Full Changelog**: https://github.com/AstarVienna/speXtra/compare/v0.43.3...v0.43.4
+
+
 # Version 0.43.3
 **2026-03-24**
 
