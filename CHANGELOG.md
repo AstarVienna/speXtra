@@ -1,3 +1,15 @@
+# Version 0.43.3
+**2026-03-24**
+
+Quick patch to sync files with updated ones on the server.
+
+## What's Changed
+### Other Changes
+* Clean and harmonize library index.yml files by @teutoburg in https://github.com/AstarVienna/speXtra/pull/127
+
+**Full Changelog**: https://github.com/AstarVienna/speXtra/compare/v0.43.2...v0.43.3
+
+
 # Version 0.43.2
 **2026-03-23**
 
