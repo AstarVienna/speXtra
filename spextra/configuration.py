@@ -2,8 +2,10 @@
 """Holds the Config class and an instance to use as global configuration."""
 
 from pathlib import Path
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 import yaml
+
+from astar_utils.cache_dir import get_write_cache_dir
 
 from .exceptions import SpextraError
 
@@ -37,7 +39,10 @@ class Config:
     """
 
     database_url: str
-    cache_dir: Path
+    cache_dir: Path  # TODO: check if this is now redundant
+    _write_cache_dir: Path | None = field(init=False, default=None)
+    svo_dir: str = field(init=False, default="svo")
+    package_name: str = field(init=False, default="spextra")
     retry: int
     registry_file: Path
 
@@ -54,8 +59,15 @@ class Config:
         if not self.registry_file.exists():
             raise SpextraError("registry file not found")
 
+        # TODO: Maybe override if absolute path is set in config??
+        self._write_cache_dir = get_write_cache_dir(self.package_name)
+
         # TODO: dump back into config file
         # TODO: add method to restore defaults
+
+    @property
+    def write_cache_dir(self) -> Path:
+        return self._write_cache_dir
 
     @classmethod
     def from_yaml(cls, path: Path):

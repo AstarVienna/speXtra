@@ -10,7 +10,7 @@ import yaml
 
 from astar_utils import NestedMapping
 
-from .downloads import retriever
+from .downloads import fetch_data_file
 from .configuration import config
 
 __all__ = ["load_yamldict", "spextra_database", "DEFAULT_DATA"]
@@ -43,7 +43,7 @@ class Database(NestedMapping):
         if abspath.exists():
             return abspath
 
-        abspath = Path(retriever.fetch(filename, progressbar=True))
+        abspath = Path(fetch_data_file(filename, progressbar=True))
         return abspath
 
     def clear_cache(self) -> None:
@@ -85,7 +85,7 @@ class DefaultData:
         paths = (
             path_local
             if (path_local := Path(__file__).parent.parent / "database" / fname).exists()
-            else Path(retriever.fetch(fname))
+            else Path(fetch_data_file(fname))
             for fname in yamlfiles
         )
         yamls = dict_from_yamls(*paths)
@@ -101,7 +101,7 @@ def load_yamldict(filename: str) -> dict:
     if filepath_local.exists():
         filepath = filepath_local
     else:
-        filepath = retriever.fetch(filename, progressbar=True)
+        filepath = fetch_data_file(filename, progressbar=True)
     with open(filepath, encoding="utf-8") as file:
         yamldict = yaml.safe_load(file)
     return yamldict
