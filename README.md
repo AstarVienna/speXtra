@@ -7,7 +7,7 @@
 ![dev version](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2FAstarVienna%2FspeXtra%2Fmain%2Fpyproject.toml&query=%24.project.version&label=dev%20version&color=teal)
 ![GitHub Release Date](https://img.shields.io/github/release-date/AstarVienna/speXtra)
 
-[![Documentation Status](https://readthedocs.org/projects/spextra/badge/?version=latest)](https://speXtra.readthedocs.io/en/latest)
+[![Documentation Status](https://readthedocs.org/projects/spextra/badge/?version=latest)](https://speXtra.readthedocs.io/latest)
 [![codecov](https://codecov.io/gh/AstarVienna/speXtra/graph/badge.svg)](https://codecov.io/gh/AstarVienna/speXtra)
 [![PyPI - Version](https://img.shields.io/pypi/v/speXtra)](https://pypi.org/project/speXtra/)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/speXtra)
