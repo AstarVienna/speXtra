@@ -152,7 +152,12 @@ class SpecLibrary(Library):
 
     @property
     def library_name(self):
-        """Deprecated feature."""
+        """Deprecated feature.
+
+        .. deprecated:: 0.44.0
+
+           Please use the identical ``.name`` instead!
+        """
         warnings.warn("The alias .library_name is deprecated and will be "
                       "removed in v1.0. Please use .name instead!",
                       FutureWarning, 2)
@@ -160,7 +165,12 @@ class SpecLibrary(Library):
 
     @property
     def templates(self):
-        """Deprecated feature."""
+        """Deprecated feature.
+
+        .. deprecated:: 0.44.0
+
+           Please use the identical ``.items()`` instead!
+        """
         warnings.warn("The alias .templates is deprecated and will be "
                       "removed in v1.0. Please use .items() instead!",
                       FutureWarning, 2)
@@ -168,7 +178,12 @@ class SpecLibrary(Library):
 
     @property
     def template_names(self):
-        """Deprecated feature."""
+        """Deprecated feature.
+
+        .. deprecated:: 0.44.0
+
+           Please use the identical ``.keys()`` instead!
+        """
         warnings.warn("The alias .template_names is deprecated and will be "
                       "removed in v1.0. Please use the  more general "
                       ".keys() instead!", FutureWarning, 2)
@@ -176,7 +191,10 @@ class SpecLibrary(Library):
 
     @property
     def template_comments(self):
-        """Deprecated feature."""
+        """Deprecated feature.
+
+        .. deprecated:: 0.44.0
+        """
         warnings.warn("The properts .template_comments is deprecated and will "
                       "be removed in v1.0.", FutureWarning, 2)
         return list(self.values())
@@ -218,7 +236,12 @@ class FilterSystem(Library):
 
     @property
     def filter_system(self):
-        """Deprecated feature."""
+        """Deprecated feature.
+
+        .. deprecated:: 0.44.0
+
+           Please use the identical ``.name`` instead!
+        """
         warnings.warn("The alias .filter_system is deprecated and will be "
                       "removed in v1.0. Please use .name instead!",
                       FutureWarning, 2)
@@ -226,7 +249,12 @@ class FilterSystem(Library):
 
     @property
     def filters(self):
-        """Deprecated feature."""
+        """Deprecated feature.
+
+        .. deprecated:: 0.44.0
+
+           Please use the identical ``.items()`` instead!
+        """
         warnings.warn("The alias .filters is deprecated and will be "
                       "removed in v1.0. Please use .items() instead!",
                       FutureWarning, 2)
@@ -234,7 +262,12 @@ class FilterSystem(Library):
 
     @property
     def filter_names(self):
-        """Deprecated feature."""
+        """Deprecated feature.
+
+        .. deprecated:: 0.44.0
+
+           Please use the identical ``.keys()`` instead!
+        """
         warnings.warn("The alias .filter_names is deprecated and will be "
                       "removed in v1.0. Please use the  more general "
                       ".keys() instead!", FutureWarning, 2)
@@ -242,7 +275,10 @@ class FilterSystem(Library):
 
     @property
     def filter_comments(self):
-        """Deprecated feature."""
+        """Deprecated feature.
+
+        .. deprecated:: 0.44.0
+        """
         warnings.warn("The properts .filter_comments is deprecated and will "
                       "be removed in v1.0.", FutureWarning, 2)
         return list(self.values())

@@ -43,6 +43,9 @@ class DBFile:
 
     @property
     def datafile(self):
+        """
+        .. deprecated:: PLACEHOLDER_NEXT_RELEASE_VERSION
+        """
         raise AttributeError(
             "The .datafile attribute is deprecated and wil be fully removed in"
             "version 0.45.0. Please use .filename instead.")
@@ -59,7 +62,12 @@ class DBFile:
     def filename(self):
         """Name and extension of the file.
 
-        TODO: versionchanged placeholder here!!
+        .. versionchanged:: PLACEHOLDER_NEXT_RELEASE_VERSION
+
+           This attribute used to return ``self.library.name`` before v0.44.0,
+           it now returns ``self.basename + self.library.file_extension``.
+           If you need the name of the underlying library, use
+           ``.library.name`` directly.
         """
         return self.basename + self.library.file_extension
 
@@ -92,7 +100,12 @@ class SpectrumContainer(DBFile):
 
     @property
     def template_name(self):
-        """Deprecated feature."""
+        """Deprecated feature.
+
+        .. deprecated:: 0.44.0
+
+           Please use the identical ``.basename`` instead!
+        """
         warnings.warn("The .template_name property is deprecated and will be "
                       "removed in v1.0. Please use the identical .basename "
                       "instead!", FutureWarning, 2)
@@ -100,7 +113,12 @@ class SpectrumContainer(DBFile):
 
     @property
     def template_comment(self):
-        """Deprecated feature."""
+        """Deprecated feature.
+
+        .. deprecated:: 0.44.0
+
+           Please use the identical ``.description`` instead!
+        """
         warnings.warn("The .template_comment property is deprecated and will be "
                       "removed in v1.0. Please use the identical .description "
                       "instead!", FutureWarning, 2)
@@ -120,7 +138,12 @@ class FilterContainer(DBFile):
 
     @property
     def filter_comment(self):
-        """Deprecated feature."""
+        """Deprecated feature.
+
+        .. deprecated:: 0.44.0
+
+           Please use the identical ``.description`` instead!
+        """
         warnings.warn("The .filter_comment property is deprecated and will be "
                       "removed in v1.0. Please use the identical .description "
                       "instead!", FutureWarning, 2)
@@ -140,7 +163,12 @@ class ExtCurveContainer(DBFile):
 
     @property
     def curve_comment(self):
-        """Deprecated feature."""
+        """Deprecated feature.
+
+        .. deprecated:: 0.44.0
+
+           Please use the identical ``.description`` instead!
+        """
         warnings.warn("The .curve_comment property is deprecated and will be "
                       "removed in v1.0. Please use the identical .description "
                       "instead!", FutureWarning, 2)
