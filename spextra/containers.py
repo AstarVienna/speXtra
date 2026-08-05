@@ -25,7 +25,7 @@ class DBFile:
     def __init__(self, name: str):
         # To avoid name conflict with backwards-compatible meaning
         # In the future, just call it .name
-        self._name = name
+        self.name = name
         name_match = NAME_REGEX.match(name)
         if not name_match:
             raise ConstructorError(
@@ -43,12 +43,9 @@ class DBFile:
 
     @property
     def datafile(self):
-        """Name and extension of the file."""
-        warnings.warn("The 'name plus file extension' property will be moved "
-                      "to .filename in version 0.44.0, making "
-                      ".datafile deprecated.",
-                      FutureWarning, 2)
-        return self.basename + self.library.file_extension
+        raise AttributeError(
+            "The .datafile attribute is deprecated and wil be fully removed in"
+            "version 0.45.0. Please use .filename instead.")
 
     @property
     def path(self) -> Path:
@@ -56,28 +53,15 @@ class DBFile:
         if not self.is_in_library:
             raise NotInLibraryError(f"{self._subclass_str} '{self.basename}' "
                                     "not in library")
-        # TODO: Use self.filename once that recursion has been resolved.
-        filename = self.basename + self.library.file_extension
-        return spextra_database.fetch(f"{self.library.path}/{filename}")
+        return spextra_database.fetch(f"{self.library.path}/{self.filename}")
 
     @property
     def filename(self):
-        """Deprecated feature."""
-        warnings.warn("The .filename property is deprecated and will refer to "
-                      "the full name incl. file extension in version 0.44.0. "
-                      "For the absolute file path, please use .path instead!",
-                      FutureWarning, 2)
-        return self.path
+        """Name and extension of the file.
 
-    @property
-    def name(self):
-        """Deprecated feature."""
-        warnings.warn("Accessing the library name directly via the .name "
-                      "property is ambiguous. From v0.44.0 onwards, .name will "
-                      "refer to the .basename attribute + library_name. "
-                      "Please use the more explicit .library.name instead!",
-                      FutureWarning, 2)
-        return self.library.name
+        TODO: versionchanged placeholder here!!
+        """
+        return self.basename + self.library.file_extension
 
     @property
     def description(self) -> str:
@@ -89,19 +73,10 @@ class DBFile:
         self.path.unlink()
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({self._name!r})"
+        return f"{self.__class__.__name__}({self.name!r})"
 
     def __str__(self) -> str:
-        return f"{self._subclass_str} '{self._name}' ({self.description})"
-
-    def __getattr__(self, key: str):
-        """Allow (hacky) direct access to attributes of library."""
-        if not key.startswith("__") and hasattr(self.library, key):
-            warnings.warn(f"Accessing library attributes like '{key}' "
-                          "directly is deprecated and will raise an error in "
-                          "version 0.44.0. Please use the more explicit "
-                          f".library.{key} instead!", FutureWarning, 2)
-        return getattr(self.library, key)
+        return f"{self._subclass_str} '{self.name}' ({self.description})"
 
 
 class SpectrumContainer(DBFile):
@@ -113,7 +88,7 @@ class SpectrumContainer(DBFile):
     @property
     def template(self) -> str:
         """Name of the spectrum template."""
-        return self._name
+        return self.name
 
     @property
     def template_name(self):
@@ -141,7 +116,7 @@ class FilterContainer(DBFile):
     @property
     def filter_name(self) -> str:
         """Name of the filter."""
-        return self._name
+        return self.name
 
     @property
     def filter_comment(self):
@@ -161,7 +136,7 @@ class ExtCurveContainer(DBFile):
     @property
     def curve_name(self) -> str:
         """Name of the extinction curve."""
-        return self._name
+        return self.name
 
     @property
     def curve_comment(self):
