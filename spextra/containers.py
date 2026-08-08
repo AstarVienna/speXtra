@@ -16,15 +16,23 @@ NAME_REGEX = re.compile(r"^(?P<libname>\w+(/\w+)*)/(?P<basename>[\w\.\-]+)$")
 
 
 class DBFile:
-    """Base class for database files."""
+    """Base class for database files.
+
+
+    .. versionchanged:: PLACEHOLDER_NEXT_RELEASE_VERSION
+
+       Attempting to construct an instance that does not point to a valid file
+       in the specified library will now immediately raise an error, rather
+       than only when ``.path`` is accessed the first time. The exception to
+       this are filters, which might be found in the SVO.
+    """
 
     library = None  # necessary to avoid access before init ran (REALLY??)
     _subclass_str = "DBFile"
     _subclass_library = Library
+    _strict = True  # overridded for Filters -> SVO fallback
 
     def __init__(self, name: str):
-        # To avoid name conflict with backwards-compatible meaning
-        # In the future, just call it .name
         self.name = name
         name_match = NAME_REGEX.match(name)
         if not name_match:
@@ -34,7 +42,12 @@ class DBFile:
 
         self.basename = name_match["basename"]
         self.library = self._subclass_library(name_match["libname"])
-        # TODO: maybe an info log if not in DB?
+
+        if self._strict and not self.is_in_library:
+            raise NotInLibraryError(
+                f"{self._subclass_str} '{self.basename}' "
+                f"not in library '{self.library.name}'."
+            )
 
     @property
     def is_in_library(self) -> bool:
@@ -54,8 +67,10 @@ class DBFile:
     def path(self) -> Path:
         """Path to the cached file."""
         if not self.is_in_library:
-            raise NotInLibraryError(f"{self._subclass_str} '{self.basename}' "
-                                    "not in library")
+            raise NotInLibraryError(
+                f"{self._subclass_str} '{self.basename}' "
+                f"not in library '{self.library.name}'."
+            )
         return spextra_database.fetch(f"{self.library.path}/{self.filename}")
 
     @property
@@ -130,6 +145,7 @@ class FilterContainer(DBFile):
 
     _subclass_str = "Filter"
     _subclass_library = FilterSystem
+    _strict = False
 
     @property
     def filter_name(self) -> str:
