@@ -9,15 +9,11 @@ from spextra.database import DefaultData
 from spextra.libraries import SpecLibrary
 from spextra.configuration import config
 
-from . import PATH_HERE
-
-path = PATH_HERE / "mocks/index.yml"
-with path.open(encoding="utf-8") as file:
-    datacont = yaml.safe_load(file)
-
 
 @pytest.fixture(scope="class")
-def mock_database():
+def mock_database(mock_dir):
+    with (mock_dir / "index.yml").open(encoding="utf-8") as file:
+        datacont = yaml.safe_load(file)
     return datacont
 
 
@@ -54,8 +50,8 @@ class TestDefaultData:
 
 
 class TestSpecLibrary:
-    def test_name(self, subtests):
-        for library_name in datacont["libraries"]:
+    def test_name(self, subtests, mock_database):
+        for library_name in mock_database["libraries"]:
             with subtests.test(library=library_name):
                 lib = SpecLibrary(library_name)
                 assert lib.name == library_name
@@ -66,8 +62,8 @@ class TestSpecLibrary:
         assert "bulge" in lib.keys()
 
     @pytest.mark.parametrize("attribute", ["file_extension", "data_type"])
-    def test_attr(self, subtests, attribute):
-        for library_name in datacont["libraries"]:
+    def test_attr(self, subtests, mock_database, attribute):
+        for library_name in mock_database["libraries"]:
             with subtests.test(library=library_name):
                 lib = SpecLibrary(library_name)
                 assert hasattr(lib, attribute)

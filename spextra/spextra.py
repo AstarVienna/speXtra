@@ -70,9 +70,10 @@ class Passband(SpectralElement, FilterContainer):
 
         FilterContainer.__init__(self, filter_name)
 
-        if self.is_in_library and self.library.is_in_database:
+        if self.is_in_library:
             self._database_loader()
         else:
+            # TODO: Move this to Container base class?
             try:  # try to download it from SVO
                 self._svo_loader(filter_name)
             except ValueError:
