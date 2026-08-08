@@ -1,3 +1,28 @@
+# Version 0.44.0
+**2026-08-08**
+
+> [!IMPORTANT]
+> The minimum required Python version for this package is now **3.12** (see Dependency Changes).
+
+## What's Changed
+### API Changes
+* Fully remove v0.44.0 deprecations by @teutoburg in https://github.com/AstarVienna/speXtra/pull/144
+* Check library and file name on creation by @teutoburg in https://github.com/AstarVienna/speXtra/pull/147
+### New Features or Improvements
+* Use new astar-utils cache functionality by @teutoburg in https://github.com/AstarVienna/speXtra/pull/146
+### Dependency Changes
+* Bump requests from 2.32.5 to 2.33.0 by @dependabot[bot] in https://github.com/AstarVienna/speXtra/pull/132
+* Bump pygments from 2.17.2 to 2.20.0 by @dependabot[bot] in https://github.com/AstarVienna/speXtra/pull/133
+* Bump poetry and pillow by @teutoburg in https://github.com/AstarVienna/speXtra/pull/135
+* Bump urllib3 from 2.6.3 to 2.7.0 by @dependabot[bot] in https://github.com/AstarVienna/speXtra/pull/136
+* Bump various dependencies by @teutoburg in https://github.com/AstarVienna/speXtra/pull/142
+* Drop support for Python 3.10 and 3.11 by @teutoburg in https://github.com/AstarVienna/speXtra/pull/145
+### Other Changes
+* Sync workflows following DevOps changes by @teutoburg in https://github.com/AstarVienna/speXtra/pull/143
+
+**Full Changelog**: https://github.com/AstarVienna/speXtra/compare/v0.43.5...v0.44.0
+
+
 # Version 0.43.5
 **2026-03-24**
 
