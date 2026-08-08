@@ -32,12 +32,15 @@ class Library(Mapping):
         "flux_col": "flux_col",
         "flux_unit": "flux_unit",
     }
+    _strict = True  # overridded for Filters -> SVO fallback
 
     def __init__(self, name):
         self.name = name
 
-        if self.is_in_database:
+        if self.db_key in spextra_database:
             yamldict = load_yamldict(f"{self.path}/index.yml")
+        elif self._strict:
+            raise ValueError(f"{self.name} not in DB")
         else:
             yamldict = {}
 
@@ -77,9 +80,9 @@ class Library(Mapping):
         return read_kwargs
 
     @property
-    def is_in_database(self) -> bool:
-        """Return True if library is defined in the database instance."""
-        return f"!{self.db_dir}.{self.name}" in spextra_database
+    def db_key(self) -> bool:
+        """Return database lookup name."""
+        return f"!{self.db_dir}.{self.name}"
 
     @property
     def path(self):
@@ -221,6 +224,7 @@ class FilterSystem(Library):
         "flux_col": "flux_col",
         "flux_unit": "flux_unit",
     }
+    _strict = False
 
     def __init__(self, name=None, filter_system=None):
         if filter_system is not None:
