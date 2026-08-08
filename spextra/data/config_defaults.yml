@@ -1,4 +1,4 @@
 database_url: https://scopesim.univie.ac.at/spextra/database/
-cache_dir: .spextra_cache
+cache_dir: .astar/spextra
 retry: 3
 registry_file: spextra_registry.txt

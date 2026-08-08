@@ -1,23 +1,80 @@
 # -*- coding: utf-8 -*-
-"""Utility functions for downloads. Subject to change."""
+"""Utility functions for downloads.
+
+Cache locations are resolved through ``astar_utils.cache_dir``, which knows
+about ScopeSim_Data and the shared ``~/.astar`` cache. All pooch-specific code
+lives here in spextra, so that astar-utils stays dependency-free.
+
+The pattern throughout is "check trusted local copies first, download only as a
+last resort". Trusted local copies live in ScopeSim_Data (if installed) and in
+the package's own bundled data (present in a clone / editable install). The
+home cache below them is managed by pooch for registry files, and written to
+directly for SVO files.
+
+Registry database
+-----------------
+Via the module-level ``retriever`` using known hashes. Use the
+``fetch_data_file`` wrapper: it pre-checks the trusted local locations and
+otherwise delegates to pooch, which owns the home cache (with hash + update
+detection) and downloads from the remote database if needed.
+
+SVO filter curves
+-----------------
+Via ``download_svo_filter``. These have no known hash and are treated as
+static: once a copy exists anywhere it is trusted. For now the actual download
+uses ``pooch.retrieve(known_hash=None)``. This is a candidate to be replaced by
+a reusable ecosystem-wide chunked downloader (e.g. niquests-based) later.
+"""
 
 import warnings
 from pathlib import Path
 
 import pooch
 
-from .configuration import config
+from astar_utils.cache_dir import find_cached_file
+
+from .configuration import config, __data_dir__
+
+__all__ = [
+    "retriever",
+    "fetch_data_file",
+    "download_file",
+    "download_svo_filter",
+]
 
 
-__all__ = ["retriever",
-           "download_file",
-           "download_svo_filter"]
 
-
-retriever = pooch.create(path=config.cache_dir,
-                         base_url=config.database_url,
-                         retry_if_failed=config.retry)
+retriever = pooch.create(
+    path=config.cache_dir,
+    base_url=config.database_url,
+    retry_if_failed=config.retry,
+)
 retriever.load_registry(config.registry_file)
+
+
+def fetch_data_file(filename: str, **kwargs) -> Path:
+    """Return a registry data file, preferring trusted local copies.
+
+    Checks ScopeSim_Data and the package's bundled data first (committed,
+    trusted locations, returned as-is without re-downloading). Failing that,
+    delegates to pooch, which manages the home download cache -- including hash
+    verification and update detection -- and downloads from the remote database
+    if the file is missing or stale.
+
+    The home cache is deliberately not pre-checked here: it is pooch's
+    ``path``, so pooch should own it (hence ``include_home_cache=False``).
+    """
+    try:
+        cached_path = find_cached_file(
+            Path(filename),
+            config.package_name,
+            extra_dirs=[__data_dir__],
+            include_home_cache=False,
+        )
+        return cached_path
+    except FileNotFoundError:
+        pass  # Fallback to download
+    return Path(retriever.fetch(filename, **kwargs))
 
 
 def download_file(remote_url, local_name):
@@ -32,40 +89,46 @@ def download_file(remote_url, local_name):
 
 def download_svo_filter(filter_name):
     """
-    Query the SVO service for the true transmittance for a given filter.
+    Query the SVO service for the transmittance of a given filter.
+
+    The filter is looked for, in order, in ScopeSim_Data, the package's bundled
+    data, and the local download cache. Only if it is found nowhere is it
+    downloaded from SVO and stored in the write cache. SVO curves are static,
+    so an existing copy is always trusted.
 
     Parameters
     ----------
     filter_name : str
-        Name of the filter as available on the spanish VO filter service
-        e.g: ``Paranal/HAWKI.Ks``
+        Name of the filter as available on the Spanish VO filter service,
+        e.g. ``"Paranal/HAWKI.Ks"``.
 
     Returns
     -------
-    filt_curve : tuple with wave and trans values
+    wave, trans
+        Wavelength and transmission columns of the filter curve.
     """
     from astropy.table import Table
 
-    data_dir = config.cache_dir
+    # Relative path that is correct on every platform, e.g.
+    # "svo/Paranal/HAWKI.Ks". The home cache is a valid read location for SVO
+    # (that is where downloads land), so include it here.
+    relpath = Path(config.svo_dir, *filter_name.split("/"))
 
-    origin = ("http://svo2.cab.inta-csic.es/theory/fps3/"
-              f"fps.php?ID={filter_name}")
+    try:
+        local_path = find_cached_file(
+            relpath, config.package_name, extra_dirs=[__data_dir__]
+        )
+    except FileNotFoundError:
+        target = config.write_cache_dir / relpath
+        origin = (
+            "http://svo2.cab.inta-csic.es/theory/fps3/"
+            f"fps.php?ID={filter_name}"
+        )
+        local_path = Path(
+            pooch.retrieve(
+                origin, known_hash=None, fname=target.name, path=target.parent
+            )
+        )
 
-    local_path_cache = Path(data_dir, "svo_filters", filter_name)
-    local_path_package = config.cache_dir / "svo" / filter_name
-
-    if local_path_package.exists():
-        local_path = local_path_package
-    else:
-        local_path = local_path_cache
-        if not local_path.exists():
-            download_file(origin, local_path)
-
-    # raises ValueError if table is malformed
-    # this can be used to catch problmes
     tbl = Table.read(local_path, format="votable")
-
-    wave = tbl["Wavelength"]
-    trans = tbl["Transmission"]
-
-    return wave, trans
+    return tbl["Wavelength"], tbl["Transmission"]
