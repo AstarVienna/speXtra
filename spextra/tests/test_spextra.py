@@ -204,7 +204,7 @@ class TestSpextrum:
 
     def test_wrong_load(self):
         with pytest.raises(NotInLibraryError):
-            _ = Spextrum("kc96/wrong_name")
+            Spextrum("kc96/wrong_name")
 
     @pytest.mark.parametrize("unit", [u.mag, u.STmag, u.ABmag])
     def test_ref_spectrum_is_right(self, unit):

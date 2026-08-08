@@ -11,8 +11,7 @@ from spextra.configuration import config
 
 from . import PATH_HERE
 
-path = PATH_HERE / "mocks/index.yml"
-with path.open(encoding="utf-8") as file:
+with (PATH_HERE / "mocks/index.yml").open(encoding="utf-8") as file:
     datacont = yaml.safe_load(file)
 
 
