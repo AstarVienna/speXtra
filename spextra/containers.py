@@ -19,7 +19,7 @@ class DBFile:
     """Base class for database files.
 
 
-    .. versionchanged:: PLACEHOLDER_NEXT_RELEASE_VERSION
+    .. versionchanged:: 0.44.0
 
        Attempting to construct an instance that does not point to a valid file
        in the specified library will now immediately raise an error, rather
@@ -57,7 +57,7 @@ class DBFile:
     @property
     def datafile(self):
         """
-        .. deprecated:: PLACEHOLDER_NEXT_RELEASE_VERSION
+        .. deprecated:: 0.44.0
         """
         raise AttributeError(
             "The .datafile attribute is deprecated and wil be fully removed in"
@@ -77,7 +77,7 @@ class DBFile:
     def filename(self):
         """Name and extension of the file.
 
-        .. versionchanged:: PLACEHOLDER_NEXT_RELEASE_VERSION
+        .. versionchanged:: 0.44.0
 
            This attribute used to return ``self.library.name`` before v0.44.0,
            it now returns ``self.basename + self.library.file_extension``.
